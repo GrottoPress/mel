@@ -1,0 +1,21 @@
+services:
+  app: &crystal
+    depends_on:
+      - store
+    environment:
+      REDIS_URL: redis://store:6379/0
+    image: crystallang/crystal:1.0.0-alpine
+    volumes:
+      - .:/app
+    working_dir: /app
+  store:
+    image: redis:6.2-alpine
+  shards:
+    <<: *crystal
+    command: 'sh -c "shards update"'
+    depends_on: []
+    environment: {}
+  spec:
+    <<: *crystal
+    command: 'sh -c "crystal spec"'
+version: "2.4"

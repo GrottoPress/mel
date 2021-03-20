@@ -1,0 +1,27 @@
+name: mel
+version: 0.1.0
+description: A simple, scalable asynchronous jobs engine.
+
+authors:
+  - GrottoPress <info@grottopress.com>
+  - N Atta Kusi Adusei
+
+license: MIT
+
+crystal: ~> 1.0
+
+dependencies:
+  cron_parser:
+    github: kostya/cron_parser
+    version: ~> 0.4.0
+  pond:
+    github: GrottoPress/pond
+    version: ~> 0.2.0
+  redis:
+    github: jgaskins/redis
+    version: ~> 0.1.9
+
+development_dependencies:
+  timecop:
+    github: crystal-community/timecop.cr
+    version: ~> 0.4.0
