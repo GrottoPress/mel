@@ -19,9 +19,5 @@ Spec.before_each do
 end
 
 def sync(task)
-  task.try &.run.try do |fiber|
-    until fiber.dead?
-      Fiber.yield
-    end
-  end
+  task.try &.run.try { |fiber| Pond.drain(fiber) }
 end
