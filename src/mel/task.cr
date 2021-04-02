@@ -17,10 +17,10 @@ module Mel::Task
 
         value = Mel.redis.multi do |redis|
           if force
-            redis.run({"ZADD", Task.key, time.to_unix.to_s, id})
+            redis.run({"ZADD", Mel::Task.key, time.to_unix.to_s, id})
             redis.set(key, to_json)
           else
-            redis.run({"ZADD", Task.key, "NX", time.to_unix.to_s, id})
+            redis.run({"ZADD", Mel::Task.key, "NX", time.to_unix.to_s, id})
             redis.set(key, to_json, nx: true)
           end
         end
@@ -35,7 +35,7 @@ module Mel::Task
         log_dequeueing
 
         value = Mel.redis.multi do |redis|
-          redis.run({"ZREM", Task.key, id})
+          redis.run({"ZREM", Mel::Task.key, id})
           redis.del(key)
         end
 
@@ -69,44 +69,44 @@ module Mel::Task
     end
 
     def key : String
-      Task.key(id)
+      Mel::Task.key(id)
     end
 
     def self.find(count : Int32, *, delete = false) : Array(self)?
-      Task.find(count, delete: delete).try &.each
+      Mel::Task.find(count, delete: delete).try &.each
         .select(&.is_a? self)
         .map(&.as self)
         .to_a
     end
 
     def self.find(id : String, *, delete = false) : self?
-      Task.find(id, delete: delete).try(&.as self)
+      Mel::Task.find(id, delete: delete).try(&.as self)
     rescue TypeCastError
     end
 
     def self.find(ids : Array, *, delete = false) : Array(self)?
-      Task.find(ids, delete: delete).try &.each
+      Mel::Task.find(ids, delete: delete).try &.each
         .select(&.is_a? self)
         .map(&.as self)
         .to_a
     end
 
     def self.find_lt(time : Time, count = -1, *, delete = false) : Array(self)?
-      Task.find_lt(time, count, delete: delete).try &.each
+      Mel::Task.find_lt(time, count, delete: delete).try &.each
         .select(&.is_a? self)
         .map(&.as self)
         .to_a
     end
 
     def self.find_lte(time : Time, count = -1, *, delete = false) : Array(self)?
-      Task.find_lte(time, count, delete: delete).try &.each
+      Mel::Task.find_lte(time, count, delete: delete).try &.each
         .select(&.is_a? self)
         .map(&.as self)
         .to_a
     end
 
     def self.from_json(json) : self?
-      Task.from_json(json).try(&.as self)
+      Mel::Task.from_json(json).try(&.as self)
     rescue TypeCastError
     end
   end
@@ -142,7 +142,7 @@ module Mel::Task
     connect do
       values = Mel.redis.multi do |redis|
         redis.run(["MGET"] + keys)
-        redis.run(["ZREM", Task.key] + keys) if delete
+        redis.run(["ZREM", key] + keys) if delete
         redis.run(["DEL"] + keys) if delete
       end
 
