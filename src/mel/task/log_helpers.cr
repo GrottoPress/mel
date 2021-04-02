@@ -4,24 +4,16 @@ module Mel::Task::LogHelpers
       Mel.log.info &.emit("Enqueueing task...", task: to_json)
     end
 
-    private def log_enqueued(result) : Nil
-      if result
-        Mel.log.info &.emit("Task enqueued successfully", task: to_json)
-      else
-        Mel.log.error &.emit("Enqueueing task failed", task: to_json)
-      end
+    private def log_enqueued : Nil
+      Mel.log.info &.emit("Task enqueued successfully", task: to_json)
     end
 
     private def log_dequeueing : Nil
       Mel.log.info &.emit("Dequeueing task...", task: to_json)
     end
 
-    private def log_dequeued(result) : Nil
-      if result
-        Mel.log.info &.emit("Task dequeued successfully", task: to_json)
-      else
-        Mel.log.error &.emit("Dequeueing task failed", task: to_json)
-      end
+    private def log_dequeued : Nil
+      Mel.log.info &.emit("Task dequeued successfully", task: to_json)
     end
 
     private def log_not_due : Nil

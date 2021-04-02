@@ -25,8 +25,8 @@ module Mel::Task
           end
         end
 
-        log_enqueued(result = value.none?(0))
-        result
+        log_enqueued
+        value
       end
     end
 
@@ -39,8 +39,8 @@ module Mel::Task
           redis.del(key)
         end
 
-        log_dequeued(result = value.none?(0))
-        result
+        log_dequeued
+        value
       end
     end
 
