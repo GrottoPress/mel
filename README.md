@@ -199,9 +199,7 @@ This means jobs are never lost mid-flight. However, because workers pull due tas
 
 ## Development
 
-Run tests with `docker-compose run --rm spec`. If you need to update shards before that, run `docker-compose run --rm shards`.
-
-If you would rather run tests on your local machine (ie, without docker), create a `.env.sh` file:
+Create a `.env.sh` file:
 
 ```bash
 #!/bin/bash
