@@ -12,6 +12,8 @@ module Mel::Task
     private MAX_ATTEMPTS = 3
 
     def enqueue(*, force = false)
+      job.before_enqueue
+
       connect do
         log_enqueueing
 
@@ -26,11 +28,14 @@ module Mel::Task
         end
 
         log_enqueued
+        job.after_enqueue
         value
       end
     end
 
     def dequeue
+      job.before_dequeue
+
       connect do
         log_dequeueing
 
@@ -40,12 +45,14 @@ module Mel::Task
         end
 
         log_dequeued
+        job.after_dequeue
         value
       end
     end
 
     def run(*, force = false) : Fiber?
       return log_not_due unless force || due?
+      job.before_run
 
       original = clone
       reschedule
@@ -61,6 +68,7 @@ module Mel::Task
         original.enqueue(force: true)
       else
         log_ran
+        job.after_run
       end
     end
 

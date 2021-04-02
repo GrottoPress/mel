@@ -1,6 +1,6 @@
 name: mel
 version: 0.1.0
-description: A simple, scalable asynchronous jobs engine.
+description: A scalable asynchronous event-driven jobs engine
 
 authors:
   - GrottoPress <info@grottopress.com>

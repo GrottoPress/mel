@@ -1,6 +1,6 @@
 # Mel
 
-**Mel** is an asychronous jobs processing engine designed to scale. *Mel* simplifies jobs management by abstracting away the nuances of scheduling and running jobs.
+**Mel** is an asychronous event-driven jobs processing engine designed to scale. *Mel* simplifies jobs management by abstracting away the nuances of scheduling and running jobs.
 
 In *Mel*, a scheduled job is called a *task*. A single job may be scheduled in multiple ways, yielding multiple tasks from the same job.
 
@@ -66,8 +66,36 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      end
      # <= Instance vars must be JSON-serializable
 
-     def run # <= Required
+     # (Required)
+     #
+     # Main operation to be performed.
+     # Called in a new fiber.
+     def run
        # << Do work here >>
+     end
+
+     # Called in the main fiber, before spawning the fiber
+     # that calls the `#run` method above.
+     def before_run
+       # ...
+     end
+
+     # Called in the same fiber that calls `#run`, but only if
+     # `#run` successfully completes.
+     def after_run
+       # ...
+     end
+
+     # Called in the main fiber before enqueueing the task in
+     # Redis.
+     def before_enqueue
+       # ...
+     end
+
+     # Called in the main fiber after enqueueing the task in
+     # Redis, but only if the enqueue succeeds.
+     def after_enqueue
+       # ...
      end
    end
    ```

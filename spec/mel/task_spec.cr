@@ -5,7 +5,7 @@ describe Mel::Task do
     it "retries failed task" do
       id = "1001"
 
-      RetryJob.run(id)
+      FailedJob.run(id)
 
       task = Mel::InstantTask.find(id, delete: true)
       task.try(&.attempts).should eq(0)

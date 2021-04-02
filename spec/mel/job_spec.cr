@@ -177,4 +177,98 @@ describe Mel::Job do
       end
     end
   end
+
+  describe "#before_run" do
+    it "runs" do
+      address = "user@domain.tld"
+
+      task = SendEmailJob.run(address: address)
+
+      task.try(&.job.as(SendEmailJob).run_before).should be_false
+      sync(task)
+      task.try(&.job.as(SendEmailJob).run_before).should be_true
+    end
+
+    it "runs even if task fails" do
+      task = FailedJob.run
+
+      task.try(&.job.as(FailedJob).run_before).should be_false
+      sync(task)
+      task.try(&.job.as(FailedJob).run_before).should be_true
+    end
+  end
+
+  describe "#after_run" do
+    it "runs" do
+      address = "user@domain.tld"
+
+      task = SendEmailJob.run(address: address)
+
+      task.try(&.job.as(SendEmailJob).run_after).should be_false
+      sync(task)
+      task.try(&.job.as(SendEmailJob).run_after).should be_true
+    end
+
+    it "does not run if task fails" do
+      task = FailedJob.run
+
+      task.try(&.job.as(FailedJob).run_after).should be_false
+      sync(task)
+      task.try(&.job.as(FailedJob).run_after).should be_false
+    end
+  end
+
+  describe "#before_enqueue" do
+    it "runs" do
+      address = "user@domain.tld"
+
+      task = SendEmailJob.run(address: address)
+      task.try(&.job.as(SendEmailJob).enqueue_before).should be_true
+    end
+
+    pending "runs even if enqueue fails" do
+    end
+  end
+
+  describe "#after_enqueue" do
+    it "runs" do
+      address = "user@domain.tld"
+
+      task = SendEmailJob.run(address: address)
+      task.try(&.job.as(SendEmailJob).enqueue_after).should be_true
+    end
+
+    pending "does not run if enqueue fails" do
+    end
+  end
+
+  describe "#before_dequeue" do
+    it "runs" do
+      address = "user@domain.tld"
+
+      task = SendEmailJob.run(address: address)
+
+      task.try(&.job.as(SendEmailJob).dequeue_before).should be_false
+      task.try(&.dequeue)
+      task.try(&.job.as(SendEmailJob).dequeue_before).should be_true
+    end
+
+    pending "runs even if dequeue fails" do
+    end
+  end
+
+  describe "#after_dequeue" do
+    it "runs" do
+      address = "user@domain.tld"
+
+      task = SendEmailJob.run(address: address)
+
+      task.try(&.job.as(SendEmailJob).dequeue_after).should be_false
+      task.try(&.dequeue)
+      task.try(&.job.as(SendEmailJob).dequeue_after).should be_true
+    end
+
+    pending "does not run if dequeue fails" do
+    end
+  end
 end

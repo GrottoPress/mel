@@ -19,6 +19,24 @@ module Mel::Job
       \{% raise "#{@type}#run not implemented" %}
     end
 
+    def before_run
+    end
+
+    def after_run
+    end
+
+    def before_enqueue
+    end
+
+    def after_enqueue
+    end
+
+    def before_dequeue
+    end
+
+    def after_dequeue
+    end
+
     def self.run(id = UUID.random.to_s, **job_args)
       run_now(id, **job_args)
     end
