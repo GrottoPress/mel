@@ -15,6 +15,8 @@ module Mel
 
   private module Config
     class_property batch_size : Int32 = 10
+    class_property log_backend : Log::Backend?
+    class_property log_level : Log::Severity?
     class_property poll_interval : Time::Span = 3.seconds
     class_property! redis_url : String
     class_property redis_pool_size : Int32?
@@ -56,7 +58,7 @@ module Mel
   def start
     return log_already_started if state.started?
 
-    config.timezone.try { |location| Time::Location.local = location }
+    configure
     log_starting
     @@state = State::Started
 
@@ -70,6 +72,16 @@ module Mel
 
     @@state = State::Stopped
     sleep config.poll_interval
+  end
+
+  private def configure
+    config.timezone.try { |location| Time::Location.local = location }
+
+    config.log_backend.try do |backend|
+      log.class.setup(log.source, backend: backend)
+    end
+
+    config.log_level.try { |level| log.level = level }
   end
 
   private def run_tasks
