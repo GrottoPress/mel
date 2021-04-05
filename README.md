@@ -171,6 +171,10 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
 
      # ...
 
+     Spec.before_each do
+       Mel::Task::Query.truncate
+     end
+
      spawn { Mel.start }
 
      Spec.after_suite { Mel.stop }

@@ -12,10 +12,7 @@ end
 
 Spec.before_each do
   Time::Location.local = Time::Location.load("America/Los_Angeles")
-  Mel.redis.del(Mel::Task.key)
-
-  keys = Mel.redis.keys("#{Mel::Task.key}*")
-  Mel.redis.run(["DEL"] + keys) unless keys.empty?
+  Mel::Task::Query.truncate
 end
 
 def sync(task)

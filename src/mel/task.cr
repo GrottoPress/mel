@@ -13,37 +13,20 @@ module Mel::Task
 
     def enqueue(*, force = false)
       job.before_enqueue
+      log_enqueueing
 
-      connect do
-        log_enqueueing
-
-        value = Mel.redis.multi do |redis|
-          if force
-            redis.run({"ZADD", Mel::Task.key, time.to_unix.to_s, id})
-            redis.set(key, to_json)
-          else
-            redis.run({"ZADD", Mel::Task.key, "NX", time.to_unix.to_s, id})
-            redis.set(key, to_json, nx: true)
-          end
-        end
-
+      Mel::Task::Query.add(self, force: force).try do |values|
         log_enqueued
         job.after_enqueue
-        value
+        values
       end
     end
 
     def dequeue
       job.before_dequeue
+      log_dequeueing
 
-      connect do
-        log_dequeueing
-
-        value = Mel.redis.multi do |redis|
-          redis.run({"ZREM", Mel::Task.key, id})
-          redis.del(key)
-        end
-
+      Mel::Task::Query.delete(id).try do |value|
         log_dequeued
         job.after_dequeue
         value
@@ -77,117 +60,102 @@ module Mel::Task
     end
 
     def key : String
-      Mel::Task.key(id)
-    end
-
-    def self.find(count : Int32, *, delete = false) : Array(self)?
-      Mel::Task.find(count, delete: delete).try &.each
-        .select(&.is_a? self)
-        .map(&.as self)
-        .to_a
-    end
-
-    def self.find(id : String, *, delete = false) : self?
-      Mel::Task.find(id, delete: delete).try(&.as self)
-    rescue TypeCastError
-    end
-
-    def self.find(ids : Array, *, delete = false) : Array(self)?
-      Mel::Task.find(ids, delete: delete).try &.each
-        .select(&.is_a? self)
-        .map(&.as self)
-        .to_a
+      Mel::Task::Query.key(id)
     end
 
     def self.find_lt(time : Time, count = -1, *, delete = false) : Array(self)?
-      Mel::Task.find_lt(time, count, delete: delete).try &.each
-        .select(&.is_a? self)
-        .map(&.as self)
-        .to_a
+      return if count.zero?
+
+      Mel::Task.find_lt(time, -1, delete: false).try do |tasks|
+        tasks = tasks.each.select(&.is_a? self).map(&.as self)
+        tasks = Mel::Task::Query.resize(tasks, count)
+
+        Mel::Task::Query.delete(tasks.map(&.id).to_a) if delete
+        tasks.to_a
+      end
     end
 
     def self.find_lte(time : Time, count = -1, *, delete = false) : Array(self)?
-      Mel::Task.find_lte(time, count, delete: delete).try &.each
-        .select(&.is_a? self)
-        .map(&.as self)
-        .to_a
+      return if count.zero?
+
+      Mel::Task.find_lte(time, -1, delete: false).try do |tasks|
+        tasks = tasks.each.select(&.is_a? self).map(&.as self)
+        tasks = Mel::Task::Query.resize(tasks, count)
+
+        Mel::Task::Query.delete(tasks.map(&.id).to_a) if delete
+        tasks.to_a
+      end
+    end
+
+    def self.find(count : Int32, *, delete = false) : Array(self)?
+      return if count.zero?
+
+      Mel::Task.find(-1, delete: false).try do |tasks|
+        tasks = tasks.each.select(&.is_a? self).map(&.as self)
+        tasks = Mel::Task::Query.resize(tasks, count)
+
+        Mel::Task::Query.delete(tasks.map(&.id).to_a) if delete
+        tasks.to_a
+      end
+    end
+
+    def self.find(id : String, *, delete = false) : self?
+      Mel::Task.find(id, delete: false).try do |task|
+        next unless task.is_a?(self)
+        Mel::Task::Query.delete(task.id) if delete
+        task.as(self)
+      end
+    end
+
+    def self.find(ids : Array, *, delete = false) : Array(self)?
+      Mel::Task.find(ids, delete: false).try do |tasks|
+        tasks = tasks.each.select(&.is_a? self).map(&.as self)
+        Mel::Task::Query.delete(tasks.map(&.id).to_a) if delete
+        tasks.to_a
+      end
     end
 
     def self.from_json(json) : self?
-      Mel::Task.from_json(json).try(&.as self)
-    rescue TypeCastError
+      Mel::Task.from_json(json).try { |task| task.as(self) if task.is_a?(self) }
     end
   end
 
   extend self
 
-  def key : String
-    "mel:tasks"
-  end
-
-  def key(*parts : String) : String
-    "#{key}:#{parts.join(':')}"
-  end
-
-  def find(count : Int32, *, delete = false)
-    return if count.zero?
-
-    connect do
-      last = count < 1 ? count : count - 1
-      ids = Mel.redis.run({"ZRANGE", key, "0", last.to_s}).as(Array)
-      find(ids, delete: delete)
-    end
-  end
-
-  def find(id : String, *, delete = false) : self?
-    find([id], delete: delete).try &.first?
-  end
-
-  def find(ids : Array, *, delete = false)
-    return if ids.empty?
-    keys = ids.map { |id| key(id.to_s) }
-
-    connect do
-      values = Mel.redis.multi do |redis|
-        redis.run(["MGET"] + keys)
-        redis.run(["ZREM", key] + keys) if delete
-        redis.run(["DEL"] + keys) if delete
-      end
-
-      return unless values = values.first?
-
-      values = values.as(Array)
-      values = values.each.map { |value| from_json(value.to_s) if value }
-      values.reject(&.nil?).map(&.not_nil!).to_a
-    end
-  end
-
   def find_lt(time : Time, count = -1, *, delete = false)
-    return if count.zero?
-
-    connect do
-      ids = Mel.redis
-        .run({"ZRANGEBYSCORE", key, "-inf", "(#{time.to_unix}"})
-        .as(Array)
-
-      find(ids(ids, count), delete: delete)
+    Query.find_lt(time, count, delete: delete).try do |values|
+      from_json(values)
     end
   end
 
   def find_lte(time : Time, count = -1, *, delete = false)
-    return if count.zero?
-
-    connect do
-      ids = Mel.redis
-        .run({"ZRANGEBYSCORE", key, "-inf", time.to_unix.to_s})
-        .as(Array)
-
-      find(ids(ids, count), delete: delete)
+    Query.find_lte(time, count, delete: delete).try do |values|
+      from_json(values)
     end
   end
 
-  def from_json(json) : self?
-    json = JSON.parse(json)
+  def find(count : Int32, *, delete = false)
+    Query.find(count, delete: delete).try { |values| from_json(values) }
+  end
+
+  def find(id : String, *, delete = false) : self?
+    Query.find(id, delete: delete).try { |value| from_json(value) }
+  end
+
+  def find(ids : Array, *, delete = false)
+    Query.find(ids, delete: delete).try { |values| from_json(values) }
+  end
+
+  def from_json(values : Array)
+    values.each
+      .map { |value| from_json(value.to_s) if value }
+      .reject(&.nil?)
+      .map(&.not_nil!)
+      .to_a
+  end
+
+  def from_json(value) : self?
+    json = JSON.parse(value)
 
     job_type = {{ Job.includers }}.find do |type|
       type.name == json["job"]["__type__"].as_s
@@ -211,16 +179,5 @@ module Mel::Task
 
     task.attempts = attempts
     task
-  end
-
-  private def ids(ids, count)
-    count < 0 ? ids : ids.first(count)
-  end
-
-  private def connect
-    yield
-  rescue error : IO::Error
-    Mel.log.error(exception: error, &.emit("Redis connection failed"))
-    nil
   end
 end

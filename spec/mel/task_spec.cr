@@ -49,6 +49,22 @@ describe Mel::Task do
     end
   end
 
+  describe ".find" do
+    it "returns the correct count" do
+      address = "user@domain.tld"
+
+      SendEmailJob.run(address: address)
+      SendEmailJob.run(address: address)
+      SendEmailJob.run(address: address)
+
+      Mel::InstantTask.find(1).try(&.size).should eq(1)
+      Mel::InstantTask.find(2).try(&.size).should eq(2)
+      Mel::InstantTask.find(3).try(&.size).should eq(3)
+      Mel::InstantTask.find(4).try(&.size).should eq(3)
+      Mel::InstantTask.find(-1).try(&.size).should eq(3)
+    end
+  end
+
   describe ".find_lt" do
     it "returns all tasks whose times are past due" do
       address = "user@domain.tld"
