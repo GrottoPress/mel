@@ -26,12 +26,9 @@ describe Mel::Task::Query do
       Mel.redis.run(["MGET"] + not_mel_keys).as(Array).size.should eq(3)
 
       Mel::Task::Query.truncate
-      Mel::Task.find(-1).should be_nil
 
-      Mel.redis.run(["MGET"] + not_mel_keys)
-        .as(Array)
-        .none?(&.nil?)
-        .should(be_true)
+      Mel::Task.find(-1).should be_nil
+      Mel.redis.run(["MGET"] + not_mel_keys).as(Array).should_not contain(nil)
 
       # Clean up
       Mel.redis.run(["DEL"] + not_mel_keys)
