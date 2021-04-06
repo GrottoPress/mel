@@ -44,8 +44,8 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      settings.log_backend = Log::IOBackend.new
      settings.log_level = :info
      settings.poll_interval = 3.seconds
-     settings.redis_url = "redis://localhost:6379/0"
      settings.redis_pool_size = 25
+     settings.redis_url = "redis://localhost:6379/0"
      settings.timezone = Time::Location.load("Africa/Accra")
    end
 
@@ -171,14 +171,12 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
 
      # ...
 
-     Spec.before_each do
-       Mel::Task::Query.truncate
-     end
-
-     spawn { Mel.start }
+     Spec.before_each { Mel::Task::Query.truncate }
 
      Spec.after_suite { Mel.stop }
      # <= `Mel.stop` waits for all running tasks to complete before exiting
+
+     spawn { Mel.start }
 
      # ...
      ```
