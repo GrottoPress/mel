@@ -5,9 +5,9 @@ require "timecop"
 require "../src/mel"
 require "./support/**"
 
-Mel.configure do |config|
-  config.redis_url = ENV["REDIS_URL"]
-  config.batch_size = -1
+Mel.configure do |settings|
+  settings.redis_url = ENV["REDIS_URL"]
+  settings.batch_size = -1
 end
 
 Spec.before_each do

@@ -10,7 +10,7 @@ describe Mel do
 
       JOBS.size.should eq(0)
 
-      Mel.config.poll_interval = 1.millisecond
+      Mel.settings.poll_interval = 1.millisecond
 
       pond = Pond.new
 

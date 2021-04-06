@@ -13,7 +13,7 @@ module Mel
   extend self
   include LogHelpers
 
-  private module Config
+  private module Settings
     class_property batch_size : Int32 = 10
     class_property log_backend : Log::Backend?
     class_property log_level : Log::Severity?
@@ -31,12 +31,12 @@ module Mel
 
   class_getter state = State::Ready
 
-  def config
-    Config
+  def settings
+    Settings
   end
 
   def configure
-    yield config
+    yield settings
   end
 
   def log
@@ -45,9 +45,9 @@ module Mel
 
   def redis
     @@redis ||= begin
-      uri = URI.parse(config.redis_url)
+      uri = URI.parse(settings.redis_url)
 
-      config.redis_pool_size.try do |size|
+      settings.redis_pool_size.try do |size|
         uri.query_params["max_idle_pool_size"] = size.to_s
       end
 
@@ -71,17 +71,17 @@ module Mel
     log_stopping
 
     @@state = State::Stopped
-    sleep config.poll_interval
+    sleep settings.poll_interval
   end
 
   private def configure
-    config.timezone.try { |location| Time::Location.local = location }
+    settings.timezone.try { |location| Time::Location.local = location }
 
-    config.log_backend.try do |backend|
+    settings.log_backend.try do |backend|
       log.class.setup(log.source, backend: backend)
     end
 
-    config.log_level.try { |level| log.level = level }
+    settings.log_level.try { |level| log.level = level }
   end
 
   private def run_tasks
@@ -89,11 +89,15 @@ module Mel
     pond = Pond.new
 
     while state.started?
-      Task.find_lte(Time.local, config.batch_size, delete: true).try do |tasks|
+      Task.find_lte(
+        Time.local,
+        settings.batch_size,
+        delete: true
+      ).try do |tasks|
         tasks.each &.run(force: true).try { |fiber| pond << fiber }
       end
 
-      sleep config.poll_interval
+      sleep settings.poll_interval
     end
 
     log_waiting
