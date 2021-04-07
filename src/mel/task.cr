@@ -67,11 +67,12 @@ module Mel::Task
       return if count.zero?
 
       Mel::Task.find_lt(time, -1, delete: false).try do |tasks|
-        tasks = tasks.each.select(&.is_a? self).map(&.as self)
+        tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
         tasks = Mel::Task::Query.resize(tasks, count)
+        next if tasks.empty?
 
-        Mel::Task::Query.delete(tasks.map(&.id).to_a) if delete
-        tasks.to_a
+        Mel::Task::Query.delete(tasks.map &.id) if delete
+        tasks
       end
     end
 
@@ -79,11 +80,12 @@ module Mel::Task
       return if count.zero?
 
       Mel::Task.find_lte(time, -1, delete: false).try do |tasks|
-        tasks = tasks.each.select(&.is_a? self).map(&.as self)
+        tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
         tasks = Mel::Task::Query.resize(tasks, count)
+        next if tasks.empty?
 
-        Mel::Task::Query.delete(tasks.map(&.id).to_a) if delete
-        tasks.to_a
+        Mel::Task::Query.delete(tasks.map &.id) if delete
+        tasks
       end
     end
 
@@ -91,11 +93,12 @@ module Mel::Task
       return if count.zero?
 
       Mel::Task.find(-1, delete: false).try do |tasks|
-        tasks = tasks.each.select(&.is_a? self).map(&.as self)
+        tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
         tasks = Mel::Task::Query.resize(tasks, count)
+        next if tasks.empty?
 
-        Mel::Task::Query.delete(tasks.map(&.id).to_a) if delete
-        tasks.to_a
+        Mel::Task::Query.delete(tasks.map &.id) if delete
+        tasks
       end
     end
 
@@ -109,9 +112,11 @@ module Mel::Task
 
     def self.find(ids : Array, *, delete = false) : Array(self)?
       Mel::Task.find(ids, delete: false).try do |tasks|
-        tasks = tasks.each.select(&.is_a? self).map(&.as self)
-        Mel::Task::Query.delete(tasks.map(&.id).to_a) if delete
-        tasks.to_a
+        tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
+        next if tasks.empty?
+
+        Mel::Task::Query.delete(tasks.map &.id) if delete
+        tasks
       end
     end
 
@@ -147,11 +152,13 @@ module Mel::Task
   end
 
   def from_json(values : Array)
-    values.each
+    values = values.each
       .map { |value| from_json(value.to_s) if value }
       .reject(&.nil?)
       .map(&.not_nil!)
       .to_a
+
+    values unless values.empty?
   end
 
   def from_json(value) : self?

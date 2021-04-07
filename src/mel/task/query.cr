@@ -93,7 +93,8 @@ module Mel::Task::Query
         redis.run(["DEL"] + keys) if delete
       end
 
-      values[0].as(Array)
+      values = values[0].as(Array)
+      values unless values.empty?
     end
   end
 
