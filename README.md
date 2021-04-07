@@ -14,7 +14,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
 
 1. **Periodic Tasks:** These are tasks that run regularly at a specified interval. They may run forever, or till some specified time in the future.
 
-1. **Cron Tasks:** These are tasks that run according a specified schedule in *Unix Cron* format. They may run forever, or till some specified time in the future.
+1. **Cron Tasks:** These are tasks that run according to a specified schedule in *Unix Cron* format. They may run forever, or till some specified time in the future.
 
 ## Installation
 
