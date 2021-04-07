@@ -49,6 +49,24 @@ describe Mel::Task do
     end
   end
 
+  describe "#dequeue" do
+    it "removes task from redis" do
+      address = "user@domain.tld"
+
+      SendEmailJob.run(address: address)
+      task = SendEmailJob.run_every(10.minutes, address: address)
+      SendEmailJob.run_on("0 2 * * *", for: 1.week, address: address)
+
+      Mel::Task.find(-1).try(&.size).should eq(3)
+      Mel::PeriodicTask.find(-1).try(&.size).should eq(1)
+
+      task.try(&.dequeue)
+
+      Mel::Task.find(-1).try(&.size).should eq(2)
+      Mel::PeriodicTask.find(-1).should be_nil
+    end
+  end
+
   describe ".find" do
     it "returns the correct count" do
       address = "user@domain.tld"
