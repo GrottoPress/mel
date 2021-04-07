@@ -120,8 +120,17 @@ module Mel::Task
       end
     end
 
-    def self.from_json(json) : self?
-      Mel::Task.from_json(json).try { |task| task.as(self) if task.is_a?(self) }
+    def self.from_json(values) : Array(self)?
+      Mel::Task.from_json(values).try do |tasks|
+        tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
+        tasks unless tasks.empty?
+      end
+    end
+
+    def self.from_json(value) : self?
+      Mel::Task.from_json(value).try do |task|
+        task.as(self) if task.is_a?(self)
+      end
     end
   end
 
