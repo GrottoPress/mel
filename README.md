@@ -59,8 +59,6 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    ```crystal
    # ->>> src/jobs/do_some_work.cr
 
-   require "mel"
-
    class DoSomeWork
      include Mel::Job # <= Required
 
