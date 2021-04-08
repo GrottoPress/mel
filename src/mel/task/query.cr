@@ -99,7 +99,7 @@ module Mel::Task::Query
   end
 
   def truncate
-    keys = Mel.redis.keys("#{Mel::Task::Query.key}*")
+    keys = Mel.redis.keys("#{key}*")
 
     Mel.redis.multi do |redis|
       redis.del(key)
