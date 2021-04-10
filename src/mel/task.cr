@@ -177,23 +177,23 @@ module Mel::Task
       type.name == json["job"]["__type__"].as_s
     end
 
-    return unless type = job_type
+    job_type.try do |type|
+      id = json["id"].as_s
+      job = type.from_json(json["job"].to_json)
+      time = Time.unix(json["time"].as_i64)
+      till = json["till"]?.try { |t| Time.unix(t.as_i64) }
+      attempts = json["attempts"].as_i
 
-    id = json["id"].as_s
-    job = type.from_json(json["job"].to_json)
-    time = Time.unix(json["time"].as_i64)
-    till = json["till"]?.try { |t| Time.unix(t.as_i64) }
-    attempts = json["attempts"].as_i
+      if schedule = json["schedule"]?
+        task = CronTask.new(id, job, time, till, schedule.as_s)
+      elsif interval = json["interval"]?
+        task = PeriodicTask.new(id, job, time, till, interval.as_i64.seconds)
+      else
+        task = InstantTask.new(id, job, time)
+      end
 
-    if schedule = json["schedule"]?
-      task = CronTask.new(id, job, time, till, schedule.as_s)
-    elsif interval = json["interval"]?
-      task = PeriodicTask.new(id, job, time, till, interval.as_i64.seconds)
-    else
-      task = InstantTask.new(id, job, time)
+      task.attempts = attempts
+      task
     end
-
-    task.attempts = attempts
-    task
   end
 end
