@@ -5,7 +5,7 @@ module Mel::Task
     include Mel::Task::LogHelpers
 
     property id : String
-    property job : Job
+    property job : Mel::Job
     property time : Time
     property attempts : Int32 = 0
 
