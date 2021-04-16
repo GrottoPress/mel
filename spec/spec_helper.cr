@@ -15,6 +15,8 @@ Spec.before_each do
   Mel::Task::Query.truncate
 end
 
+Spec.after_suite { Mel::Task::Query.truncate }
+
 def sync(task)
   task.try &.run.try { |fiber| Pond.drain(fiber) }
 end
