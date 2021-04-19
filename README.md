@@ -119,13 +119,17 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      DoSomeWork.run_in(5.minutes, arg_1: 5, arg_2: "value")
      ```
 
+     The given `Time::Span` can be negative. Eg: `DoSomeWork.run_in(-5.minutes, ...)`. This may be useful for prioritizing certain tasks.
+
    - Run job at specific time:
 
      ```crystal
      # ->>> src/app/some_file.cr
 
-     DoSomeWork.run_at(1.minute.from_now, arg_1: 5, arg_2: "value")
+     DoSomeWork.run_at(10.minutes.from_now, arg_1: 5, arg_2: "value")
      ```
+
+     The specified `Time` can be in the past. Eg: `DoSomeWork.run_at(-10.minutes.from_now, ...)`. This may be useful for prioritizing certain tasks.
 
    - Run periodically:
 
@@ -147,7 +151,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
 
      Instead of `for:`, you may use `till:` and specify a `Time`. Leave those out to run forever.
 
-   The `.run_*` methods accept the following additional arguments:
+   The `DoSomeWork.run_*` methods accept the following additional arguments:
 
    - `retries`: Number of times to attempt a task after it fails, before giving up. Default: `2`. Eg: `DoSomeWork.run(... retries: 1, ...)`
 
@@ -202,21 +206,19 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    # ...
    ```
 
-### Triggered vs. Global jobs
+### Specifying task IDs
 
-By default, whenever any `SomeJob.run_*` method is called, *Mel* creates a new task (with a unique ID) for the job and schedules it in *Redis*. This may be OK for *triggered* jobs (jobs triggered by some kind of user interaction).
+You may specify an ID whenever you schedule a new job, thus: `DoSomeWork.run_*(... id: "1001", ...)`. If not specified, *Mel* automatically generates a unique **dynamic** ID for the task.
 
-For example, you may define a job to send an email notification whenever a user logs in. Each email notification is a unique task tied to a particular login instance. You should **never** hardcode IDs, or use an idempotent method to generate IDs, for such jobs.
+Dynamic task IDs may be OK for *triggered* jobs (jobs triggered by some kind of user interaction), such as a job that sends an email notification whenever a user logs in.
 
-However, there may be jobs that are scheduled unconditionally when your app starts (*global* jobs). For example, sending invoices at the beginning of every month. You should specify unique **hardcoded** IDs for such tasks.
+However, there may be jobs that are scheduled unconditionally when your app starts (*global* jobs). For example, sending invoices at the beginning of every month. You should specify unique **static** IDs for such tasks.
 
 Otherwise, every time the app (re)starts, jobs are scheduled again, each time with a different set of IDs. *Redis* would accept the new schedules because the IDs are different, resulting in duplicated scheduling of the same jobs.
 
 This is particularly important if you run multiple instances of your app. Hardcoding IDs for *global* jobs means that all instances hold the same IDs, so cannot reschedule a job that has already been scheduled by another instance.
 
-To specify an ID: `SomeJob.run_*(id: "1001", ...)`. Do **not** generate the ID with any *method* or *macro* call -- **hardcode** it, making sure it's unique.
-
-In sum, you need to consider whether or not a job you defined should create a new task every time a call to run the job is encountered. If yes, do not specify an ID (*Mel* would generate one every time). Otherwise, specify a hardcoded ID.
+A task ID may be a mixture of static and dynamic parts. For instance, you may include the current month and year for a global job that runs once a month, to ensure it is never scheduled twice within the same month.
 
 ### Optimization
 
