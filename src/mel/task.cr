@@ -43,10 +43,10 @@ module Mel::Task
 
     def run(*, force = false) : Fiber?
       return log_not_due unless force || due?
-      job.before_run
 
       original = clone
       reschedule
+      job.before_run
       @attempts += 1
 
       spawn(name: id) do
