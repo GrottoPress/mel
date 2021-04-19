@@ -44,7 +44,6 @@ module Mel::Task
     def run(*, force = false) : Fiber?
       return log_not_due unless force || due?
 
-      original = clone
       reschedule
       job.before_run
       @attempts += 1
@@ -55,8 +54,7 @@ module Mel::Task
       rescue error
         log_errored(error)
         next log_failed if attempts > retries
-        original.attempts = attempts
-        original.enqueue(force: true)
+        schedule_failed_task
       else
         log_ran
         job.after_run
@@ -139,6 +137,12 @@ module Mel::Task
       Mel::Task.from_json(value).try do |task|
         task.as(self) if task.is_a?(self)
       end
+    end
+
+    private def schedule_failed_task
+      original = clone
+      original.attempts = attempts
+      original.enqueue(force: true)
     end
   end
 
