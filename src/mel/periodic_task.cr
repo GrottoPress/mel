@@ -5,7 +5,7 @@ class Mel::PeriodicTask
 
   property interval : Time::Span
 
-  def initialize(@id, @job, @time, @till, @interval)
+  def initialize(@id, @job, @time, @retries, @till, @interval)
   end
 
   def to_json : String
@@ -13,6 +13,7 @@ class Mel::PeriodicTask
       id: id,
       job: job,
       time: time.to_unix,
+      retries: retries,
       attempts: attempts,
       interval: interval.total_seconds.to_i64
     }
@@ -22,7 +23,7 @@ class Mel::PeriodicTask
   end
 
   def clone
-    self.class.new(id, job.dup, time, till, interval)
+    self.class.new(id, job.dup, time, retries, till, interval)
   end
 
   private def next_time : Time

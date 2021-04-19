@@ -5,7 +5,7 @@ class Mel::CronTask
 
   property schedule : String
 
-  def initialize(@id, @job, @time, @till, @schedule)
+  def initialize(@id, @job, @time, @retries, @till, @schedule)
   end
 
   def to_json : String
@@ -13,6 +13,7 @@ class Mel::CronTask
       id: id,
       job: job,
       time: time.to_unix,
+      retries: retries,
       attempts: attempts,
       schedule: schedule
     }
@@ -22,7 +23,7 @@ class Mel::CronTask
   end
 
   def clone
-    self.class.new(id, job.dup, time, till, schedule)
+    self.class.new(id, job.dup, time, retries, till, schedule)
   end
 
   private def next_time : Time

@@ -9,7 +9,15 @@ module Mel::Task
     property time : Time
     property attempts : Int32 = 0
 
-    private MAX_ATTEMPTS = 3
+    @retries : Int32
+
+    def retries : Int32
+      self.retries = @retries
+    end
+
+    def retries=(retries)
+      @retries = retries < 0 ? 0 : retries
+    end
 
     def enqueue(*, force = false)
       job.before_enqueue
@@ -46,7 +54,7 @@ module Mel::Task
         job.run
       rescue error
         log_errored(error)
-        next log_failed if attempts >= MAX_ATTEMPTS
+        next log_failed if attempts > retries
         original.attempts = attempts
         original.enqueue(force: true)
       else
@@ -177,23 +185,28 @@ module Mel::Task
       type.name == json["job"]["__type__"].as_s
     end
 
-    job_type.try do |type|
-      id = json["id"].as_s
-      job = type.from_json(json["job"].to_json)
-      time = Time.unix(json["time"].as_i64)
-      till = json["till"]?.try { |t| Time.unix(t.as_i64) }
-      attempts = json["attempts"].as_i
+    job_type.try { |type| from_json(json, type) }
+  end
 
-      if schedule = json["schedule"]?
-        task = CronTask.new(id, job, time, till, schedule.as_s)
-      elsif interval = json["interval"]?
-        task = PeriodicTask.new(id, job, time, till, interval.as_i64.seconds)
-      else
-        task = InstantTask.new(id, job, time)
-      end
+  private def from_json(json, type)
+    id = json["id"].as_s
+    job = type.from_json(json["job"].to_json)
+    time = Time.unix(json["time"].as_i64)
+    retries = json["retries"].as_i
+    attempts = json["attempts"].as_i
+    till = json["till"]?.try { |timestamp| Time.unix(timestamp.as_i64) }
+    schedule = json["schedule"]?.try(&.as_s)
+    interval = json["interval"]?.try(&.as_i64.seconds)
 
-      task.attempts = attempts
-      task
+    if schedule
+      task = CronTask.new(id, job, time, retries, till, schedule)
+    elsif interval
+      task = PeriodicTask.new(id, job, time, retries, till, interval)
+    else
+      task = InstantTask.new(id, job, time, retries)
     end
+
+    task.attempts = attempts
+    task
   end
 end

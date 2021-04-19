@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased] - 
 
+### Added
+- Add per task `retries` argument.
+
 ### Changed
 - Return `nil` for query methods returning empty collections
 

@@ -5,7 +5,7 @@ describe Mel::Task do
     it "retries failed task" do
       id = "1001"
 
-      FailedJob.run(id)
+      FailedJob.run(id, retries: 1)
 
       task = Mel::InstantTask.find(id, delete: true)
       task.try(&.attempts).should eq(0)
@@ -16,11 +16,6 @@ describe Mel::Task do
       task.try(&.attempts).should eq(1)
       sync(task)
       task.try(&.attempts).should eq(2)
-
-      task = Mel::InstantTask.find(id, delete: true)
-      task.try(&.attempts).should eq(2)
-      sync(task)
-      task.try(&.attempts).should eq(3)
 
       Mel::InstantTask.find(id).should be_nil
     end

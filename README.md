@@ -147,6 +147,10 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
 
      Instead of `for:`, you may use `till:` and specify a `Time`. Leave those out to run forever.
 
+   The `.run_*` methods accept the following additional arguments:
+
+   - `retries`: Number of times to attempt a task after it fails, before giving up. Default: `2`. Eg: `DoSomeWork.run(... retries: 1, ...)`
+
 1. Start *Mel*:
 
    - As its own process (compiled separately):

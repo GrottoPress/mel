@@ -41,7 +41,7 @@ module Mel::Task::LogHelpers
 
     private def log_failed : Nil
       Mel.log.error &.emit(
-        "Task failed after #{MAX_ATTEMPTS} attempts",
+        "Task failed after #{attempts} attempts",
         task: to_json
       )
     end
