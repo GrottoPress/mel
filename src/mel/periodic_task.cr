@@ -3,9 +3,17 @@ require "./recurring_task"
 class Mel::PeriodicTask
   include RecurringTask
 
-  property interval : Time::Span
+  @interval : Time::Span
 
   def initialize(@id, @job, @time, @retries, @till, @interval)
+  end
+
+  def interval : Time::Span
+    self.interval = @interval
+  end
+
+  def interval=(interval)
+    @interval = interval.abs
   end
 
   def to_json : String

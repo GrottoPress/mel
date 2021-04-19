@@ -73,7 +73,7 @@ describe Mel::Job do
       address = "user@domain.tld"
       id = "1001"
 
-      SendEmailJob.run_every(2.hours, id: id, address: address)
+      SendEmailJob.run_every(-2.hours, id: id, address: address)
 
       Time::Location.local = Time::Location.load("Europe/Berlin")
 
