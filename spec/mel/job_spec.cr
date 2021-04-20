@@ -190,7 +190,7 @@ describe Mel::Job do
     end
 
     it "runs even if task fails" do
-      task = FailedJob.run
+      task = FailedJob.run(retries: 0)
 
       task.try(&.job.as(FailedJob).run_before).should be_false
       sync(task)
@@ -209,12 +209,12 @@ describe Mel::Job do
       task.try(&.job.as(SendEmailJob).run_after).should be_true
     end
 
-    it "does not run if task fails" do
-      task = FailedJob.run
+    it "runs even if task fails" do
+      task = FailedJob.run(retries: 0)
 
       task.try(&.job.as(FailedJob).run_after).should be_false
       sync(task)
-      task.try(&.job.as(FailedJob).run_after).should be_false
+      task.try(&.job.as(FailedJob).run_after).should be_true
     end
   end
 
@@ -238,7 +238,7 @@ describe Mel::Job do
       task.try(&.job.as(SendEmailJob).enqueue_after).should be_true
     end
 
-    pending "does not run if enqueue fails" do
+    pending "runs even if enqueue fails" do
     end
   end
 
@@ -268,7 +268,7 @@ describe Mel::Job do
       task.try(&.job.as(SendEmailJob).dequeue_after).should be_true
     end
 
-    pending "does not run if dequeue fails" do
+    pending "runs even if dequeue fails" do
     end
   end
 end

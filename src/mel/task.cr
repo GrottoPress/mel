@@ -23,10 +23,13 @@ module Mel::Task
       job.before_enqueue
       log_enqueueing
 
-      Mel::Task::Query.add(self, force: force).try do |values|
+      if values = Mel::Task::Query.add(self, force: force)
         log_enqueued
-        job.after_enqueue
+        job.after_enqueue(true)
         values
+      else
+        job.after_enqueue(false)
+        nil
       end
     end
 
@@ -34,10 +37,13 @@ module Mel::Task
       job.before_dequeue
       log_dequeueing
 
-      Mel::Task::Query.delete(id).try do |value|
+      if value = Mel::Task::Query.delete(id)
         log_dequeued
-        job.after_dequeue
+        job.after_dequeue(true)
         value
+      else
+        job.after_dequeue(false)
+        nil
       end
     end
 
@@ -53,11 +59,11 @@ module Mel::Task
         job.run
       rescue error
         log_errored(error)
-        next log_failed if attempts > retries
+        next fail_task if attempts > retries
         schedule_failed_task
       else
         log_ran
-        job.after_run
+        job.after_run(true)
       end
     end
 
@@ -137,6 +143,11 @@ module Mel::Task
       Mel::Task.from_json(value).try do |task|
         task.as(self) if task.is_a?(self)
       end
+    end
+
+    private def fail_task : Nil
+      log_failed
+      job.after_run(false)
     end
 
     private def schedule_failed_task

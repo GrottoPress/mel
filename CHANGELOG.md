@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Return `nil` for query methods returning empty collections
+- Pass status as argument to `after_*` callbacks.
 
 ### Fixed
 - Ensure interval specified for periodic tasks cannot be negative

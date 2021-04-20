@@ -80,10 +80,14 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
        # ...
      end
 
-     # Called in the same fiber that calls `#run`, but only if
-     # `#run` successfully completes.
-     def after_run
-       # ...
+     # Called in the same fiber that calls `#run`.
+     # `success` is `true` only if the run succeeded.
+     def after_run(success)
+       if success
+         # ...
+       else
+         # ...
+       end
      end
 
      # Called in the main fiber before enqueueing the task in
@@ -93,9 +97,13 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      end
 
      # Called in the main fiber after enqueueing the task in
-     # Redis, but only if the enqueue succeeds.
-     def after_enqueue
-       # ...
+     # Redis. `success` is `true` only if the enqueue succeeded.
+     def after_enqueue(success)
+       if success
+         # ...
+       else
+         # ...
+       end
      end
    end
    ```

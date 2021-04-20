@@ -24,7 +24,7 @@ class SendEmailJob
     @run_before = true
   end
 
-  def after_run
+  def after_run(success)
     @run_after = true
   end
 
@@ -32,7 +32,7 @@ class SendEmailJob
     @enqueue_before = true
   end
 
-  def after_enqueue
+  def after_enqueue(success)
     @enqueue_after = true
   end
 
@@ -40,7 +40,7 @@ class SendEmailJob
     @dequeue_before = true
   end
 
-  def after_dequeue
+  def after_dequeue(success)
     @dequeue_after = true
   end
 end

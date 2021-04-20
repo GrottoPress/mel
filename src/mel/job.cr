@@ -22,19 +22,19 @@ module Mel::Job
     def before_run
     end
 
-    def after_run
+    def after_run(success)
     end
 
     def before_enqueue
     end
 
-    def after_enqueue
+    def after_enqueue(success)
     end
 
     def before_dequeue
     end
 
-    def after_dequeue
+    def after_dequeue(success)
     end
 
     def self.run(id = UUID.random.to_s, retries = 2, **job_args)
