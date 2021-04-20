@@ -19,11 +19,11 @@ module Mel::Task
       @retries = retries < 0 ? 0 : retries
     end
 
-    def enqueue(*, force = false)
+    def enqueue(redis = nil, *, force = false)
       job.before_enqueue
       log_enqueueing
 
-      if values = Mel::Task::Query.add(self, force: force)
+      if values = Mel::Task::Query.add(self, redis, force: force)
         log_enqueued
         job.after_enqueue(true)
         values
@@ -81,7 +81,7 @@ module Mel::Task
       Mel::Task.find_lt(time, -1, delete: false).try do |tasks|
         tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
         tasks = Mel::Task::Query.resize(tasks, count)
-        next if tasks.empty?
+        return if tasks.empty?
 
         Mel::Task::Query.delete(tasks.map &.id) if delete
         tasks
@@ -94,7 +94,7 @@ module Mel::Task
       Mel::Task.find_lte(time, -1, delete: false).try do |tasks|
         tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
         tasks = Mel::Task::Query.resize(tasks, count)
-        next if tasks.empty?
+        return if tasks.empty?
 
         Mel::Task::Query.delete(tasks.map &.id) if delete
         tasks
@@ -107,7 +107,7 @@ module Mel::Task
       Mel::Task.find(-1, delete: false).try do |tasks|
         tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
         tasks = Mel::Task::Query.resize(tasks, count)
-        next if tasks.empty?
+        return if tasks.empty?
 
         Mel::Task::Query.delete(tasks.map &.id) if delete
         tasks
@@ -116,7 +116,7 @@ module Mel::Task
 
     def self.find(id : String, *, delete = false) : self?
       Mel::Task.find(id, delete: false).try do |task|
-        next unless task.is_a?(self)
+        return unless task.is_a?(self)
         Mel::Task::Query.delete(task.id) if delete
         task.as(self)
       end
@@ -125,7 +125,7 @@ module Mel::Task
     def self.find(ids : Array, *, delete = false) : Array(self)?
       Mel::Task.find(ids, delete: false).try do |tasks|
         tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
-        next if tasks.empty?
+        return if tasks.empty?
 
         Mel::Task::Query.delete(tasks.map &.id) if delete
         tasks

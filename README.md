@@ -8,6 +8,8 @@ In *Mel*, a scheduled job is called a *task*. A single job may be scheduled in m
 
 This makes *Redis* the *source of truth* for schedules, allowing to easily scale out *Mel* to multiple instances (called *workers*), or replace or stop workers without losing schedules.
 
+*Mel* supports bulk scheduling, and is able to push multiple jobs atomically, avoiding *N* queries.
+
 ### Types of tasks
 
 1. **Instant Tasks:** These are tasks that run only once after they are scheduled, either immediately or at some specified time in the future.
@@ -227,6 +229,73 @@ Otherwise, every time the app (re)starts, jobs are scheduled again, each time wi
 This is particularly important if you run multiple instances of your app. Hardcoding IDs for *global* jobs means that all instances hold the same IDs, so cannot reschedule a job that has already been scheduled by another instance.
 
 A task ID may be a mixture of static and dynamic parts. For instance, you may include the current month and year for a global job that runs once a month, to ensure it is never scheduled twice within the same month.
+
+### Bulk scheduling
+
+A common pattern is to break up long-running tasks into smaller tasks. For example:
+
+```crystal
+class SendAllEmails
+  include Mel::Job
+
+  def initialize(@users : Array(User))
+  end
+
+  def run
+    @users.each { |user| send_email(user) }
+  end
+
+  private def send_email(user)
+    # Send email
+  end
+end
+
+# Schedule job
+users = # ...
+SendAllEmails.run(users: users)
+```
+
+The above job would run in a single fiber, managed by whichever worker pulls this task at run time. This could mean too much work for a single worker if the number of users is sufficiently large.
+
+The preferred approach is to define a job that sends email to one user, and schedule that job for as many users as needed:
+
+```crystal
+class SendEmail
+  include Mel::Job
+
+  def initialize(@user : User)
+  end
+
+  def run
+    send_email(@user)
+  end
+
+  private def send_email(user)
+    # Send email
+  end
+end
+
+class SendAllEmails
+  include Mel::Job
+
+  def initialize(@users : Array(User))
+  end
+
+  def run
+    return if @users.empty?
+
+    # Pushes all jobs atomically, at the end of the block.
+    run do |redis|
+      @users.each { |user| SendEmail.run(redis: redis, user: user) }
+    end
+  end
+end
+
+# Schedule job
+users = # ...
+SendAllEmails.run(users: users)
+# <= Any `.run_*` method could be called here, as with any job.
+```
 
 ### Optimization
 

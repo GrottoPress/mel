@@ -292,4 +292,18 @@ describe Mel::Job do
     pending "runs even if dequeue fails" do
     end
   end
+
+  describe "#run" do
+    it "schedules bulk jobs" do
+      id = "1001"
+      max = 10
+
+      CounterJob.run(id: id, max: max)
+      task = Mel::InstantTask.find(id, delete: true)
+
+      task.should_not be_nil
+      sync(task)
+      Mel::InstantTask.find(-1).try(&.size).should eq(max)
+    end
+  end
 end

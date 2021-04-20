@@ -13,25 +13,31 @@ module Mel::Task::Query
     ids.map { |id| key(id.to_s) }
   end
 
-  def add(task, *, force = false)
-    force ? update(task) : create(task)
+  def add(task, redis = nil, *, force = false)
+    force ? update(task, redis) : create(task, redis)
   end
 
-  def create(task)
+  def create(task : Task, redis = nil)
     connect do
-      Mel.redis.multi do |redis|
+      command = ->(redis : Redis::Commands) do
         redis.run({"ZADD", key, "NX", task.time.to_unix.to_s, task.id})
         redis.set(task.key, task.to_json, nx: true)
       end
+
+      return command.call(redis) if redis
+      Mel.redis.multi { |redis| command.call(redis) }
     end
   end
 
-  def update(task)
+  def update(task : Task, redis = nil)
     connect do
-      Mel.redis.multi do |redis|
+      command = ->(redis : Redis::Commands) do
         redis.run({"ZADD", key, task.time.to_unix.to_s, task.id})
         redis.set(task.key, task.to_json)
       end
+
+      return command.call(redis) if redis
+      Mel.redis.multi { |redis| command.call(redis) }
     end
   end
 

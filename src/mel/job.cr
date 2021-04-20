@@ -19,6 +19,12 @@ module Mel::Job
       \{% raise "#{@type}#run not implemented" %}
     end
 
+    def run
+      Mel.redis.multi do |redis|
+        yield redis
+      end
+    end
+
     def before_run
     end
 
@@ -37,29 +43,41 @@ module Mel::Job
     def after_dequeue(success)
     end
 
-    def self.run(id = UUID.random.to_s, retries = 2, **job_args)
-      run_now(id, retries, **job_args)
+    def self.run(id = UUID.random.to_s, retries = 2, redis = nil, **job_args)
+      run_now(id, retries, redis, **job_args)
     end
 
-    def self.run_now(id = UUID.random.to_s, retries = 2, **job_args)
+    def self.run_now(
+      id = UUID.random.to_s,
+      retries = 2,
+      redis = nil,
+      **job_args
+    )
       time = Time.local
-      run_at(time, id, retries, **job_args)
+      run_at(time, id, retries, redis, **job_args)
     end
 
     def self.run_in(
       delay : Time::Span,
       id = UUID.random.to_s,
       retries = 2,
+      redis = nil,
       **job_args
     )
       time = delay.from_now
-      run_at(time, id, retries, **job_args)
+      run_at(time, id, retries, redis, **job_args)
     end
 
-    def self.run_at(time : Time, id = UUID.random.to_s, retries = 2, **job_args)
+    def self.run_at(
+      time : Time,
+      id = UUID.random.to_s,
+      retries = 2,
+      redis = nil,
+      **job_args
+    )
       job = new(**job_args)
       task = Mel::InstantTask.new(id.to_s, job, time, retries)
-      task.id if task.enqueue
+      task.id if task.enqueue(redis)
     end
 
     def self.run_every(
@@ -67,10 +85,11 @@ module Mel::Job
       for : Time::Span?,
       id = UUID.random.to_s,
       retries = 2,
+      redis = nil,
       **job_args
     )
       till = for.try(&.from_now)
-      run_every(interval, till, id, retries, **job_args)
+      run_every(interval, till, id, retries, redis, **job_args)
     end
 
     def self.run_every(
@@ -78,13 +97,14 @@ module Mel::Job
       till : Time? = nil,
       id = UUID.random.to_s,
       retries = 2,
+      redis = nil,
       **job_args
     )
       job = new(**job_args)
       time = interval.abs.from_now
       task = Mel::PeriodicTask.new(id.to_s, job, time, retries, till, interval)
 
-      task.id if task.enqueue
+      task.id if task.enqueue(redis)
     end
 
     def self.run_on(
@@ -92,10 +112,11 @@ module Mel::Job
       for : Time::Span?,
       id = UUID.random.to_s,
       retries = 2,
+      redis = nil,
       **job_args
     )
       till = for.try(&.from_now)
-      run_on(schedule, till, id, retries, **job_args)
+      run_on(schedule, till, id, retries, redis, **job_args)
     end
 
     def self.run_on(
@@ -103,13 +124,14 @@ module Mel::Job
       till : Time? = nil,
       id = UUID.random.to_s,
       retries = 2,
+      redis = nil,
       **job_args
     )
       job = new(**job_args)
       time = CronParser.new(schedule).next
       task = Mel::CronTask.new(id.to_s, job, time, retries, till, schedule)
 
-      task.id if task.enqueue
+      task.id if task.enqueue(redis)
     end
   end
 end
