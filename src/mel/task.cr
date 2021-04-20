@@ -150,7 +150,7 @@ module Mel::Task
       job.after_run(false)
     end
 
-    private def schedule_failed_task
+    private def schedule_failed_task : Nil
       original = clone
       original.attempts = attempts
       original.enqueue(force: true)
