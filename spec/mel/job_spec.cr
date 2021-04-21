@@ -180,9 +180,11 @@ describe Mel::Job do
 
   describe "#before_run" do
     it "runs" do
+      id = "1001"
       address = "user@domain.tld"
 
-      task = SendEmailJob.run(address: address)
+      SendEmailJob.run(id: id, address: address)
+      task = Mel::InstantTask.find(id)
 
       task.try(&.job.as(SendEmailJob).run_before).should be_false
       sync(task)
@@ -190,7 +192,10 @@ describe Mel::Job do
     end
 
     it "runs even if task fails" do
-      task = FailedJob.run(retries: 0)
+      id = "1001"
+
+      FailedJob.run(id: id, retries: 0)
+      task = Mel::InstantTask.find(id)
 
       task.try(&.job.as(FailedJob).run_before).should be_false
       sync(task)
@@ -200,9 +205,11 @@ describe Mel::Job do
 
   describe "#after_run" do
     it "runs" do
+      id = "1001"
       address = "user@domain.tld"
 
-      task = SendEmailJob.run(address: address)
+      SendEmailJob.run(id: id, address: address)
+      task = Mel::InstantTask.find(id)
 
       task.try(&.job.as(SendEmailJob).run_after).should be_false
       sync(task)
@@ -210,7 +217,10 @@ describe Mel::Job do
     end
 
     it "runs even if task fails" do
-      task = FailedJob.run(retries: 0)
+      id = "1001"
+
+      FailedJob.run(id: id, retries: 0)
+      task = Mel::InstantTask.find(id)
 
       task.try(&.job.as(FailedJob).run_after).should be_false
       sync(task)
@@ -220,9 +230,12 @@ describe Mel::Job do
 
   describe "#before_enqueue" do
     it "runs" do
+      id = "1001"
       address = "user@domain.tld"
 
-      task = SendEmailJob.run(address: address)
+      SendEmailJob.run(id: id, address: address)
+
+      task = Mel::InstantTask.find(id)
       task.try(&.job.as(SendEmailJob).enqueue_before).should be_true
     end
 
@@ -232,9 +245,13 @@ describe Mel::Job do
 
   describe "#after_enqueue" do
     it "runs" do
+      id = "1001"
       address = "user@domain.tld"
 
-      task = SendEmailJob.run(address: address)
+      SendEmailJob.run(id: id, address: address)
+
+      task = Mel::InstantTask.find(id)
+      task.try(&.enqueue)
       task.try(&.job.as(SendEmailJob).enqueue_after).should be_true
     end
 
@@ -244,9 +261,11 @@ describe Mel::Job do
 
   describe "#before_dequeue" do
     it "runs" do
+      id = "1001"
       address = "user@domain.tld"
 
-      task = SendEmailJob.run(address: address)
+      SendEmailJob.run(id: id, address: address)
+      task = Mel::InstantTask.find(id)
 
       task.try(&.job.as(SendEmailJob).dequeue_before).should be_false
       task.try(&.dequeue)
@@ -259,9 +278,11 @@ describe Mel::Job do
 
   describe "#after_dequeue" do
     it "runs" do
+      id = "1001"
       address = "user@domain.tld"
 
-      task = SendEmailJob.run(address: address)
+      SendEmailJob.run(id: id, address: address)
+      task = Mel::InstantTask.find(id)
 
       task.try(&.job.as(SendEmailJob).dequeue_after).should be_false
       task.try(&.dequeue)

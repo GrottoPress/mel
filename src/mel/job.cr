@@ -59,7 +59,7 @@ module Mel::Job
     def self.run_at(time : Time, id = UUID.random.to_s, retries = 2, **job_args)
       job = new(**job_args)
       task = Mel::InstantTask.new(id.to_s, job, time, retries)
-      task if task.enqueue
+      task.id if task.enqueue
     end
 
     def self.run_every(
@@ -84,7 +84,7 @@ module Mel::Job
       time = interval.abs.from_now
       task = Mel::PeriodicTask.new(id.to_s, job, time, retries, till, interval)
 
-      task if task.enqueue
+      task.id if task.enqueue
     end
 
     def self.run_on(
@@ -109,7 +109,7 @@ module Mel::Job
       time = CronParser.new(schedule).next
       task = Mel::CronTask.new(id.to_s, job, time, retries, till, schedule)
 
-      task if task.enqueue
+      task.id if task.enqueue
     end
   end
 end
