@@ -8,7 +8,7 @@ In *Mel*, a scheduled job is called a *task*. A single job may be scheduled in m
 
 This makes *Redis* the *source of truth* for schedules, allowing to easily scale out *Mel* to multiple instances (called *workers*), or replace or stop workers without losing schedules.
 
-*Mel* supports bulk scheduling, and is able to push multiple jobs atomically, avoiding *N* queries.
+*Mel* supports *bulk scheduling* of jobs as a single atomic unit. There's also support for *sequential scheduling* to track a series of jobs and perform some action after they are all complete.
 
 ### Types of tasks
 
@@ -295,6 +295,45 @@ end
 users = # ...
 SendAllEmails.run(users: users)
 # <= Any `.run_*` method could be called here, as with any job.
+```
+
+### Sequential scheduling
+
+Bulk scheduling works OK as a *fire-and-forget* mechanism. However, you may need to keep track of a series of jobs as a single unit, and perform some action only after the last job is done.
+
+This is where sequential scheduling comes in handy. *Mel*'s event-driven design allows chaining jobs, by scheduling the next after the current one completes:
+
+```crystal
+class SendAllEmails
+  include Mel::Job
+
+  def initialize(@users : Array(User))
+  end
+
+  def run
+    @users[0]?.try do |user|
+      send_email(user) # <= Send first email
+    end
+  end
+
+  def after_run(success)
+    return unless success
+
+    if @users[1]?
+      self.class.run(users: @users[1..]) # <= Schedule next email
+    else # <= All emails have been sent
+      # Do something
+    end
+  end
+
+  private def send_email(user)
+    # Send email
+  end
+end
+
+# Schedule job
+users = # ...
+SendAllEmails.run(users: users)
 ```
 
 ### Optimization
