@@ -43,13 +43,13 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
 
    Mel.configure do |settings|
      settings.batch_size = 10 # <= Maximum tasks to retrieve per poll (Optional)
-     settings.log_backend = Log::IOBackend.new
-     settings.log_level = :info
      settings.poll_interval = 3.seconds
      settings.redis_pool_size = 25
      settings.redis_url = "redis://localhost:6379/0"
      settings.timezone = Time::Location.load("Africa/Accra")
    end
+
+   Log.setup(Mel.log.source, :info, Log::IOBackend.new)
 
    # ...
    ```

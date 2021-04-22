@@ -15,8 +15,6 @@ module Mel
 
   private module Settings
     class_property batch_size : Int32 = 10
-    class_property log_backend : Log::Backend?
-    class_property log_level : Log::Severity?
     class_property poll_interval : Time::Span = 3.seconds
     class_property! redis_url : String
     class_property redis_pool_size : Int32?
@@ -76,12 +74,6 @@ module Mel
 
   private def configure
     settings.timezone.try { |location| Time::Location.local = location }
-
-    settings.log_backend.try do |backend|
-      log.class.setup(log.source, backend: backend)
-    end
-
-    settings.log_level.try { |level| log.level = level }
   end
 
   private def run_tasks

@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Ensure interval specified for periodic tasks cannot be negative
+- Fix log settings not working
 
 ## [0.1.0] - 2021-04-06
 
