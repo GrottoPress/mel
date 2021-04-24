@@ -338,6 +338,8 @@ users = # ...
 SendAllEmails.run(users: users)
 ```
 
+Although the example above involves a single job, sequential scheduling can be applied to multiple different jobs, each representing a step in a workflow, with each job scheduling the next job in its `#after_run` callback.
+
 ### Optimization
 
 *Mel*'s focus is on scaling out to multiple workers without hiccups. Each worker polls *Redis* every configurable period. Hard work has gone into reducing the number of queries made, which may be critical for performance.
