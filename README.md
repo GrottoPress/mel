@@ -257,6 +257,8 @@ SendAllEmails.run(users: users)
 
 The above job would run in a single fiber, managed by whichever worker pulls this task at run time. This could mean too much work for a single worker if the number of users is sufficiently large.
 
+Moreover, some mails may be sent multiple times if the task is retried as a result of failure. Ideally, jobs should be idempotent, and as atomic as possible.
+
 The preferred approach is to define a job that sends email to one user, and schedule that job for as many users as needed:
 
 ```crystal
