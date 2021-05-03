@@ -42,7 +42,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    require "../jobs/**"
 
    Mel.configure do |settings|
-     settings.batch_size = 10 # <= Maximum tasks to retrieve per poll (Optional)
+     settings.batch_size = 10 # <= Maximum tasks to retrieve per poll
      settings.poll_interval = 3.seconds
      settings.redis_pool_size = 25
      settings.redis_url = "redis://localhost:6379/0"
@@ -163,7 +163,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
 
    The `DoSomeWork.run_*` methods accept the following additional arguments:
 
-   - `retries`: Number of times to attempt a task after it fails, before giving up. Default: `2`. Eg: `DoSomeWork.run(... retries: 1, ...)`
+   - `retries`: Number of times to attempt a task after it fails, before giving up. Default: `2`. Eg: `DoSomeWork.run(... retries: 1, ...)`. A task fails when any exception is raised during run.
 
 1. Start *Mel*:
 
@@ -262,21 +262,6 @@ Moreover, some mails may be sent multiple times if the task is retried as a resu
 The preferred approach is to define a job that sends email to one user, and schedule that job for as many users as needed:
 
 ```crystal
-class SendEmail
-  include Mel::Job
-
-  def initialize(@user : User)
-  end
-
-  def run
-    send_email(@user)
-  end
-
-  private def send_email(user)
-    # Send email
-  end
-end
-
 class SendAllEmails
   include Mel::Job
 
@@ -289,6 +274,21 @@ class SendAllEmails
     # Pushes all jobs atomically, at the end of the block.
     run do |redis|
       @users.each { |user| SendEmail.run(redis: redis, user: user) }
+    end
+  end
+
+  class SendEmail
+    include Mel::Job
+
+    def initialize(@user : User)
+    end
+
+    def run
+      send_email(@user)
+    end
+
+    private def send_email(user)
+      # Send email
     end
   end
 end
@@ -338,9 +338,47 @@ users = # ...
 SendAllEmails.run(users: users)
 ```
 
-Although the example above involves a single job, sequential scheduling can be applied to multiple different jobs, each representing a step in a workflow, with each job scheduling the next job in its `#after_run` callback.
+Although the example above involves a single job, sequential scheduling can be applied to multiple different jobs, each representing a step in a workflow, with each job scheduling the next job in its `#after_run` callback:
 
-### Optimization
+```crystal
+struct SomeJob
+  include Mel::Job
+  
+  def run
+    # Do something
+  end
+
+  def after_run(success)
+    SomeStep.run if success
+  end
+
+  struct SomeStep
+    include Mel::Job
+
+    def run
+      # Do something
+    end
+
+    def after_run(success)
+      SomeOtherStep.run if success
+    end
+  end
+
+  struct SomeOtherStep
+    include Mel::Job
+
+    def run
+      # Do something
+    end
+
+    def after_run(success)
+      # All done; do something
+    end
+  end
+end
+```
+
+### Query optimization
 
 *Mel*'s focus is on scaling out to multiple workers without hiccups. Each worker polls *Redis* every configurable period. Hard work has gone into reducing the number of queries made, which may be critical for performance.
 
