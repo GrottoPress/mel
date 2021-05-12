@@ -25,4 +25,26 @@ describe Mel do
 
     JOBS.size.should eq(2)
   end
+
+  it "stops on SIGINT" do
+    spawn { Mel.start }
+
+    sleep 2.milliseconds
+    Mel.state.started?.should be_true
+
+    Process.signal(Signal::INT, Process.pid)
+    sleep 2.milliseconds
+    Mel.state.stopped?.should be_true
+  end
+
+  it "stops on SIGTERM" do
+    spawn { Mel.start }
+
+    sleep 2.milliseconds
+    Mel.state.started?.should be_true
+
+    Process.signal(Signal::TERM, Process.pid)
+    sleep 2.milliseconds
+    Mel.state.stopped?.should be_true
+  end
 end
