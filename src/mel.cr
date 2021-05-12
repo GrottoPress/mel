@@ -25,6 +25,7 @@ module Mel
     Ready
     Started
     Stopped
+    Ended
   end
 
   class_getter state = State::Ready
@@ -69,7 +70,10 @@ module Mel
     log_stopping
 
     @@state = State::Stopped
-    sleep settings.poll_interval
+
+    until state.ended?
+      Fiber.yield
+    end
   end
 
   private def configure
@@ -95,6 +99,8 @@ module Mel
     log_waiting
     pond.drain
     log_stopped
+
+    @@state = State::Ended
   end
 
   private def handle_signal
