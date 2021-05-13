@@ -9,12 +9,12 @@ describe Mel::Task do
 
       task = Mel::InstantTask.find(id, delete: true)
       task.try(&.attempts).should eq(0)
-      sync(task)
+      Mel.sync(task)
       task.try(&.attempts).should eq(1)
 
       task = Mel::InstantTask.find(id, delete: true)
       task.try(&.attempts).should eq(1)
-      sync(task)
+      Mel.sync(task)
       task.try(&.attempts).should eq(2)
 
       Mel::InstantTask.find(id).should be_nil

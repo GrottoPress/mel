@@ -2,10 +2,11 @@ require "spec"
 
 require "timecop"
 
-require "../src/mel"
+require "../src/spec"
 require "./support/**"
 
 Mel.configure do |settings|
+  settings.poll_interval = 1.millisecond
   settings.redis_url = ENV["REDIS_URL"]
   settings.batch_size = -1
 end
@@ -16,7 +17,3 @@ Spec.before_each do
 end
 
 Spec.after_suite { Mel::Task::Query.truncate }
-
-def sync(task)
-  task.try &.run.try { |fiber| Pond.drain(fiber) }
-end

@@ -9,17 +9,8 @@ describe Mel do
 
     JOBS.size.should eq(0)
 
-    Mel.settings.poll_interval = 1.millisecond
-
-    spawn { Mel.start }
-    Mel.state.ready?.should be_true
-
-    sleep 2.milliseconds
-    Mel.state.started?.should be_true
-
     Timecop.travel(2.hours.from_now) do
-      sleep 2.milliseconds
-      Mel.stop
+      Mel.start_and_stop
       Mel.state.ended?.should be_true
     end
 
@@ -27,23 +18,17 @@ describe Mel do
   end
 
   it "stops on SIGINT" do
-    spawn { Mel.start }
-
-    sleep 2.milliseconds
-    Mel.state.started?.should be_true
-
+    Mel.start_async
     Process.signal(Signal::INT, Process.pid)
+
     sleep 2.milliseconds
     Mel.state.stopped?.should be_true
   end
 
   it "stops on SIGTERM" do
-    spawn { Mel.start }
-
-    sleep 2.milliseconds
-    Mel.state.started?.should be_true
-
+    Mel.start_async
     Process.signal(Signal::TERM, Process.pid)
+
     sleep 2.milliseconds
     Mel.state.stopped?.should be_true
   end

@@ -18,7 +18,7 @@ abort "Missing --delete-my-data flag" unless ARGV.includes? "--delete-my-data"
 
 require "benchmark"
 
-require "../src/mel"
+require "../src/spec"
 
 ITERATIONS = ENV["ITERATIONS"]?.try(&.to_i) || 100_000
 
@@ -56,17 +56,7 @@ Benchmark.bm do |job|
   batches = batch_size < 1 ? 1 : (ITERATIONS / batch_size).ceil.to_i
 
   job.report("Run #{ITERATIONS} scheduled jobs") do
-    batches.times do
-      spawn do
-        until Mel.state.started?
-          Fiber.yield
-        end
-
-        Mel.stop
-      end
-
-      Mel.start
-    end
+    batches.times { Mel.start_and_stop }
   end
 
   Mel::Task::Query.truncate
