@@ -22,6 +22,9 @@ dependencies:
     version: ~> 0.1.9
 
 development_dependencies:
+  carbon:
+    github: luckyframework/carbon
+    version: ~> 0.2.0
   timecop:
     github: crystal-community/timecop.cr
     version: ~> 0.4.0

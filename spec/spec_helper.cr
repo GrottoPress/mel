@@ -1,9 +1,13 @@
 require "spec"
 
+require "carbon"
 require "timecop"
 
 require "../src/spec"
 require "./support/**"
+require "../src/carbon"
+
+include Carbon::Expectations
 
 Mel.configure do |settings|
   settings.poll_interval = 1.millisecond

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Add spec helpers
+- Add support for [*Carbon*](https://github.com/luckyframework/carbon) mailer
 
 ### Fixed
 - Ensure running tasks complete if *Mel* stopped in main fiber

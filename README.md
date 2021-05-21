@@ -396,6 +396,49 @@ A *Mel* worker waits for all running tasks to complete before exiting, if it rec
 
 This means jobs are never lost mid-flight. However, because workers pull due tasks from *Redis* **destructively**, if there is a force shutdown (eg: a power cut), running tasks may be lost.
 
+## Integrations
+
+### *Carbon* mailer
+
+<small>Link: https://github.com/luckyframework/carbon</small>
+
+1. Require `mel/carbon`, after your emails:
+
+   ```crystal
+   # ->>> src/app.cr
+
+   # ...
+   require "emails/base_email"
+   require "emails/**"
+
+   require "mel/carbon"
+   # ...
+   ```
+
+1. Set up base email:
+
+   ```crystal
+   # ->>> src/emails/base_email.cr
+
+   abstract class BaseEmail < Carbon::Email
+     # ...
+     include JSON::Serializable
+     # ...
+   end
+   ```
+
+1. Configure deliver later strategy:
+
+   ```crystal
+   # ->>> config/email.cr
+
+   BaseEmail.configure do |settings|
+     # ...
+     settings.deliver_later_strategy = Mel::Carbon::DeliverLaterStrategy.new
+     # ...
+   end
+   ```
+
 ## Development
 
 Create a `.env.sh` file:
