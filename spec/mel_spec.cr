@@ -7,14 +7,13 @@ describe Mel do
     CollectJobsJob.run
     CollectJobsJob.run_every(2.hours, for: 4.hours)
 
-    JOBS.size.should eq(0)
+    JOBS.lazy_get.should eq(0)
 
     Timecop.travel(2.hours.from_now) do
       Mel.start_and_stop
       Mel.state.ended?.should be_true
+      JOBS.lazy_get.should eq(2)
     end
-
-    JOBS.size.should eq(2)
   end
 
   it "stops on SIGINT" do
@@ -22,7 +21,7 @@ describe Mel do
     Process.signal(Signal::INT, Process.pid)
 
     sleep 2.milliseconds
-    Mel.state.stopped?.should be_true
+    Mel.state.started?.should be_false
   end
 
   it "stops on SIGTERM" do
@@ -30,6 +29,6 @@ describe Mel do
     Process.signal(Signal::TERM, Process.pid)
 
     sleep 2.milliseconds
-    Mel.state.stopped?.should be_true
+    Mel.state.started?.should be_false
   end
 end

@@ -1,10 +1,9 @@
-JOBS = Array(String).new
-private MUTEX = Mutex.new
+JOBS = Atomic(Int32).new(0)
 
 struct CollectJobsJob
   include Mel::Job
 
   def run
-    MUTEX.synchronize { JOBS << @__type__ }
+    JOBS.add(1)
   end
 end
