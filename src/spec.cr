@@ -3,6 +3,10 @@ require "./mel"
 module Mel
   extend self
 
+  def start_and_stop(count : Int)
+    count.times { start_and_stop }
+  end
+
   def start_and_stop
     spawn do
       until state.started?

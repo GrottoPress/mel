@@ -55,9 +55,7 @@ Benchmark.bm do |job|
   batch_size = Mel.settings.batch_size
   batches = batch_size < 1 ? 1 : (ITERATIONS / batch_size).ceil.to_i
 
-  job.report("Run #{ITERATIONS} scheduled jobs") do
-    batches.times { Mel.start_and_stop }
-  end
+  job.report("Run #{ITERATIONS} scheduled jobs") { Mel.start_and_stop(batches) }
 
   Mel::Task::Query.truncate
 end
