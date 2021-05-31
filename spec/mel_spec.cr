@@ -11,7 +11,7 @@ describe Mel do
 
     Timecop.travel(2.hours.from_now) do
       Mel.start_and_stop
-      Mel.state.ended?.should be_true
+      Mel.state.stopped?.should be_true
       JOBS.lazy_get.should eq(2)
     end
   end

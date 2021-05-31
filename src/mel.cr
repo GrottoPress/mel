@@ -24,8 +24,8 @@ module Mel
   private enum State
     Ready
     Started
+    Stopping
     Stopped
-    Ended
   end
 
   class_getter state = State::Ready
@@ -56,22 +56,20 @@ module Mel
 
   def start
     return log_already_started if state.started?
-
     configure
-    log_starting
-    @@state = State::Started
 
+    log_starting
     handle_signal
     run_tasks
   end
 
   def stop
     return log_not_started unless state.started?
+
     log_stopping
+    @@state = State::Stopping
 
-    @@state = State::Stopped
-
-    until state.ended?
+    until state.stopped?
       Fiber.yield
     end
   end
@@ -81,8 +79,10 @@ module Mel
   end
 
   private def run_tasks
-    log_started
     pond = Pond.new
+
+    log_started
+    @@state = State::Started
 
     while state.started?
       Task.find_lte(
@@ -98,9 +98,9 @@ module Mel
 
     log_waiting
     pond.drain
-    log_stopped
 
-    @@state = State::Ended
+    log_stopped
+    @@state = State::Stopped
   end
 
   private def handle_signal
