@@ -43,6 +43,7 @@ module Mel::Job
     def after_dequeue(success)
     end
 
+    {% unless @type < Mel::Instant || @type < Mel::Every || @type < Mel::On %}
     def self.run(id = UUID.random.to_s, retries = 2, redis = nil, **job_args)
       run_now(id, retries, redis, **job_args)
     end
@@ -133,5 +134,6 @@ module Mel::Job
 
       task.id if task.enqueue(redis)
     end
+    {% end %}
   end
 end

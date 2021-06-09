@@ -1,6 +1,6 @@
 module Mel::Carbon::EmailJob
   macro included
-    include Mel::Job
+    include Mel::Now
 
     def initialize(@email : {{ @type.name.gsub(/Job$/, "") }})
     end

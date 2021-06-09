@@ -218,6 +218,116 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    # ...
    ```
 
+### Schedule templates
+
+A job's `.run_*` methods allow scheduling that single job in multiple ways. However, there may be situations where you need to schedule a job the same way, every time.
+
+*Mel* comes with `Mel::Now`, `Mel::In`, `Mel::At`, `Mel::Every` and `Mel::On` schedule templates to do exactly this:
+
+```crystal
+  # Define job
+  class DoSomeWorkNow
+    include Mel::Now # <= Required
+
+    def initialize(@arg_1 : Int32, @arg_2 : String)
+    end
+
+    # (Required)
+    def run
+      # << Do work here >>
+    end
+  end
+
+  # Schedule job
+  DoSomeWorkNow.run(arg_1: 5, arg_2: "value")
+```
+
+```crystal
+  # Define job
+  class DoSomeWorkInTenMinutes
+    include Mel::In # <= Required
+
+    run_in 10.minutes # <= Required
+
+    def initialize(@arg_1 : Int32, @arg_2 : String)
+    end
+
+    # (Required)
+    def run
+      # << Do work here >>
+    end
+  end
+
+  # Schedule job
+  DoSomeWorkInTenMinutes.run(arg_1: 5, arg_2: "value")
+```
+
+```crystal
+  # Define job
+  class DoSomeWorkAtFiveOclock
+    include Mel::At # <= Required
+
+    run_at Time.local(2021, 6, 9, 5) # <= Required
+
+    def initialize(@arg_1 : Int32, @arg_2 : String)
+    end
+
+    # (Required)
+    def run
+      # << Do work here >>
+    end
+  end
+
+  # Schedule job
+  DoSomeWorkAtFiveOclock.run(arg_1: 5, arg_2: "value")
+```
+
+```crystal
+  # Define job
+  class DoSomeWorkEveryTwoHours
+    include Mel::Every # <= Required
+
+    run_every 2.hours # <= Required
+    # <= Overload: `run_every 2.hours, for: 5.hours`
+    # <= Overload: `run_every 2.hours, till: 9.hours.from_now`
+
+    def initialize(@arg_1 : Int32, @arg_2 : String)
+    end
+
+    # (Required)
+    def run
+      # << Do work here >>
+    end
+  end
+
+  # Schedule job
+  DoSomeWorkEveryTwoHours.run(arg_1: 5, arg_2: "value")
+```
+
+```crystal
+  # Define job
+  class DoSomeWorkOnFirstDayOfEveryMonth
+    include Mel::On # <= Required
+
+    run_on "0 8 1 * *" # <= Required
+    # <= Overload: `run_on "0 8 1 * *", for: 100.weeks`
+    # <= Overload: `run_on "0 8 1 * *", till: Time.local(2099, 12, 31)`
+
+    def initialize(@arg_1 : Int32, @arg_2 : String)
+    end
+
+    # (Required)
+    def run
+      # << Do work here >>
+    end
+  end
+
+  # Schedule job
+  DoSomeWorkOnFirstDayOfEveryMonth.run(arg_1: 5, arg_2: "value")
+```
+
+All methods and callbacks usable in a regular job may be used in a schedule template, including `before_*` and `after_*` callbacks.
+
 ### Specifying task IDs
 
 You may specify an ID whenever you schedule a new job, thus: `DoSomeWork.run_*(... id: "1001", ...)`. If not specified, *Mel* automatically generates a unique **dynamic** ID for the task.
