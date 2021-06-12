@@ -1,6 +1,6 @@
-module Mel::In
+module Mel::Job::In
   macro included
-    include Mel::Instant
+    include Mel::Job::Instant
   end
 
   private macro run_in(period)

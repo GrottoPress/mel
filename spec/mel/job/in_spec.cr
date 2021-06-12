@@ -1,6 +1,6 @@
-require "../spec_helper"
+require "../../spec_helper"
 
-describe Mel::In do
+describe Mel::Job::In do
   it "runs after a given period" do
     address = "user@domain.tld"
     id = "1001"

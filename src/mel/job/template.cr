@@ -1,4 +1,4 @@
-module Mel::Template
+module Mel::Job::Template
   macro included
     include Mel::Job
 

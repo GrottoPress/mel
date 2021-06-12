@@ -1,6 +1,6 @@
-require "../spec_helper"
+require "../../spec_helper"
 
-describe Mel::Now do
+describe Mel::Job::Now do
   it "runs now" do
     address = "user@domain.tld"
     id = "1001"

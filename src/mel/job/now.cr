@@ -1,6 +1,6 @@
-module Mel::Now
+module Mel::Job::Now
   macro included
-    include Mel::Instant
+    include Mel::Job::Instant
 
     protected def time : Time
       Time.local

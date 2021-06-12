@@ -222,12 +222,12 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
 
 A job's `.run_*` methods allow scheduling that single job in multiple ways. However, there may be situations where you need to schedule a job the same way, every time.
 
-*Mel* comes with `Mel::Now`, `Mel::In`, `Mel::At`, `Mel::Every` and `Mel::On` schedule templates to do exactly this:
+*Mel* comes with `Mel::Job::Now`, `Mel::Job::In`, `Mel::Job::At`, `Mel::Job::Every` and `Mel::Job::On` schedule templates to do exactly this:
 
 ```crystal
   # Define job
   class DoSomeWorkNow
-    include Mel::Now # <= Required
+    include Mel::Job::Now # <= Required
 
     def initialize(@arg_1 : Int32, @arg_2 : String)
     end
@@ -245,7 +245,7 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
 ```crystal
   # Define job
   class DoSomeWorkInTenMinutes
-    include Mel::In # <= Required
+    include Mel::Job::In # <= Required
 
     run_in 10.minutes # <= Required
 
@@ -265,7 +265,7 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
 ```crystal
   # Define job
   class DoSomeWorkAtFiveOclock
-    include Mel::At # <= Required
+    include Mel::Job::At # <= Required
 
     run_at Time.local(2021, 6, 9, 5) # <= Required
 
@@ -285,7 +285,7 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
 ```crystal
   # Define job
   class DoSomeWorkEveryTwoHours
-    include Mel::Every # <= Required
+    include Mel::Job::Every # <= Required
 
     run_every 2.hours # <= Required
     # <= Overload: `run_every 2.hours, for: 5.hours`
@@ -307,7 +307,7 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
 ```crystal
   # Define job
   class DoSomeWorkOnFirstDayOfEveryMonth
-    include Mel::On # <= Required
+    include Mel::Job::On # <= Required
 
     run_on "0 8 1 * *" # <= Required
     # <= Overload: `run_on "0 8 1 * *", for: 100.weeks`

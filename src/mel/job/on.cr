@@ -1,34 +1,34 @@
-module Mel::Every
+module Mel::Job::On
   macro included
-    include Mel::Recurring
+    include Mel::Job::Recurring
 
     def self.run(id = UUID.random.to_s, retries = 2, redis = nil, **job_args)
       job = new(**job_args)
 
-      task = Mel::PeriodicTask.new(
+      task = Mel::CronTask.new(
         id.to_s,
         job,
         job.time,
         retries,
         job.end_time,
-        job.interval
+        job.schedule
       )
 
       task.id if task.enqueue(redis)
     end
   end
 
-  private macro run_every(interval, *, till = nil, for = nil)
-    run_every({{ till }}, {{ for }}) { {{ interval }} }
+  private macro run_on(schedule, *, till = nil, for = nil)
+    run_on({{ till }}, {{ for }}) { {{ schedule }} }
   end
 
-  private macro run_every(till = nil, for = nil)
-    protected def interval : Time::Span
+  private macro run_on(till = nil, for = nil)
+    protected def schedule : String
       {{ yield }}
     end
 
     protected def time : Time
-      interval.abs.from_now
+      CronParser.new(schedule).next
     end
 
     protected def end_time : Time?

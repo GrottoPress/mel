@@ -1,5 +1,5 @@
 class SendEmailOnJob
-  include Mel::On
+  include Mel::Job::On
 
   getter sent : Bool
 

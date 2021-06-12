@@ -1,6 +1,6 @@
-module Mel::At
+module Mel::Job::At
   macro included
-    include Mel::Instant
+    include Mel::Job::Instant
   end
 
   private macro run_at(time)

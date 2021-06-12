@@ -43,7 +43,7 @@ module Mel::Job
     def after_dequeue(success)
     end
 
-    {% unless @type < Mel::Template %}
+    {% unless @type < Mel::Job::Template %}
     def self.run(id = UUID.random.to_s, retries = 2, redis = nil, **job_args)
       run_now(id, retries, redis, **job_args)
     end

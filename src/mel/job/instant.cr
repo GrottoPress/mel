@@ -1,6 +1,6 @@
-module Mel::Instant
+module Mel::Job::Instant
   macro included
-    include Mel::Template
+    include Mel::Job::Template
 
     def self.run(id = UUID.random.to_s, retries = 2, redis = nil, **job_args)
       job = new(**job_args)

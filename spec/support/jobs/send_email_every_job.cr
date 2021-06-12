@@ -1,5 +1,5 @@
 class SendEmailEveryJob
-  include Mel::Every
+  include Mel::Job::Every
 
   getter sent : Bool
 
