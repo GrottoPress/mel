@@ -1,9 +1,6 @@
 module Mel::Instant
   macro included
-    include Mel::Job
-
-    protected def time : Time
-    end
+    include Mel::Template
 
     def self.run(id = UUID.random.to_s, retries = 2, redis = nil, **job_args)
       job = new(**job_args)
