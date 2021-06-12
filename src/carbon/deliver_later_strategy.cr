@@ -9,3 +9,16 @@ class Mel::Carbon::DeliverLaterStrategy < Carbon::DeliverLaterStrategy
     {% end %}
   end
 end
+
+{% for klass in Carbon::Email.all_subclasses.reject(&.abstract?) %}
+struct {{ klass }}Job
+  include Mel::Job::Now
+
+  def initialize(@email : {{ klass }})
+  end
+
+  def run
+    @email.deliver
+  end
+end
+{% end %}
