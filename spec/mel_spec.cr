@@ -20,15 +20,23 @@ describe Mel do
     Mel.start_async
     Process.signal(Signal::INT, Process.pid)
 
-    sleep 2.milliseconds
-    Mel.state.started?.should be_false
+    10_000.times do
+      break if Mel.state.stopped?
+      Fiber.yield
+    end
+
+    Mel.state.stopped?.should be_true
   end
 
   it "stops on SIGTERM" do
     Mel.start_async
     Process.signal(Signal::TERM, Process.pid)
 
-    sleep 2.milliseconds
-    Mel.state.started?.should be_false
+    10_000.times do
+      break if Mel.state.stopped?
+      Fiber.yield
+    end
+
+    Mel.state.stopped?.should be_true
   end
 end
