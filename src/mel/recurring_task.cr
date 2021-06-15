@@ -6,7 +6,7 @@ module Mel::RecurringTask
 
     property till : Time?
 
-    private def reschedule
+    private def schedule_next
       return if till.try(&.< next_time)
       log_scheduling
 

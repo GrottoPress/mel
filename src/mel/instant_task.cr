@@ -20,6 +20,6 @@ class Mel::InstantTask
     self.class.new(id, job.dup, time, retries)
   end
 
-  private def reschedule
+  private def schedule_next
   end
 end

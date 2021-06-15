@@ -50,7 +50,7 @@ module Mel::Task
     def run(*, force = false) : Fiber?
       return log_not_due unless force || due?
 
-      reschedule
+      schedule_next
       job.before_run
       @attempts += 1
 
