@@ -61,7 +61,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    ```crystal
    # ->>> src/jobs/do_some_work.cr
 
-   class DoSomeWork
+   struct DoSomeWork
      include Mel::Job # <= Required
 
      def initialize(@arg_1 : Int32, @arg_2 : String)
@@ -226,7 +226,7 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
 
 ```crystal
   # Define job
-  class DoSomeWorkNow
+  struct DoSomeWorkNow
     include Mel::Job::Now # <= Required
 
     def initialize(@arg_1 : Int32, @arg_2 : String)
@@ -244,7 +244,7 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
 
 ```crystal
   # Define job
-  class DoSomeWorkInTenMinutes
+  struct DoSomeWorkInTenMinutes
     include Mel::Job::In # <= Required
 
     run_in 10.minutes # <= Required
@@ -264,7 +264,7 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
 
 ```crystal
   # Define job
-  class DoSomeWorkAtFiveOclock
+  struct DoSomeWorkAtFiveOclock
     include Mel::Job::At # <= Required
 
     run_at Time.local(2021, 6, 9, 5) # <= Required
@@ -284,7 +284,7 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
 
 ```crystal
   # Define job
-  class DoSomeWorkEveryTwoHours
+  struct DoSomeWorkEveryTwoHours
     include Mel::Job::Every # <= Required
 
     run_every 2.hours # <= Required
@@ -306,7 +306,7 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
 
 ```crystal
   # Define job
-  class DoSomeWorkOnFirstDayOfEveryMonth
+  struct DoSomeWorkOnFirstDayOfEveryMonth
     include Mel::Job::On # <= Required
 
     run_on "0 8 1 * *" # <= Required
@@ -347,7 +347,7 @@ A task ID may be a mixture of static and dynamic parts. For instance, you may in
 A common pattern is to break up long-running tasks into smaller tasks. For example:
 
 ```crystal
-class SendAllEmails
+struct SendAllEmails
   include Mel::Job
 
   def initialize(@users : Array(User))
@@ -374,7 +374,7 @@ Moreover, some mails may be sent multiple times if the task is retried as a resu
 The preferred approach is to define a job that sends email to one user, and schedule that job for as many users as needed:
 
 ```crystal
-class SendAllEmails
+struct SendAllEmails
   include Mel::Job
 
   def initialize(@users : Array(User))
@@ -389,7 +389,7 @@ class SendAllEmails
     end
   end
 
-  class SendEmail
+  struct SendEmail
     include Mel::Job
 
     def initialize(@user : User)
@@ -418,7 +418,7 @@ Bulk scheduling works OK as a *fire-and-forget* mechanism. However, you may need
 This is where sequential scheduling comes in handy. *Mel*'s event-driven design allows chaining jobs, by scheduling the next after the current one completes:
 
 ```crystal
-class SendAllEmails
+struct SendAllEmails
   include Mel::Job
 
   def initialize(@users : Array(User))
