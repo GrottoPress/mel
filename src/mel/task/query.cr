@@ -53,11 +53,17 @@ module Mel::Task::Query
     return if count.zero?
 
     connect do
-      ids = Mel.redis
-        .run({"ZRANGEBYSCORE", key, "-inf", "(#{time.to_unix}"})
-        .as(Array)
+      ids = Mel.redis.run({
+        "ZRANGEBYSCORE",
+        key,
+        "0",
+        "(#{time.to_unix}",
+        "LIMIT",
+        "0",
+        count.to_s
+      }).as(Array)
 
-      find(resize(ids, count), delete: delete)
+      find(ids, delete: delete)
     end
   end
 
@@ -65,11 +71,17 @@ module Mel::Task::Query
     return if count.zero?
 
     connect do
-      ids = Mel.redis
-        .run({"ZRANGEBYSCORE", key, "-inf", time.to_unix.to_s})
-        .as(Array)
+      ids = Mel.redis.run({
+        "ZRANGEBYSCORE",
+        key,
+        "0",
+        time.to_unix.to_s,
+        "LIMIT",
+        "0",
+        count.to_s
+      }).as(Array)
 
-      find(resize(ids, count), delete: delete)
+      find(ids, delete: delete)
     end
   end
 
@@ -77,8 +89,16 @@ module Mel::Task::Query
     return if count.zero?
 
     connect do
-      last = count < 1 ? count : count - 1
-      ids = Mel.redis.run({"ZRANGE", key, "0", last.to_s}).as(Array)
+      ids = Mel.redis.run({
+        "ZRANGEBYSCORE",
+        key,
+        "0",
+        "+inf",
+        "LIMIT",
+        "0",
+        count.to_s
+      }).as(Array)
+
       find(ids, delete: delete)
     end
   end
@@ -111,10 +131,6 @@ module Mel::Task::Query
       redis.del(key)
       redis.run(["DEL"] + keys) unless keys.empty?
     end
-  end
-
-  protected def resize(items, count)
-    count < 0 ? items : items.first(count)
   end
 
   private def connect

@@ -80,7 +80,7 @@ module Mel::Task
 
       Mel::Task.find_lt(time, -1, delete: false).try do |tasks|
         tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
-        tasks = Mel::Task::Query.resize(tasks, count)
+        tasks = Mel::Task.resize(tasks, count)
         return if tasks.empty?
 
         Mel::Task::Query.delete(tasks.map &.id) if delete
@@ -93,7 +93,7 @@ module Mel::Task
 
       Mel::Task.find_lte(time, -1, delete: false).try do |tasks|
         tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
-        tasks = Mel::Task::Query.resize(tasks, count)
+        tasks = Mel::Task.resize(tasks, count)
         return if tasks.empty?
 
         Mel::Task::Query.delete(tasks.map &.id) if delete
@@ -106,7 +106,7 @@ module Mel::Task
 
       Mel::Task.find(-1, delete: false).try do |tasks|
         tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
-        tasks = Mel::Task::Query.resize(tasks, count)
+        tasks = Mel::Task.resize(tasks, count)
         return if tasks.empty?
 
         Mel::Task::Query.delete(tasks.map &.id) if delete
@@ -223,5 +223,9 @@ module Mel::Task
 
     task.attempts = attempts
     task
+  end
+
+  protected def resize(items, count)
+    count < 0 ? items : items.first(count)
   end
 end
