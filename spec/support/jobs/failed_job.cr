@@ -1,8 +1,11 @@
-class FailedJob
+struct FailedJob
   include Mel::Job
 
-  getter run_before : Bool = false
-  getter run_after : Bool = false
+  @[JSON::Field(ignore: true)]
+  getter run_before = false
+
+  @[JSON::Field(ignore: true)]
+  getter run_after = false
 
   def run
     raise "Failed on purpose"

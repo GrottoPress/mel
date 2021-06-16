@@ -1,12 +1,12 @@
-class SendEmailOnTillJob
+struct SendEmailOnTillJob
   include Mel::Job::On
 
-  getter sent : Bool
+  @[JSON::Field(ignore: true)]
+  getter sent = false
 
   run_on "0 */2 * * *", till: 4.hours.from_now
 
   def initialize(@address : String)
-    @sent = false
   end
 
   def run

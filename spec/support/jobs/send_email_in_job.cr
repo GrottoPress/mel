@@ -1,12 +1,12 @@
-class SendEmailInJob
+struct SendEmailInJob
   include Mel::Job::In
 
-  getter sent : Bool
+  @[JSON::Field(ignore: true)]
+  getter sent = false
 
   run_in 2.hours
 
   def initialize(@address : String)
-    @sent = false
   end
 
   def run

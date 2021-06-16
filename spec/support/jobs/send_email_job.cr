@@ -1,19 +1,27 @@
-class SendEmailJob
+struct SendEmailJob
   include Mel::Job
 
-  getter sent : Bool
+  @[JSON::Field(ignore: true)]
+  getter sent = false
 
-  getter run_before : Bool = false
-  getter run_after : Bool = false
+  @[JSON::Field(ignore: true)]
+  getter run_before = false
 
-  getter enqueue_before : Bool = false
-  getter enqueue_after : Bool = false
+  @[JSON::Field(ignore: true)]
+  getter run_after = false
 
-  getter dequeue_before : Bool = false
-  getter dequeue_after : Bool = false
+  getter enqueue_before = false
+
+  @[JSON::Field(ignore: true)]
+  getter enqueue_after = false
+
+  @[JSON::Field(ignore: true)]
+  getter dequeue_before = false
+
+  @[JSON::Field(ignore: true)]
+  getter dequeue_after = false
 
   def initialize(@address : String)
-    @sent = false
   end
 
   def run
