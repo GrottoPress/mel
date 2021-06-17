@@ -294,6 +294,17 @@ describe Mel::Job do
   end
 
   describe "#run" do
+    it "runs even if callbacks fail" do
+      id = "1001"
+
+      FailCallbacksJob.run(id: id, retries: 0)
+      task = Mel::InstantTask.find(id)
+
+      task.try(&.job.as(FailCallbacksJob).done).should be_false
+      Mel.sync(task)
+      task.try(&.job.as(FailCallbacksJob).done).should be_true
+    end
+
     it "schedules bulk jobs" do
       id = "1001"
       max = 10

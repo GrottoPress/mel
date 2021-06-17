@@ -3,6 +3,7 @@ require "./task/**"
 module Mel::Task
   macro included
     include Mel::Task::LogHelpers
+    include Mel::Task::CallbackHelpers
 
     property id : String
     property job : Mel::Job
@@ -20,29 +21,29 @@ module Mel::Task
     end
 
     def enqueue(redis = nil, *, force = false)
-      job.before_enqueue
+      do_before_enqueue
       log_enqueueing
 
       if values = Mel::Task::Query.add(self, redis, force: force)
         log_enqueued
-        job.after_enqueue(true)
+        do_after_enqueue(true)
         values
       else
-        job.after_enqueue(false)
+        do_after_enqueue(false)
         nil
       end
     end
 
     def dequeue
-      job.before_dequeue
+      do_before_dequeue
       log_dequeueing
 
       if value = Mel::Task::Query.delete(id)
         log_dequeued
-        job.after_dequeue(true)
+        do_after_dequeue(true)
         value
       else
-        job.after_dequeue(false)
+        do_after_dequeue(false)
         nil
       end
     end
@@ -51,7 +52,7 @@ module Mel::Task
       return log_not_due unless force || due?
 
       schedule_next
-      job.before_run
+      do_before_run
       @attempts += 1
 
       spawn(name: id) do
@@ -63,7 +64,7 @@ module Mel::Task
         schedule_failed_task
       else
         log_ran
-        job.after_run(true)
+        do_after_run(true)
       end
     end
 
@@ -147,7 +148,7 @@ module Mel::Task
 
     private def fail_task : Nil
       log_failed
-      job.after_run(false)
+      do_after_run(false)
     end
 
     private def schedule_failed_task : Nil

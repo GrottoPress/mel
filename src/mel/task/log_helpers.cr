@@ -53,5 +53,12 @@ module Mel::Task::LogHelpers
     private def log_scheduled : Nil
       Mel.log.info &.emit("Recurring task rescheduled", task: to_json)
     end
+
+    private def log_callback_failed(callback, error) : Nil
+      Mel.log.warn(
+        exception: error,
+        &.emit("Callback failed", callback: callback, task: to_json)
+      )
+    end
   end
 end
