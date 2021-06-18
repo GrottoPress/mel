@@ -19,6 +19,7 @@ module Mel
     class_property! redis_url : String
     class_property redis_pool_size : Int32?
     class_property timezone : Time::Location?
+    class_property! worker_id : Int32
   end
 
   private enum State
@@ -60,7 +61,9 @@ module Mel
 
     log_starting
     handle_signal
-    run_tasks
+
+    run_pending_tasks(pond = Pond.new)
+    run_tasks(pond)
   end
 
   def stop
@@ -78,18 +81,18 @@ module Mel
     settings.timezone.try { |location| Time::Location.local = location }
   end
 
-  private def run_tasks
-    pond = Pond.new
+  private def run_pending_tasks(pond)
+    Task.find_pending.try do |tasks|
+      tasks.each &.run(force: true).try { |fiber| pond << fiber }
+    end
+  end
 
+  private def run_tasks(pond)
     log_started
     @@state = State::Started
 
     while state.started?
-      Task.find_lte(
-        Time.local,
-        settings.batch_size,
-        delete: true
-      ).try do |tasks|
+      Task.find_lte(Time.local, settings.batch_size, delete: nil).try do |tasks|
         tasks.each &.run(force: true).try { |fiber| pond << fiber }
       end
 

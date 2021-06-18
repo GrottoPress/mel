@@ -7,6 +7,7 @@
 #          benchmark/main.cr`
 #
 # 2. Set env vars:
+#    - WORKER_ID
 #    - BATCH_SIZE
 #    - ITERATIONS
 #    - REDIS_URL
@@ -24,8 +25,9 @@ ITERATIONS = ENV["ITERATIONS"]?.try(&.to_i) || 100_000
 
 Mel.configure do |settings|
   settings.batch_size = ENV["BATCH_SIZE"]?.try(&.to_i) || 10_000
-  settings.poll_interval = 1.nanosecond
+  settings.poll_interval = 1.microsecond
   settings.redis_url = ENV["REDIS_URL"]
+  settings.worker_id = ENV["WORKER_ID"].to_i
 end
 
 Log.setup(Mel.log.source, :none)

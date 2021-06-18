@@ -79,6 +79,24 @@ describe Mel::Task do
     end
   end
 
+  describe ".find_pending" do
+    it "retrieves pending tasks" do
+      address = "user@domain.tld"
+
+      SendEmailJob.run(address: address)
+      SendEmailJob.run(address: address)
+      SendEmailJob.run(address: address)
+
+      Mel::InstantTask.find_pending.should be_nil
+
+      Mel::InstantTask.find(2, delete: nil).try(&.size).should eq(2)
+      Mel::InstantTask.find(-1).try(&.size).should eq(1)
+
+      Mel::InstantTask.find_pending.try(&.size).should eq(2)
+      Mel::InstantTask.find_pending(1).try(&.size).should eq(1)
+    end
+  end
+
   describe ".find_lt" do
     it "returns all tasks whose times are past due" do
       address = "user@domain.tld"

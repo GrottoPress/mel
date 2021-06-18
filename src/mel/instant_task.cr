@@ -21,5 +21,6 @@ class Mel::InstantTask
   end
 
   private def schedule_next
+    dequeue
   end
 end

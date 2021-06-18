@@ -103,6 +103,24 @@ module Mel::Task::Query
     end
   end
 
+  def find_pending(count = -1, *, delete = false)
+    return if count.zero?
+
+    connect do
+      ids = Mel.redis.run({
+        "ZRANGEBYSCORE",
+        key,
+        worker_score,
+        worker_score,
+        "LIMIT",
+        "0",
+        count.to_s
+      }).as(Array)
+
+      find(ids, delete: delete)
+    end
+  end
+
   def find(id : String, *, delete = false)
     find([id], delete: delete).try &.first?.try &.as(String)
   end
@@ -115,8 +133,14 @@ module Mel::Task::Query
 
       values = Mel.redis.multi do |redis|
         redis.run(["MGET"] + keys)
-        redis.run(["ZREM", key] + ids) if delete
-        redis.run(["DEL"] + keys) if delete
+
+        if delete
+          redis.run(["ZREM", key] + ids)
+          redis.run(["DEL"] + keys)
+        elsif delete.nil?
+          scores_ids = ids.join(",#{worker_score},").split(',')
+          redis.run(["ZADD", key, "XX", worker_score] + scores_ids)
+        end
       end
 
       values = values[0].as(Array)
@@ -131,6 +155,10 @@ module Mel::Task::Query
       redis.del(key)
       redis.run(["DEL"] + keys) unless keys.empty?
     end
+  end
+
+  private def worker_score
+    "-#{Mel.settings.worker_id.abs}"
   end
 
   private def connect

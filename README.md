@@ -4,7 +4,7 @@
 
 In *Mel*, a scheduled job is called a *task*. A single job may be scheduled in multiple ways, yielding multiple tasks from the same job.
 
-*Mel* schedules all tasks in *Redis*, as a set of task `id`s sorted by their times of next run. For recurring tasks, the next run is scheduled in *Redis* right before the current run runs.
+*Mel* schedules all tasks in *Redis*, as a set of task `id`s sorted by their times of next run. For recurring tasks, the next run is scheduled in *Redis* right after the current run completes.
 
 This makes *Redis* the *source of truth* for schedules, allowing to easily scale out *Mel* to multiple instances (called *workers*), or replace or stop workers without losing schedules.
 
@@ -47,6 +47,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      settings.redis_pool_size = 25
      settings.redis_url = "redis://localhost:6379/0"
      settings.timezone = Time::Location.load("Africa/Accra")
+     settings.worker_id = 1 # <= Unique, static integer
    end
 
    Log.setup(Mel.log.source, :info, Log::IOBackend.new)
@@ -490,21 +491,15 @@ struct SomeJob
 end
 ```
 
-### Query optimization
+### Jobs *security*
 
-*Mel*'s focus is on scaling out to multiple workers without hiccups. Each worker polls *Redis* every configurable period. Hard work has gone into reducing the number of queries made, which may be critical for performance.
+A *Mel* worker waits for all running tasks to complete before exiting, if it received a `Signal::INT` or a `Signal::TERM`, or if you called `Mel.stop` somewhere in your code. This means jobs are never lost mid-flight.
 
-There is only one queue in *Mel* on which all tasks are scheduled. When a worker polls redis, it makes **only one** query for due tasks. If any tasks are due, one more query is made to retrieve the actual task objects (JSON).
+Jobs are not lost even if there is a force shutdown of the worker process, since *Mel* does not delete a task from *Redis* until it is complete. The worker can pick off where it left off when it comes back online.
 
-This means, each worker makes no more than two queries for every poll. When a worker runs a task, it may make a query to reschedule the task if it fails, or to schedule the next run if it is a recurring task.
+*Mel* relies on the `woker_id` setting to achieve this. Each worker, therefore, must have a *unique*, *static* integer ID, so it knows which *pending* tasks it owns.
 
-Keep these in mind when configuring your poll interval, or deciding the number of workers to run.
-
-### Graceful shutdown
-
-A *Mel* worker waits for all running tasks to complete before exiting, if it received a `Signal::INT` or a `Signal::TERM`, or if you called `Mel.stop` somewhere in your code.
-
-This means jobs are never lost mid-flight. However, because workers pull due tasks from *Redis* **destructively**, if there is a force shutdown (eg: a power cut), running tasks may be lost.
+Once a task enters the *pending* state, only the worker that put it in that state can run it. So if you need to take down a worker permanently, ensure that it completes all pending tasks by sending the appropriate signal.
 
 ## Integrations
 

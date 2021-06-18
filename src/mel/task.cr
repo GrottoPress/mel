@@ -51,7 +51,6 @@ module Mel::Task
     def run(*, force = false) : Fiber?
       return log_not_due unless force || due?
 
-      schedule_next
       do_before_run
       @attempts += 1
 
@@ -63,6 +62,7 @@ module Mel::Task
         next fail_task if attempts > retries
         schedule_failed_task
       else
+        schedule_next
         log_ran
         do_after_run(true)
       end
@@ -80,12 +80,9 @@ module Mel::Task
       return if count.zero?
 
       Mel::Task.find_lt(time, -1, delete: false).try do |tasks|
-        tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
-        tasks = Mel::Task.resize(tasks, count)
+        tasks = Mel::Task.resize(tasks.select(&.is_a? self), count)
         return if tasks.empty?
-
-        Mel::Task::Query.delete(tasks.map &.id) if delete
-        tasks
+        Mel::Task.delete(tasks, delete).try &.map(&.as self)
       end
     end
 
@@ -93,12 +90,9 @@ module Mel::Task
       return if count.zero?
 
       Mel::Task.find_lte(time, -1, delete: false).try do |tasks|
-        tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
-        tasks = Mel::Task.resize(tasks, count)
+        tasks = Mel::Task.resize(tasks.select(&.is_a? self), count)
         return if tasks.empty?
-
-        Mel::Task::Query.delete(tasks.map &.id) if delete
-        tasks
+        Mel::Task.delete(tasks, delete).try &.map(&.as self)
       end
     end
 
@@ -106,30 +100,34 @@ module Mel::Task
       return if count.zero?
 
       Mel::Task.find(-1, delete: false).try do |tasks|
-        tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
-        tasks = Mel::Task.resize(tasks, count)
+        tasks = Mel::Task.resize(tasks.select(&.is_a? self), count)
         return if tasks.empty?
+        Mel::Task.delete(tasks, delete).try &.map(&.as self)
+      end
+    end
 
-        Mel::Task::Query.delete(tasks.map &.id) if delete
-        tasks
+    def self.find_pending(count = -1, *, delete = false) : Array(self)?
+      return if count.zero?
+
+      Mel::Task.find_pending(-1, delete: false).try do |tasks|
+        tasks = Mel::Task.resize(tasks.select(&.is_a? self), count)
+        return if tasks.empty?
+        Mel::Task.delete(tasks, delete).try &.map(&.as self)
       end
     end
 
     def self.find(id : String, *, delete = false) : self?
       Mel::Task.find(id, delete: false).try do |task|
         return unless task.is_a?(self)
-        Mel::Task::Query.delete(task.id) if delete
-        task.as(self)
+        Mel::Task.delete(task, delete).try &.as(self)
       end
     end
 
     def self.find(ids : Array, *, delete = false) : Array(self)?
       Mel::Task.find(ids, delete: false).try do |tasks|
-        tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
+        tasks = tasks.select(&.is_a? self)
         return if tasks.empty?
-
-        Mel::Task::Query.delete(tasks.map &.id) if delete
-        tasks
+        Mel::Task.delete(tasks, delete).try &.map(&.as self)
       end
     end
 
@@ -147,6 +145,7 @@ module Mel::Task
     end
 
     private def fail_task : Nil
+      schedule_next
       log_failed
       do_after_run(false)
     end
@@ -174,6 +173,10 @@ module Mel::Task
 
   def find(count : Int32, *, delete = false)
     Query.find(count, delete: delete).try { |values| from_json(values) }
+  end
+
+  def find_pending(count = -1, *, delete = false)
+    Query.find_pending(count, delete: delete).try { |values| from_json(values) }
   end
 
   def find(id : String, *, delete = false) : self?
@@ -228,5 +231,13 @@ module Mel::Task
 
   protected def resize(items, count)
     count < 0 ? items : items.first(count)
+  end
+
+  protected def delete(tasks : Array, delete)
+    delete == false ? tasks : Mel::Task.find(tasks.map(&.id), delete: delete)
+  end
+
+  protected def delete(task, delete)
+    delete == false ? task : Mel::Task.find(task.id, delete: delete)
   end
 end
