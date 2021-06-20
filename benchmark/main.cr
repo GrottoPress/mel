@@ -7,11 +7,11 @@
 #          benchmark/main.cr`
 #
 # 2. Set env vars:
-#    - WORKER_ID
 #    - BATCH_SIZE
+#    - CRYSTAL_WORKERS
 #    - ITERATIONS
 #    - REDIS_URL
-#    - CRYSTAL_WORKERS
+#    - WORKER_ID
 #
 # 3. Run: `./melb --delete-my-data`
 
