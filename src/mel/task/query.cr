@@ -105,6 +105,7 @@ module Mel::Task::Query
 
   def find_pending(count = -1, *, delete = false)
     return if count.zero?
+    delete = false if delete.nil?
 
     connect do
       ids = Mel.redis.run({
