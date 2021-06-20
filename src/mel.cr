@@ -70,7 +70,7 @@ module Mel
     return log_not_started unless state.started?
 
     log_stopping
-    @@state = State::Stopping
+    @@state = State::Stopping unless state.stopped?
 
     until state.stopped?
       Fiber.yield
