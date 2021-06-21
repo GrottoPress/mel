@@ -497,7 +497,7 @@ A *Mel* worker waits for all running tasks to complete before exiting, if it rec
 
 Jobs are not lost even if there is a force shutdown of the worker process, since *Mel* does not delete a task from *Redis* until it is complete. The worker can pick off where it left off when it comes back online.
 
-*Mel* relies on the `woker_id` setting to achieve this. Each worker, therefore, must have a *unique*, *static* integer ID, so it knows which *pending* tasks it owns.
+*Mel* relies on the `worker_id` setting to achieve this. Each worker, therefore, must set a *unique*, *static* integer ID, so it knows which *pending* tasks it owns.
 
 Once a task enters the *pending* state, only the worker that put it in that state can run it. So if you need to take down a worker permanently, ensure that it completes all pending tasks by sending the appropriate signal.
 
