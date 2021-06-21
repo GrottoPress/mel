@@ -92,7 +92,7 @@ module Mel
     @@state = State::Started
 
     while state.started?
-      Task.find_lte(Time.local, settings.batch_size, delete: nil).try do |tasks|
+      Task.find_lte(Time.local, batch_size(pond), delete: nil).try do |tasks|
         tasks.each &.run(force: true).try { |fiber| pond << fiber }
       end
 
@@ -108,5 +108,10 @@ module Mel
 
   private def handle_signal
     {Signal::INT, Signal::TERM}.each &.trap { stop }
+  end
+
+  private def batch_size(pond)
+    return settings.batch_size if settings.batch_size > -2
+    {0, settings.batch_size.abs - pond.size}.max
   end
 end

@@ -42,7 +42,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    require "../jobs/**"
 
    Mel.configure do |settings|
-     settings.batch_size = 10 # <= Maximum tasks to retrieve per poll
+     settings.batch_size = 10
      settings.poll_interval = 3.seconds
      settings.redis_pool_size = 25
      settings.redis_url = "redis://localhost:6379/0"
@@ -500,6 +500,16 @@ Jobs are not lost even if there is a force shutdown of the worker process, since
 *Mel* relies on the `woker_id` setting to achieve this. Each worker, therefore, must have a *unique*, *static* integer ID, so it knows which *pending* tasks it owns.
 
 Once a task enters the *pending* state, only the worker that put it in that state can run it. So if you need to take down a worker permanently, ensure that it completes all pending tasks by sending the appropriate signal.
+
+### Smart polling
+
+*Mel*'s `batch_size` setting allow setting a limit on the number of due tasks to retrieve and run each poll, and, consequently, the number of fibers spawned to handle those tasks.
+
+If the setting is a positive integer `N`, *Mel* would pull and run `N` due tasks each poll.
+
+If it is a negative integer `-N`  (other than `-1`), the number of due tasks pulled and ran each poll would vary such that the total number of running tasks would not be greater than `N`.
+
+`-1` sets *no* limits. *Mel* would pull as many tasks as are due each poll, and run all of them.
 
 ## Integrations
 

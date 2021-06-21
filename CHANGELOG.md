@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased] - 
 
+### Changed
+- Allow limiting the number of running tasks via the `batch_size` setting
+
 ### Fixed
 - Ensure tasks are never lost in the event of a force shutdown
 - Ensure tasks run even if any callback raises an exception
