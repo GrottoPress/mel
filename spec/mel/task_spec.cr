@@ -87,6 +87,8 @@ describe Mel::Task do
       SendEmailJob.run(address: address)
       SendEmailJob.run(address: address)
 
+      Mel.settings.worker_id = 1
+
       Mel::InstantTask.find_pending.should be_nil
 
       Mel::InstantTask.find(2, delete: nil).try(&.size).should eq(2)

@@ -47,7 +47,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      settings.redis_pool_size = 25
      settings.redis_url = "redis://localhost:6379/0"
      settings.timezone = Time::Location.load("Africa/Accra")
-     settings.worker_id = 1 # <= Unique, static integer
+     settings.worker_id = ENV["WORKER_ID"]?.try(&.to_i)
    end
 
    Log.setup(Mel.log.source, :info, Log::IOBackend.new)

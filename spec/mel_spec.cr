@@ -9,6 +9,8 @@ describe Mel do
 
     JOBS.lazy_get.should eq(0)
 
+    Mel.settings.worker_id = 1
+
     Timecop.travel(2.hours.from_now) do
       Mel.start_and_stop
       Mel.state.stopped?.should be_true
@@ -17,6 +19,8 @@ describe Mel do
   end
 
   it "stops on SIGINT" do
+    Mel.settings.worker_id = 1
+
     Mel.start_async
     Process.signal(Signal::INT, Process.pid)
 
@@ -29,6 +33,8 @@ describe Mel do
   end
 
   it "stops on SIGTERM" do
+    Mel.settings.worker_id = 1
+
     Mel.start_async
     Process.signal(Signal::TERM, Process.pid)
 

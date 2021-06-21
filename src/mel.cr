@@ -19,7 +19,7 @@ module Mel
     class_property! redis_url : String
     class_property redis_pool_size : Int32?
     class_property timezone : Time::Location?
-    class_property! worker_id : Int32
+    class_property worker_id : Int32?
   end
 
   private enum State

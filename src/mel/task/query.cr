@@ -159,7 +159,7 @@ module Mel::Task::Query
   end
 
   private def worker_score
-    "-#{Mel.settings.worker_id.abs}"
+    "-#{Mel.settings.worker_id.not_nil!.abs}"
   end
 
   private def connect
