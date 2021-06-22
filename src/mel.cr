@@ -35,8 +35,10 @@ module Mel
     Settings
   end
 
-  def configure
+  def configure : Nil
     yield settings
+
+    settings.timezone.try { |location| Time::Location.local = location }
   end
 
   def log
@@ -57,7 +59,6 @@ module Mel
 
   def start
     return log_already_started if state.started?
-    configure
 
     log_starting
     handle_signal
@@ -75,10 +76,6 @@ module Mel
     until state.stopped?
       Fiber.yield
     end
-  end
-
-  private def configure
-    settings.timezone.try { |location| Time::Location.local = location }
   end
 
   private def run_pending_tasks(pond)
