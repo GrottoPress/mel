@@ -502,6 +502,84 @@ struct SomeJob
 end
 ```
 
+### Tracking progress
+
+*Mel* provides a progress tracker for jobs. This is particularly useful for tracking multiple jobs representing a series of steps in a workflow:
+
+```crystal
+# ->>> src/app/config.cr
+
+# ...
+
+Mel.configure do |settings|
+  settings.progress_expiry = 1.day
+end
+
+# ...
+```
+
+```crystal
+# ->>> src/jobs/some_job.cr
+
+struct SomeJob
+  include Mel::Job
+
+  def initialize
+    @progress = Mel::Progress.new("some_job")
+  end
+
+  # ...
+
+  def after_run(success)
+    return @progress.fail unless success
+
+    SomeStep.run(progress: @progress)
+    @progress.track(50) # <= Move to 50%
+  end
+
+  struct SomeStep
+    include Mel::Job::Now
+
+    def initialize(@progress : Mel::Progress)
+    end
+
+    # ...
+
+    def after_run(success)
+      return @progress.fail unless success
+
+      SomeOtherStep.run(progress: @progress)
+      @progress.track(80) # <= Move to 80%
+    end
+  end
+
+  struct SomeOtherStep
+    include Mel::Job::Now
+
+    def initialize(@progress : Mel::Progress)
+    end
+
+    # ...
+
+    def after_run(success)
+      return @progress.fail unless success
+      @progress.succeed # <= Move to 100%
+    end
+  end
+end
+
+# Schedule job
+SomeJob.run
+
+# Track progress
+#
+# This may, for instance, be used in a route in a web application.
+# CLient-side javascipt can query this route periodically, and
+# show response using a progress tracker UI.
+progress = Mel::Progress.new("some_job")
+progress.track # <= Returns current progress
+```
+
 ### Jobs *security*
 
 A *Mel* worker waits for all running tasks to complete before exiting, if it received a `Signal::INT` or a `Signal::TERM`, or if you called `Mel.stop` somewhere in your code. This means jobs are never lost mid-flight.
@@ -511,6 +589,8 @@ Jobs are not lost even if there is a force shutdown of the worker process, since
 *Mel* relies on the `worker_id` setting to achieve this. Each worker, therefore, must set a *unique*, *static* integer ID, so it knows which *pending* tasks it owns.
 
 Once a task enters the *pending* state, only the worker that put it in that state can run it. So if you need to take down a worker permanently, ensure that it completes all pending tasks by sending the appropriate signal.
+
+<!-- TODO: Add notes on setting different env vars for different replicas in swarm (https://stackoverflow.com/questions/56203272/docker-compose-scaling-with-unique-environment-variable#56209034). OR starting each worker as it's own service, where you can set it's own env vars. -->
 
 ### Smart polling
 
