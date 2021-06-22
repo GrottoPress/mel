@@ -1,4 +1,4 @@
-require "./mel"
+require "./worker"
 
 module Mel
   extend self

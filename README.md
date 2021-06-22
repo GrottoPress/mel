@@ -42,12 +42,9 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    require "../jobs/**"
 
    Mel.configure do |settings|
-     settings.batch_size = 10
-     settings.poll_interval = 3.seconds
      settings.redis_pool_size = 25
      settings.redis_url = "redis://localhost:6379/0"
      settings.timezone = Time::Location.load("Africa/Accra")
-     settings.worker_id = ENV["WORKER_ID"]?.try(&.to_i)
    end
 
    Log.setup(Mel.log.source, :info, Log::IOBackend.new)
@@ -173,7 +170,15 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      ```crystal
      # ->>> src/worker.cr
 
+     require "mel/worker"
+
      require "./app/**"
+
+     Mel.configure do |settings|
+       settings.batch_size = 10
+       settings.poll_interval = 3.seconds
+       settings.worker_id = ENV["WORKER_ID"].to_i
+     end
 
      Mel.start
      # <= Blocks forever, polls for due tasks and runs them.
@@ -189,6 +194,12 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      # ...
 
      require "mel/spec"
+
+     Mel.configure do |settings|
+       settings.batch_size = 10
+       settings.poll_interval = 3.seconds
+       settings.worker_id = ENV["WORKER_ID"].to_i
+     end
 
      Spec.before_each { Mel::Task::Query.truncate }
 

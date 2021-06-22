@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased] - 
 
 ### Changed
+- Move out worker-specific code into own files (enables `require "mel/worker"`).
 - Allow limiting the number of running tasks via the `batch_size` setting
 
 ### Fixed
