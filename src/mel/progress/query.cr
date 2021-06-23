@@ -8,7 +8,7 @@ struct Mel::Progress
     end
 
     def key
-      "mel:progress:#{id}"
+      self.class.key(id)
     end
 
     def set(value)
@@ -26,6 +26,19 @@ struct Mel::Progress
 
     def get(redis)
       redis.incrby(key, 0)
+    end
+
+    def self.key
+      "mel:progress"
+    end
+
+    def self.key(*parts : String)
+      "#{key}:#{parts.join(':')}"
+    end
+
+    def self.truncate
+      keys = Mel.redis.keys("#{key}*")
+      Mel.redis.run(["DEL"] + keys) unless keys.empty?
     end
   end
 end

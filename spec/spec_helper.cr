@@ -16,6 +16,12 @@ Mel.configure do |settings|
   settings.timezone = Time::Location.load("America/Los_Angeles")
 end
 
-Spec.before_each { Mel::Task::Query.truncate }
+Spec.before_each do
+  Mel::Task::Query.truncate
+  Mel::Progress::Query.truncate
+end
 
-Spec.after_suite { Mel::Task::Query.truncate }
+Spec.after_suite do
+  Mel::Task::Query.truncate
+  Mel::Progress::Query.truncate
+end

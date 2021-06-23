@@ -580,6 +580,28 @@ progress = Mel::Progress.new("some_job")
 progress.track # <= Returns current progress
 ```
 
+You may delete progress data in specs thus:
+
+```crystal
+# ->>> spec/spec_helper.cr
+
+# ...
+
+Spec.before_each do
+  # ...
+  Mel::Progress::Query.truncate
+  # ...
+end
+
+Spec.after_suite do
+  # ...
+  Mel::Progress::Query.truncate
+  # ...
+end
+
+# ...
+```
+
 ### Jobs *security*
 
 A *Mel* worker waits for all running tasks to complete before exiting, if it received a `Signal::INT` or a `Signal::TERM`, or if you called `Mel.stop` somewhere in your code. This means jobs are never lost mid-flight.
