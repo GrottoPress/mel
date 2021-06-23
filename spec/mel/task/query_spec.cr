@@ -2,7 +2,7 @@ require "../../spec_helper"
 
 describe Mel::Task::Query do
   describe ".truncate" do
-    it "deletes all Mel data" do
+    it "deletes all tasks" do
       address = "user@domain.tld"
 
       SendEmailJob.run(address: address)
@@ -14,9 +14,9 @@ describe Mel::Task::Query do
       Mel::Task.find(-1).should be_nil
     end
 
-    it "does not delete non-Mel data" do
+    it "does not delete non-task data" do
       address = "user@domain.tld"
-      not_mel_keys = ["not_mel", "not_mel_2", "not_mel_3"]
+      not_mel_keys = ["not_mel", "#{Mel::Progress::Query.key}:2", "not_mel_3"]
       not_mel_all = not_mel_keys.zip(not_mel_keys).flat_map(&.to_a)
 
       SendEmailJob.run(address: address)
