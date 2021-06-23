@@ -1,8 +1,8 @@
 require "../spec_helper"
 
-describe Mel::Task do
-  describe "#run" do
-    it "retries failed task" do
+describe Mel::Progress do
+  describe "#track" do
+    it "tracks progress" do
       progress = Mel::Progress.new(ProgressJob.progress_id)
 
       ProgressJob.run(retries: 0)
