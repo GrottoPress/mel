@@ -19,12 +19,6 @@ module Mel::Job
       \{% raise "#{@type}#run not implemented" %}
     end
 
-    def run
-      Mel.redis.multi do |redis|
-        yield redis
-      end
-    end
-
     def before_run
     end
 
@@ -135,5 +129,11 @@ module Mel::Job
       task.id if task.enqueue(redis)
     end
     {% end %}
+
+    private def multi
+      Mel.redis.multi do |redis|
+        yield redis
+      end
+    end
   end
 end

@@ -396,7 +396,7 @@ struct SendAllEmails
     return if @users.empty?
 
     # Pushes all jobs atomically, at the end of the block.
-    run do |redis|
+    multi do |redis|
       @users.each { |user| SendEmail.run(redis: redis, user: user) }
     end
   end
