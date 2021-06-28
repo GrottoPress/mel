@@ -7,7 +7,7 @@ class CounterJob
   def run
     return if @max < 1
 
-    multi do |redis|
+    redis.multi do |redis|
       @max.times { |count| CountJob.run(count: count, redis: redis) }
     end
   end

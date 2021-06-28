@@ -130,10 +130,8 @@ module Mel::Job
     end
     {% end %}
 
-    private def multi
-      Mel.redis.multi do |redis|
-        yield redis
-      end
+    private def redis
+      Mel.redis
     end
   end
 end

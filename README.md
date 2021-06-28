@@ -396,7 +396,9 @@ struct SendAllEmails
     return if @users.empty?
 
     # Pushes all jobs atomically, at the end of the block.
-    multi do |redis|
+    #
+    # There's also `redis#pipeline(&)`, if you do not need the atomicity.
+    redis.multi do |redis|
       @users.each { |user| SendEmail.run(redis: redis, user: user) }
     end
   end

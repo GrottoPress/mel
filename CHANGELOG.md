@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Add progress tracker
+- Add `Mel::Job#redis`
 
 ### Changed
 - Move out worker-specific code into own files (enables `require "mel/worker"`).
 - Allow limiting the number of running tasks via the `batch_size` setting
-- Rename `Mel::Job#run(&)` to `multi`
+
+### Removed
+- Remove `Mel::Job#run(&)`
 
 ### Fixed
 - Ensure tasks are never lost in the event of a force shutdown
