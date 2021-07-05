@@ -196,9 +196,9 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      require "mel/spec"
 
      Mel.configure do |settings|
-       settings.batch_size = 10
-       settings.poll_interval = 3.seconds
-       settings.worker_id = ENV["WORKER_ID"].to_i
+       settings.batch_size = -1
+       settings.poll_interval = 1.millisecond
+       settings.worker_id = 1
      end
 
      Spec.before_each { Mel::Task::Query.truncate }
