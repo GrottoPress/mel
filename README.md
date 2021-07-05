@@ -577,7 +577,7 @@ SomeJob.run
 # Track progress
 #
 # This may, for instance, be used in a route in a web application.
-# CLient-side javascipt can query this route periodically, and
+# Client-side javascipt can query this route periodically, and
 # show response using a progress tracker UI.
 progress = Mel::Progress.new("some_job")
 progress.track # <= Returns current progress
