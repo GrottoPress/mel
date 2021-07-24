@@ -8,10 +8,10 @@ module Mel::Job::Every
       task = Mel::PeriodicTask.new(
         id.to_s,
         job,
-        job.time,
+        job.class.time,
         retries,
-        job.end_time,
-        job.interval
+        job.class.end_time,
+        job.class.interval
       )
 
       task.id if task.enqueue(redis)
@@ -23,15 +23,15 @@ module Mel::Job::Every
   end
 
   private macro run_every(till = nil, for = nil)
-    protected def interval : Time::Span
+    def self.interval : Time::Span
       {{ yield }}
     end
 
-    protected def time : Time
+    def self.time : Time
       interval.abs.from_now
     end
 
-    protected def end_time : Time?
+    def self.end_time : Time?
       {{ till }} || {{ for }}.try(&.from_now)
     end
   end

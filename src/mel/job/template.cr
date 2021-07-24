@@ -2,7 +2,7 @@ module Mel::Job::Template
   macro included
     include Mel::Job
 
-    protected def time : Time
+    def self.time : Time
     end
   end
 end

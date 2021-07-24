@@ -8,7 +8,7 @@ module Mel::Job::At
   end
 
   private macro run_at
-    protected def time : Time
+    def self.time : Time
       {{ yield }}
     end
   end

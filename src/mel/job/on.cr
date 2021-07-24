@@ -8,10 +8,10 @@ module Mel::Job::On
       task = Mel::CronTask.new(
         id.to_s,
         job,
-        job.time,
+        job.class.time,
         retries,
-        job.end_time,
-        job.schedule
+        job.class.end_time,
+        job.class.schedule
       )
 
       task.id if task.enqueue(redis)
@@ -23,15 +23,15 @@ module Mel::Job::On
   end
 
   private macro run_on(till = nil, for = nil)
-    protected def schedule : String
+    def self.schedule : String
       {{ yield }}
     end
 
-    protected def time : Time
+    def self.time : Time
       CronParser.new(schedule).next
     end
 
-    protected def end_time : Time?
+    def self.end_time : Time?
       {{ till }} || {{ for }}.try(&.from_now)
     end
   end
