@@ -19,12 +19,12 @@ describe Mel do
   end
 
   it "stops on SIGINT" do
-    Mel.settings.worker_id = 1
+    Mel.settings.worker_id = 2
 
     Mel.start_async
     Process.signal(Signal::INT, Process.pid)
 
-    10_000.times do
+    100_000.times do
       break if Mel.state.stopped?
       Fiber.yield
     end
@@ -33,12 +33,12 @@ describe Mel do
   end
 
   it "stops on SIGTERM" do
-    Mel.settings.worker_id = 1
+    Mel.settings.worker_id = 3
 
     Mel.start_async
     Process.signal(Signal::TERM, Process.pid)
 
-    10_000.times do
+    100_000.times do
       break if Mel.state.stopped?
       Fiber.yield
     end

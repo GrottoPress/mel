@@ -7,7 +7,7 @@ describe Mel::Progress do
 
       ProgressJob.run(retries: 0)
 
-      Mel.settings.worker_id = 1
+      Mel.settings.worker_id = 4
 
       Mel.start_and_stop
       progress.track.should eq(50)

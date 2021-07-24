@@ -87,7 +87,7 @@ describe Mel::Task do
       SendEmailJob.run(address: address)
       SendEmailJob.run(address: address)
 
-      Mel.settings.worker_id = 1
+      Mel.settings.worker_id = 5
 
       Mel::InstantTask.find_pending.should be_nil
       Mel::PeriodicTask.find_pending.should be_nil
