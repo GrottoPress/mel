@@ -4,9 +4,11 @@ describe Mel::Job::On do
   it "runs on given schedule" do
     address = "user@domain.tld"
     id = "1001"
-    cron = CronParser.new("0 */2 * * *")
+    schedule = "0 */2 * * *"
 
-    SendEmailOnJob.run(id: id, address: address)
+    cron = CronParser.new(schedule)
+
+    SendEmailOnJob.run_on(schedule, id: id, address: address)
 
     Timecop.travel(time = cron.next) do
       task = Mel::CronTask.find(id, delete: true)
@@ -44,9 +46,16 @@ describe Mel::Job::On do
   it "deletes task after given time" do
     address = "user@domain.tld"
     id = "1001"
-    cron = CronParser.new("0 */2 * * *")
+    schedule = "0 */2 * * *"
 
-    SendEmailOnTillJob.run(id: id, address: address)
+    cron = CronParser.new(schedule)
+
+    SendEmailOnTillJob.run_on(
+      schedule,
+      till: 4.hours.from_now,
+      id: id,
+      address: address
+    )
 
     Timecop.travel(time = cron.next) do
       task = Mel::CronTask.find(id, delete: true)
@@ -68,9 +77,11 @@ describe Mel::Job::On do
   it "deletes task after given period" do
     address = "user@domain.tld"
     id = "1001"
-    cron = CronParser.new("0 */2 * * *")
+    schedule = "0 */2 * * *"
 
-    SendEmailOnForJob.run(id: id, address: address)
+    cron = CronParser.new(schedule)
+
+    SendEmailOnForJob.run_on(schedule, for: 4.hours, id: id, address: address)
 
     Timecop.travel(time = cron.next) do
       task = Mel::CronTask.find(id, delete: true)

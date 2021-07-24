@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased] - 
 
 ### Changed
-- Expose schedules in schedule templates as public class methods
+- Enable setting arbitrary schedule for any given schedule template
+- Rename schedule templates `.run` to corresponding `.run_*` methods
+
+### Removed
+- Remove schedule templates `.run_*` macros
 
 ## [0.4.0] - 2021-07-20
 

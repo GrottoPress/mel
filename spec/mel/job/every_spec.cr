@@ -5,7 +5,7 @@ describe Mel::Job::Every do
     address = "user@domain.tld"
     id = "1001"
 
-    SendEmailEveryJob.run(id: id, address: address)
+    SendEmailEveryJob.run_every(-2.hours, id: id, address: address)
 
     Time::Location.local = Time::Location.load("Europe/Berlin")
 
@@ -25,7 +25,12 @@ describe Mel::Job::Every do
     address = "user@domain.tld"
     id = "1001"
 
-    SendEmailEveryTillJob.run(id: id, address: address)
+    SendEmailEveryTillJob.run_every(
+      2.hours,
+      till: 5.hours.from_now,
+      id: id,
+      address: address
+    )
 
     Time::Location.local = Time::Location.load("Europe/Berlin")
 
@@ -45,7 +50,12 @@ describe Mel::Job::Every do
     address = "user@domain.tld"
     id = "1001"
 
-    SendEmailEveryForJob.run(id: id, address: address)
+    SendEmailEveryForJob.run_every(
+      2.hours,
+      for: 5.hours,
+      id: id,
+      address: address
+    )
 
     Time::Location.local = Time::Location.load("Europe/Berlin")
 

@@ -252,15 +252,14 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
 
   # Schedule job
   DoSomeWorkNow.run(arg_1: 5, arg_2: "value")
+  # <= Alias: `DoSomeWorkNow.run_now(...)`
 ```
 
 ```crystal
   # Define job
-  struct DoSomeWorkInTenMinutes
+  struct DoSomeWorkIn
     include Mel::Job::In # <= Required
 
-    run_in 10.minutes # <= Required
-
     def initialize(@arg_1 : Int32, @arg_2 : String)
     end
 
@@ -271,16 +270,14 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
   end
 
   # Schedule job
-  DoSomeWorkInTenMinutes.run(arg_1: 5, arg_2: "value")
+  DoSomeWorkIn.run_in(10.minutes, arg_1: 5, arg_2: "value")
 ```
 
 ```crystal
   # Define job
-  struct DoSomeWorkAtFiveOclock
+  struct DoSomeWorkAt
     include Mel::Job::At # <= Required
 
-    run_at Time.local(2021, 6, 9, 5) # <= Required
-
     def initialize(@arg_1 : Int32, @arg_2 : String)
     end
 
@@ -291,18 +288,14 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
   end
 
   # Schedule job
-  DoSomeWorkAtFiveOclock.run(arg_1: 5, arg_2: "value")
+  DoSomeWorkAt.run_at(Time.local(2021, 6, 9, 5), arg_1: 5, arg_2: "value")
 ```
 
 ```crystal
   # Define job
-  struct DoSomeWorkEveryTwoHours
+  struct DoSomeWorkEvery
     include Mel::Job::Every # <= Required
 
-    run_every 2.hours # <= Required
-    # <= Overload: `run_every 2.hours, for: 5.hours`
-    # <= Overload: `run_every 2.hours, till: 9.hours.from_now`
-
     def initialize(@arg_1 : Int32, @arg_2 : String)
     end
 
@@ -313,17 +306,15 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
   end
 
   # Schedule job
-  DoSomeWorkEveryTwoHours.run(arg_1: 5, arg_2: "value")
+  DoSomeWorkEvery.run_every(2.hours, arg_1: 5, arg_2: "value")
+  # <= Overload: `.run_every 2.hours, for: 5.hours`
+  # <= Overload: `.run_every 2.hours, till: 9.hours.from_now`
 ```
 
 ```crystal
   # Define job
-  struct DoSomeWorkOnFirstDayOfEveryMonth
+  struct DoSomeWorkOn
     include Mel::Job::On # <= Required
-
-    run_on "0 8 1 * *" # <= Required
-    # <= Overload: `run_on "0 8 1 * *", for: 100.weeks`
-    # <= Overload: `run_on "0 8 1 * *", till: Time.local(2099, 12, 31)`
 
     def initialize(@arg_1 : Int32, @arg_2 : String)
     end
@@ -335,10 +326,14 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
   end
 
   # Schedule job
-  DoSomeWorkOnFirstDayOfEveryMonth.run(arg_1: 5, arg_2: "value")
+  DoSomeWorkOn.run_on("0 8 1 * *", arg_1: 5, arg_2: "value")
+  # <= Overload: `.run_on "0 8 1 * *", for: 100.weeks`
+  # <= Overload: `.run_on "0 8 1 * *", till: Time.local(2099, 12, 31)`
 ```
 
-All methods and callbacks usable in a regular job may be used in a schedule template, including `before_*` and `after_*` callbacks.
+A schedule template excludes all methods not relevant to that template. For instance, calling `.run_every` or `.run_now` for a `Mel::Job::At` template won't compile.
+
+All other methods and callbacks usable in a regular job may be used in a schedule template, including `before_*` and `after_*` callbacks.
 
 ### Specifying task IDs
 

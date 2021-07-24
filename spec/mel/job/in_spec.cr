@@ -5,7 +5,7 @@ describe Mel::Job::In do
     address = "user@domain.tld"
     id = "1001"
 
-    SendEmailInJob.run(id, address: address)
+    SendEmailInJob.run_in(2.hours, id: id, address: address)
 
     Time::Location.local = Time::Location.load("Europe/Berlin")
 

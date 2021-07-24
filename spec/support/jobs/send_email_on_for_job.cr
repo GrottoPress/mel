@@ -4,8 +4,6 @@ struct SendEmailOnForJob
   @[JSON::Field(ignore: true)]
   getter sent = false
 
-  run_on "0 */2 * * *", for: 4.hours
-
   def initialize(@address : String)
   end
 
