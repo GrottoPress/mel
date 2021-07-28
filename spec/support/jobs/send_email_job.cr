@@ -32,7 +32,7 @@ struct SendEmailJob
     @run_before = true
   end
 
-  def after_run(result)
+  def after_run(success)
     @run_after = true
   end
 
@@ -40,7 +40,7 @@ struct SendEmailJob
     @enqueue_before = true
   end
 
-  def after_enqueue(result)
+  def after_enqueue(success)
     @enqueue_after = true
   end
 
@@ -48,7 +48,7 @@ struct SendEmailJob
     @dequeue_before = true
   end
 
-  def after_dequeue(result)
+  def after_dequeue(success)
     @dequeue_after = true
   end
 end

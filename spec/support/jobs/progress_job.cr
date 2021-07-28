@@ -8,8 +8,8 @@ struct ProgressJob
   def run
   end
 
-  def after_run(result)
-    return @progress.fail unless result
+  def after_run(success)
+    return @progress.fail unless success
     SomeStep.run(progress: @progress, retries: 0)
     @progress.track(50)
   end
@@ -27,8 +27,8 @@ struct ProgressJob
     def run
     end
 
-    def after_run(result)
-      return @progress.fail unless result
+    def after_run(success)
+      return @progress.fail unless success
       SomeOtherStep.run(progress: @progress, retries: 0)
       @progress.track(80)
     end
@@ -44,8 +44,8 @@ struct ProgressJob
       raise "Fail on purpose"
     end
 
-    def after_run(result)
-      return @progress.fail unless result
+    def after_run(success)
+      return @progress.fail unless success
       @progress.succeed
     end
   end

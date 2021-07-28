@@ -26,10 +26,10 @@ module Mel::Task
 
       if values = Mel::Task::Query.add(self, redis, force: force)
         log_enqueued
-        do_after_enqueue(values)
+        do_after_enqueue(true)
         values
       else
-        do_after_enqueue(nil)
+        do_after_enqueue(false)
         nil
       end
     end
@@ -40,10 +40,10 @@ module Mel::Task
 
       if value = Mel::Task::Query.delete(id)
         log_dequeued
-        do_after_dequeue(value)
+        do_after_dequeue(true)
         value
       else
-        do_after_dequeue(nil)
+        do_after_dequeue(false)
         nil
       end
     end
@@ -56,7 +56,7 @@ module Mel::Task
 
       spawn(name: id) do
         log_running
-        result = job.run
+        job.run
       rescue error
         log_errored(error)
         next fail_task if attempts > retries
@@ -64,7 +64,7 @@ module Mel::Task
       else
         schedule_next
         log_ran
-        do_after_run(result || true)
+        do_after_run(true)
       end
     end
 
@@ -137,7 +137,7 @@ module Mel::Task
     private def fail_task : Nil
       schedule_next
       log_failed
-      do_after_run(nil)
+      do_after_run(false)
     end
 
     private def schedule_failed_task : Nil
