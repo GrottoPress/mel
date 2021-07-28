@@ -22,19 +22,19 @@ module Mel::Job
     def before_run
     end
 
-    def after_run(success)
+    def after_run(result)
     end
 
     def before_enqueue
     end
 
-    def after_enqueue(success)
+    def after_enqueue(result)
     end
 
     def before_dequeue
     end
 
-    def after_dequeue(success)
+    def after_dequeue(result)
     end
 
     {% if @type < Mel::Job::Now || !(@type < Mel::Job::Template) %}

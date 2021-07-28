@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Enable setting arbitrary schedule for any given schedule template
 - Rename schedule templates `.run` to corresponding `.run_*` methods
+- Pass nilable result (instead of boolean) to the `after_*` callbacks
 
 ### Removed
 - Remove schedule templates `.run_*` macros

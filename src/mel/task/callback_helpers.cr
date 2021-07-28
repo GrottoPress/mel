@@ -8,8 +8,8 @@ module Mel::Task::CallbackHelpers
       false
     end
 
-    private def do_after_run(success) : Bool
-      job.after_run(success)
+    private def do_after_run(result) : Bool
+      job.after_run(result)
       true
     rescue error
       log_callback_failed("after_run", error)
@@ -24,8 +24,8 @@ module Mel::Task::CallbackHelpers
       false
     end
 
-    private def do_after_enqueue(success) : Bool
-      job.after_enqueue(success)
+    private def do_after_enqueue(result) : Bool
+      job.after_enqueue(result)
       true
     rescue error
       log_callback_failed("after_enqueue", error)
@@ -40,8 +40,8 @@ module Mel::Task::CallbackHelpers
       false
     end
 
-    private def do_after_dequeue(success) : Bool
-      job.after_dequeue(success)
+    private def do_after_dequeue(result) : Bool
+      job.after_dequeue(result)
       true
     rescue error
       log_callback_failed("after_dequeue", error)

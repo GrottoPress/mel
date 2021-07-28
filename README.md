@@ -80,10 +80,11 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
        # ...
      end
 
-     # Called in the same fiber that calls `#run`.
-     # `success` is `true` only if the run succeeded.
-     def after_run(success)
-       if success
+     # Called in the same fiber that calls `#run`. `result`
+     # is `nil` if the run failed, otherwise it is the return
+     # of `#run` (or `true` if `#run` returns a falsey).
+     def after_run(result)
+       if result
          # ...
        else
          # ...
@@ -97,9 +98,9 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      end
 
      # Called in the main fiber after enqueueing the task in
-     # Redis. `success` is `true` only if the enqueue succeeded.
-     def after_enqueue(success)
-       if success
+     # Redis. `result` is `nil` only if the enqueue failed.
+     def after_enqueue(result)
+       if result
          # ...
        else
          # ...
@@ -440,8 +441,8 @@ struct SendAllEmails
     end
   end
 
-  def after_run(success)
-    return unless success
+  def after_run(result)
+    return unless result
 
     if @users[1]?
       self.class.run(users: @users[1..]) # <= Schedule next email
@@ -470,8 +471,8 @@ struct SomeJob
     # Do something
   end
 
-  def after_run(success)
-    SomeStep.run if success
+  def after_run(result)
+    SomeStep.run if result
   end
 
   struct SomeStep
@@ -481,8 +482,8 @@ struct SomeJob
       # Do something
     end
 
-    def after_run(success)
-      SomeOtherStep.run if success
+    def after_run(result)
+      SomeOtherStep.run if result
     end
   end
 
@@ -493,7 +494,7 @@ struct SomeJob
       # Do something
     end
 
-    def after_run(success)
+    def after_run(result)
       # All done; do something
     end
   end
@@ -528,8 +529,8 @@ struct SomeJob
 
   # ...
 
-  def after_run(success)
-    return @progress.fail unless success
+  def after_run(result)
+    return @progress.fail unless result
 
     SomeStep.run(progress: @progress)
     @progress.track(50) # <= Move to 50%
@@ -543,8 +544,8 @@ struct SomeJob
 
     # ...
 
-    def after_run(success)
-      return @progress.fail unless success
+    def after_run(result)
+      return @progress.fail unless result
 
       SomeOtherStep.run(progress: @progress)
       @progress.track(80) # <= Move to 80%
@@ -559,8 +560,8 @@ struct SomeJob
 
     # ...
 
-    def after_run(success)
-      return @progress.fail unless success
+    def after_run(result)
+      return @progress.fail unless result
       @progress.succeed # <= Move to 100%
     end
   end

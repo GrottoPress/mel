@@ -15,7 +15,7 @@ struct FailedJob
     @run_before = true
   end
 
-  def after_run(success)
+  def after_run(result)
     @run_after = true
   end
 end
