@@ -10,8 +10,11 @@ struct ProgressJob
 
   def after_run(success)
     return @progress.fail unless success
-    SomeStep.run(progress: @progress, retries: 0)
-    @progress.move(50)
+
+    redis.pipeline do |redis|
+      SomeStep.run(redis: redis, progress: @progress, retries: 0)
+      @progress.move(50, redis)
+    end
   end
 
   def self.progress_id
@@ -29,8 +32,11 @@ struct ProgressJob
 
     def after_run(success)
       return @progress.fail unless success
-      SomeOtherStep.run(progress: @progress, retries: 0)
-      @progress.forward(30)
+
+      redis.pipeline do |redis|
+        SomeOtherStep.run(redis: redis, progress: @progress, retries: 0)
+        @progress.forward(30, redis)
+      end
     end
   end
 
