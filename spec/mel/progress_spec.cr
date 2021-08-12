@@ -37,4 +37,26 @@ describe Mel::Progress do
       progress.failure?.should be_true
     end
   end
+
+  describe "#forward" do
+    it "moves progress forward" do
+      progress = Mel::Progress.new(ProgressJob.progress_id)
+
+      progress.track(40)
+      progress.forward(30)
+
+      progress.track.should eq(70)
+    end
+  end
+
+  describe "#backward" do
+    it "moves progress backward" do
+      progress = Mel::Progress.new(ProgressJob.progress_id)
+
+      progress.track(90)
+      progress.backward(30)
+
+      progress.track.should eq(60)
+    end
+  end
 end

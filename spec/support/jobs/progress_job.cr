@@ -30,7 +30,7 @@ struct ProgressJob
     def after_run(success)
       return @progress.fail unless success
       SomeOtherStep.run(progress: @progress, retries: 0)
-      @progress.track(80)
+      @progress.forward(30)
     end
   end
 

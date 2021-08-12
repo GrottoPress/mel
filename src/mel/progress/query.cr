@@ -28,6 +28,30 @@ struct Mel::Progress
       redis.incrby(key, 0)
     end
 
+    def increment(by value)
+      Mel.redis.multi { |redis| increment(value, redis) }
+    end
+
+    def increment(by value, redis)
+      redis.incrby(key, value)
+
+      Mel.settings.progress_expiry.try do |expiry|
+        redis.run({"EXPIRE", key, expiry.total_seconds.to_i64.to_s})
+      end
+    end
+
+    def decrement(by value)
+      Mel.redis.multi { |redis| decrement(value, redis) }
+    end
+
+    def decrement(by value, redis)
+      redis.decrby(key, value)
+
+      Mel.settings.progress_expiry.try do |expiry|
+        redis.run({"EXPIRE", key, expiry.total_seconds.to_i64.to_s})
+      end
+    end
+
     def self.key
       "mel:progress"
     end

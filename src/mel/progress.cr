@@ -40,4 +40,12 @@ struct Mel::Progress
     value = FAIL if value < START
     redis ? @query.set(value, redis) : @query.set(value)
   end
+
+  def forward(by value : Number, redis = nil)
+    redis ? @query.increment(value, redis) : @query.increment(value)
+  end
+
+  def backward(by value : Number, redis = nil)
+    redis ? @query.decrement(value, redis) : @query.decrement(value)
+  end
 end
