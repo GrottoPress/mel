@@ -25,7 +25,7 @@ describe Mel::Progress do
 
   describe "#move" do
     it "moves progress" do
-      progress = Mel::Progress.new(ProgressJob.progress_id)
+      progress = Mel::Progress.new("some_job_1")
 
       progress.move(70)
       progress.track.should eq(70)
@@ -35,14 +35,14 @@ describe Mel::Progress do
     end
 
     it "ensures progress never exceeds 100%" do
-      progress = Mel::Progress.new(ProgressJob.progress_id)
+      progress = Mel::Progress.new("some_job_2")
 
       progress.move(120)
       progress.track.should eq(100)
     end
 
     it "fails progress if less than 0%" do
-      progress = Mel::Progress.new(ProgressJob.progress_id)
+      progress = Mel::Progress.new("some_job_3")
 
       progress.move(-120)
       progress.track.should eq(-1)
@@ -52,7 +52,7 @@ describe Mel::Progress do
 
   describe "#forward" do
     it "moves progress forward" do
-      progress = Mel::Progress.new(ProgressJob.progress_id)
+      progress = Mel::Progress.new("some_job_4")
 
       progress.move(40)
       progress.forward(30)
@@ -63,7 +63,7 @@ describe Mel::Progress do
 
   describe "#backward" do
     it "moves progress backward" do
-      progress = Mel::Progress.new(ProgressJob.progress_id)
+      progress = Mel::Progress.new("some_job_5")
 
       progress.move(90)
       progress.backward(30)
