@@ -11,7 +11,7 @@ struct ProgressJob
   def after_run(success)
     return @progress.fail unless success
     SomeStep.run(progress: @progress, retries: 0)
-    @progress.track(50)
+    @progress.move(50)
   end
 
   def self.progress_id

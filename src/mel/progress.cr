@@ -12,11 +12,11 @@ struct Mel::Progress
   end
 
   def succeed(redis = nil)
-    track(END, redis)
+    move(END, redis)
   end
 
   def fail(redis = nil)
-    track(FAIL, redis)
+    move(FAIL, redis)
   end
 
   def success?(redis = nil) : Bool
@@ -27,7 +27,7 @@ struct Mel::Progress
     track(redis) < START
   end
 
-  def tracking?(redis = nil) : Bool
+  def moving?(redis = nil) : Bool
     END > track(redis) >= START
   end
 
@@ -35,7 +35,7 @@ struct Mel::Progress
     redis ? @query.get(redis) : @query.get
   end
 
-  def track(to value : Number, redis = nil)
+  def move(to value : Number, redis = nil)
     value = END if value > END
     value = FAIL if value < START
     redis ? @query.set(value, redis) : @query.set(value)

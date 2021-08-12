@@ -532,7 +532,7 @@ struct SomeJob
     return @progress.fail unless success
 
     SomeStep.run(progress: @progress)
-    @progress.track(50) # <= Move to 50%
+    @progress.move(50) # <= Move to 50%
     # <= Same as: `@progress.forward(50)`
     # <=   Moves forward by 50%, from previous 0%.
   end
@@ -549,7 +549,7 @@ struct SomeJob
       return @progress.fail unless success
 
       SomeOtherStep.run(progress: @progress)
-      @progress.track(80) # <= Move to 80%
+      @progress.move(80) # <= Move to 80%
       # <= Same as: `@progress.forward(30)`
       # <=   Moves forward by 30%, from previous 50%.
     end
