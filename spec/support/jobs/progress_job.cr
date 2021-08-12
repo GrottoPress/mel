@@ -9,8 +9,6 @@ struct ProgressJob
   end
 
   def after_run(success)
-    return @progress.fail unless success
-
     redis.pipeline do |redis|
       SomeStep.run(redis: redis, progress: @progress, retries: 0)
       @progress.move(50, redis)
@@ -31,8 +29,6 @@ struct ProgressJob
     end
 
     def after_run(success)
-      return @progress.fail unless success
-
       redis.pipeline do |redis|
         SomeOtherStep.run(redis: redis, progress: @progress, retries: 0)
         @progress.forward(30, redis)
@@ -47,12 +43,10 @@ struct ProgressJob
     end
 
     def run
-      raise "Fail on purpose"
     end
 
     def after_run(success)
-      return @progress.fail unless success
-      @progress.succeed
+      @progress.fail
     end
   end
 end
