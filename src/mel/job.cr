@@ -109,7 +109,15 @@ module Mel::Job
       )
         job = new(**job_args)
         time = interval.abs.from_now
-        task = Mel::PeriodicTask.new(id.to_s, job, time, retries, till, interval)
+
+        task = Mel::PeriodicTask.new(
+          id.to_s,
+          job,
+          time,
+          retries,
+          till,
+          interval
+        )
 
         task.id if task.enqueue(redis)
       end
