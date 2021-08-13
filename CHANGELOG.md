@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Add `Mel::Progress#forward` for moving progress forward by a given value.
 - Add `Mel::Progress#backward` for moving progress backward by a given value.
+- Allow force-scheduling a job
 
 ### Changed
 - Enable setting arbitrary schedule for any given schedule template

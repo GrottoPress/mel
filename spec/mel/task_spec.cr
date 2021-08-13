@@ -27,10 +27,29 @@ describe Mel::Task do
       id = "1001"
 
       SendEmailJob.run(id, address: address)
-      SendEmailJob.run(id, address: address)
-      SendEmailJob.run(id, address: address)
+      SendEmailJob.run(id, address: "aa@bb.cc")
+      SendEmailJob.run(id, address: "dd@ee.ff")
 
       Mel::InstantTask.find(-1).try(&.size).should eq(1)
+
+      Mel::InstantTask.find(id)
+        .try(&.job.as(SendEmailJob).address)
+        .should(eq address)
+    end
+
+    it "can overwrite existing task" do
+      address = "user@domain.tld"
+      id = "1001"
+
+      SendEmailJob.run(id, force: true, address: "aa@bb.cc")
+      SendEmailJob.run(id, force: true, address: "dd@ee.ff")
+      SendEmailJob.run(id, force: true, address: address)
+
+      Mel::InstantTask.find(-1).try(&.size).should eq(1)
+
+      Mel::InstantTask.find(id)
+        .try(&.job.as(SendEmailJob).address)
+        .should(eq address)
     end
 
     it "enqueues multiple similar tasks with different IDs" do

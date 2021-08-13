@@ -1,6 +1,8 @@
 struct SendEmailJob
   include Mel::Job
 
+  getter :address
+
   @[JSON::Field(ignore: true)]
   getter sent = false
 

@@ -38,21 +38,28 @@ module Mel::Job
     end
 
     {% if @type < Mel::Job::Now || !(@type < Mel::Job::Template) %}
-      def self.run(id = UUID.random.to_s, retries = 2, redis = nil, **job_args)
-        run_now(id, retries, redis, **job_args)
+      def self.run(
+        id = UUID.random.to_s,
+        retries = 2,
+        redis = nil,
+        force = false,
+        **job_args
+      )
+        run_now(id, retries, redis, force, **job_args)
       end
 
       def self.run_now(
         id = UUID.random.to_s,
         retries = 2,
         redis = nil,
+        force = false,
         **job_args
       )
         job = new(**job_args)
         time = Time.local
         task = Mel::InstantTask.new(id.to_s, job, time, retries)
 
-        task.id if task.enqueue(redis)
+        task.id if task.enqueue(redis, force: force)
       end
     {% end %}
 
@@ -62,13 +69,14 @@ module Mel::Job
         id = UUID.random.to_s,
         retries = 2,
         redis = nil,
+        force = false,
         **job_args
       )
         job = new(**job_args)
         time = delay.from_now
         task = Mel::InstantTask.new(id.to_s, job, time, retries)
 
-        task.id if task.enqueue(redis)
+        task.id if task.enqueue(redis, force: force)
       end
     {% end %}
 
@@ -78,11 +86,12 @@ module Mel::Job
         id = UUID.random.to_s,
         retries = 2,
         redis = nil,
+        force = false,
         **job_args
       )
         job = new(**job_args)
         task = Mel::InstantTask.new(id.to_s, job, time, retries)
-        task.id if task.enqueue(redis)
+        task.id if task.enqueue(redis, force: force)
       end
     {% end %}
 
@@ -93,10 +102,11 @@ module Mel::Job
         id = UUID.random.to_s,
         retries = 2,
         redis = nil,
+        force = false,
         **job_args
       )
         till = for.try(&.from_now)
-        run_every(interval, till, id, retries, redis, **job_args)
+        run_every(interval, till, id, retries, redis, force, **job_args)
       end
 
       def self.run_every(
@@ -105,6 +115,7 @@ module Mel::Job
         id = UUID.random.to_s,
         retries = 2,
         redis = nil,
+        force = false,
         **job_args
       )
         job = new(**job_args)
@@ -119,7 +130,7 @@ module Mel::Job
           interval
         )
 
-        task.id if task.enqueue(redis)
+        task.id if task.enqueue(redis, force: force)
       end
     {% end %}
 
@@ -130,10 +141,11 @@ module Mel::Job
         id = UUID.random.to_s,
         retries = 2,
         redis = nil,
+        force = false,
         **job_args
       )
         till = for.try(&.from_now)
-        run_on(schedule, till, id, retries, redis, **job_args)
+        run_on(schedule, till, id, retries, redis, force, **job_args)
       end
 
       def self.run_on(
@@ -142,13 +154,14 @@ module Mel::Job
         id = UUID.random.to_s,
         retries = 2,
         redis = nil,
+        force = false,
         **job_args
       )
         job = new(**job_args)
         time = CronParser.new(schedule).next
         task = Mel::CronTask.new(id.to_s, job, time, retries, till, schedule)
 
-        task.id if task.enqueue(redis)
+        task.id if task.enqueue(redis, force: force)
       end
     {% end %}
 
