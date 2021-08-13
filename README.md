@@ -237,98 +237,98 @@ A job's `.run_*` methods allow scheduling that single job in multiple ways. Howe
 *Mel* comes with `Mel::Job::Now`, `Mel::Job::In`, `Mel::Job::At`, `Mel::Job::Every` and `Mel::Job::On` schedule templates to do exactly this:
 
 ```crystal
-  # Define job
-  struct DoSomeWorkNow
-    include Mel::Job::Now # <= Required
+# Define job
+struct DoSomeWorkNow
+  include Mel::Job::Now # <= Required
 
-    def initialize(@arg_1 : Int32, @arg_2 : String)
-    end
-
-    # (Required)
-    def run
-      # << Do work here >>
-    end
+  def initialize(@arg_1 : Int32, @arg_2 : String)
   end
 
-  # Schedule job
-  DoSomeWorkNow.run(arg_1: 5, arg_2: "value")
-  # <= Alias: `DoSomeWorkNow.run_now(...)`
+  # (Required)
+  def run
+    # << Do work here >>
+  end
+end
+
+# Schedule job
+DoSomeWorkNow.run(arg_1: 5, arg_2: "value")
+# <= Alias: `DoSomeWorkNow.run_now(...)`
 ```
 
 ```crystal
-  # Define job
-  struct DoSomeWorkIn
-    include Mel::Job::In # <= Required
+# Define job
+struct DoSomeWorkIn
+  include Mel::Job::In # <= Required
 
-    def initialize(@arg_1 : Int32, @arg_2 : String)
-    end
-
-    # (Required)
-    def run
-      # << Do work here >>
-    end
+  def initialize(@arg_1 : Int32, @arg_2 : String)
   end
 
-  # Schedule job
-  DoSomeWorkIn.run_in(10.minutes, arg_1: 5, arg_2: "value")
+  # (Required)
+  def run
+    # << Do work here >>
+  end
+end
+
+# Schedule job
+DoSomeWorkIn.run_in(10.minutes, arg_1: 5, arg_2: "value")
 ```
 
 ```crystal
-  # Define job
-  struct DoSomeWorkAt
-    include Mel::Job::At # <= Required
+# Define job
+struct DoSomeWorkAt
+  include Mel::Job::At # <= Required
 
-    def initialize(@arg_1 : Int32, @arg_2 : String)
-    end
-
-    # (Required)
-    def run
-      # << Do work here >>
-    end
+  def initialize(@arg_1 : Int32, @arg_2 : String)
   end
 
-  # Schedule job
-  DoSomeWorkAt.run_at(Time.local(2021, 6, 9, 5), arg_1: 5, arg_2: "value")
+  # (Required)
+  def run
+    # << Do work here >>
+  end
+end
+
+# Schedule job
+DoSomeWorkAt.run_at(Time.local(2021, 6, 9, 5), arg_1: 5, arg_2: "value")
 ```
 
 ```crystal
-  # Define job
-  struct DoSomeWorkEvery
-    include Mel::Job::Every # <= Required
+# Define job
+struct DoSomeWorkEvery
+  include Mel::Job::Every # <= Required
 
-    def initialize(@arg_1 : Int32, @arg_2 : String)
-    end
-
-    # (Required)
-    def run
-      # << Do work here >>
-    end
+  def initialize(@arg_1 : Int32, @arg_2 : String)
   end
 
-  # Schedule job
-  DoSomeWorkEvery.run_every(2.hours, arg_1: 5, arg_2: "value")
-  # <= Overload: `.run_every 2.hours, for: 5.hours`
-  # <= Overload: `.run_every 2.hours, till: 9.hours.from_now`
+  # (Required)
+  def run
+    # << Do work here >>
+  end
+end
+
+# Schedule job
+DoSomeWorkEvery.run_every(2.hours, arg_1: 5, arg_2: "value")
+# <= Overload: `.run_every 2.hours, for: 5.hours`
+# <= Overload: `.run_every 2.hours, till: 9.hours.from_now`
 ```
 
 ```crystal
-  # Define job
-  struct DoSomeWorkOn
-    include Mel::Job::On # <= Required
+# Define job
+struct DoSomeWorkOn
+  include Mel::Job::On # <= Required
 
-    def initialize(@arg_1 : Int32, @arg_2 : String)
-    end
-
-    # (Required)
-    def run
-      # << Do work here >>
-    end
+  def initialize(@arg_1 : Int32, @arg_2 : String)
   end
 
-  # Schedule job
-  DoSomeWorkOn.run_on("0 8 1 * *", arg_1: 5, arg_2: "value")
-  # <= Overload: `.run_on "0 8 1 * *", for: 100.weeks`
-  # <= Overload: `.run_on "0 8 1 * *", till: Time.local(2099, 12, 31)`
+  # (Required)
+  def run
+    # << Do work here >>
+  end
+end
+
+# Schedule job
+DoSomeWorkOn.run_on("0 8 1 * *", arg_1: 5, arg_2: "value")
+# <= Overload: `.run_on "0 8 1 * *", for: 100.weeks`
+# <= Overload: `.run_on "0 8 1 * *", till: Time.local(2099, 12, 31)`
 ```
 
 A schedule template excludes all methods not relevant to that template. For instance, calling `.run_every` or `.run_now` for a `Mel::Job::At` template won't compile.
