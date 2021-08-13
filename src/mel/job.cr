@@ -37,7 +37,10 @@ module Mel::Job
     def after_dequeue(success)
     end
 
-    {% if @type < Mel::Job::Now || !(@type < Mel::Job::Template) %}
+    {% if @type < Mel::Job::Now ||
+      @type < Mel::Job::Instant ||
+      !(@type < Mel::Job::Template) %}
+
       def self.run(
         id = UUID.random.to_s,
         retries = 2,
@@ -63,7 +66,10 @@ module Mel::Job
       end
     {% end %}
 
-    {% if @type < Mel::Job::In || !(@type < Mel::Job::Template) %}
+    {% if @type < Mel::Job::In ||
+      @type < Mel::Job::Instant ||
+      !(@type < Mel::Job::Template) %}
+
       def self.run_in(
         delay : Time::Span,
         id = UUID.random.to_s,
@@ -80,7 +86,10 @@ module Mel::Job
       end
     {% end %}
 
-    {% if @type < Mel::Job::At || !(@type < Mel::Job::Template) %}
+    {% if @type < Mel::Job::At ||
+      @type < Mel::Job::Instant ||
+      !(@type < Mel::Job::Template) %}
+
       def self.run_at(
         time : Time,
         id = UUID.random.to_s,
@@ -95,7 +104,10 @@ module Mel::Job
       end
     {% end %}
 
-    {% if @type < Mel::Job::Every || !(@type < Mel::Job::Template) %}
+    {% if @type < Mel::Job::Every ||
+      @type < Mel::Job::Recurring ||
+      !(@type < Mel::Job::Template) %}
+
       def self.run_every(
         interval : Time::Span,
         for : Time::Span?,
@@ -134,7 +146,10 @@ module Mel::Job
       end
     {% end %}
 
-    {% if @type < Mel::Job::On || !(@type < Mel::Job::Template) %}
+    {% if @type < Mel::Job::On ||
+      @type < Mel::Job::Recurring ||
+      !(@type < Mel::Job::Template) %}
+
       def self.run_on(
         schedule : String,
         for : Time::Span?,

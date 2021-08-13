@@ -335,6 +335,12 @@ A schedule template excludes all methods not relevant to that template. For inst
 
 All other methods and callbacks usable in a regular job may be used in a schedule template, including `before_*` and `after_*` callbacks.
 
+You may `include` more than one template in a single job. For instance, including `Mel::Job::At` and `Mel::Job::Every` in a job means you can call `.run_at` and `.run_every` methods for that job.
+
+Additionally, *Mel* comes with two grouped templates: `Mel::Job::Instant` and `Mel::Job::Recurring`.
+
+`Mel::Job::Instant` is equivalent to `Mel::Job::Now`, `Mel::Job::In` and `Mel::Job::At` combined. `Mel::Job::Recurring` is the equivalent of `Mel::Job::Every` and `Mel::Job::On` combined.
+
 ### Specifying task IDs
 
 You may specify an ID whenever you schedule a new job, thus: `DoSomeWork.run_*(... id: "1001", ...)`. If not specified, *Mel* automatically generates a unique **dynamic** ID for the task.

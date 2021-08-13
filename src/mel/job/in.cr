@@ -1,5 +1,5 @@
 module Mel::Job::In
   macro included
-    include Mel::Job::Instant
+    include Mel::Job::Template
   end
 end
