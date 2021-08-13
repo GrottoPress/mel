@@ -533,8 +533,6 @@ struct SomeJob
 
     SomeStep.run(progress: @progress)
     @progress.move(50) # <= Move to 50%
-    # <= Same as: `@progress.forward(50)`
-    # <=   Moves forward by 50%, from previous 0%.
   end
 
   struct SomeStep
@@ -552,6 +550,10 @@ struct SomeJob
       @progress.move(80) # <= Move to 80%
       # <= Same as: `@progress.forward(30)`
       # <=   Moves forward by 30%, from previous 50%.
+      # <=
+      # <=   WARNING: Use `#forward` *only* to increment an earlier `#move`.
+      # <=   `#forward` does not check if the key exists (has a value) before
+      # <=   a workflow starts.
     end
   end
 
