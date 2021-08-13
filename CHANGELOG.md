@@ -14,7 +14,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Enable setting arbitrary schedule for any given schedule template
-- Rename schedule templates `.run` to corresponding `.run_*` methods
 - Rename `Mel::Progress#track(value)` to `#move`
 - Rename `Mel::Progress#tracking?` to `#moving?`
 
