@@ -9,7 +9,7 @@ struct ProgressJob
   end
 
   def after_run(success)
-    redis.pipeline do |redis|
+    redis.multi do |redis|
       SomeStep.run(redis: redis, progress: @progress, retries: 0)
       @progress.move(50, redis)
     end
@@ -29,7 +29,7 @@ struct ProgressJob
     end
 
     def after_run(success)
-      redis.pipeline do |redis|
+      redis.multi do |redis|
         SomeOtherStep.run(redis: redis, progress: @progress, retries: 0)
         @progress.forward(30, redis)
       end
