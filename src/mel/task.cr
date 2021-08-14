@@ -59,7 +59,7 @@ module Mel::Task
         job.run
       rescue error
         log_errored(error)
-        next fail_task if attempts > retries
+        next fail_task(error) if attempts > retries
         schedule_failed_task
       else
         schedule_next
@@ -134,10 +134,12 @@ module Mel::Task
       end
     end
 
-    private def fail_task : Nil
+    private def fail_task(error) : Nil
       schedule_next
       log_failed
+
       do_after_run(false)
+      raise_or(error)
     end
 
     private def schedule_failed_task : Nil

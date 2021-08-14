@@ -1,6 +1,8 @@
 module Mel::Task::Query
   extend self
 
+  include Mel::Helpers
+
   def key : String
     "mel:tasks"
   end
@@ -140,6 +142,6 @@ module Mel::Task::Query
     yield
   rescue error : IO::Error
     Mel.log.error(exception: error, &.emit("Redis connection failed"))
-    nil
+    raise_or(error)
   end
 end

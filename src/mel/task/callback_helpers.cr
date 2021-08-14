@@ -1,11 +1,13 @@
 module Mel::Task::CallbackHelpers
   macro included
+    include Mel::Helpers
+
     private def do_before_run : Bool
       job.before_run
       true
     rescue error
       log_callback_failed("before_run", error)
-      false
+      raise_or(error, false)
     end
 
     private def do_after_run(success) : Bool
@@ -13,7 +15,7 @@ module Mel::Task::CallbackHelpers
       true
     rescue error
       log_callback_failed("after_run", error)
-      false
+      raise_or(error, false)
     end
 
     private def do_before_enqueue : Bool
@@ -21,7 +23,7 @@ module Mel::Task::CallbackHelpers
       true
     rescue error
       log_callback_failed("before_enqueue", error)
-      false
+      raise_or(error, false)
     end
 
     private def do_after_enqueue(success) : Bool
@@ -29,7 +31,7 @@ module Mel::Task::CallbackHelpers
       true
     rescue error
       log_callback_failed("after_enqueue", error)
-      false
+      raise_or(error, false)
     end
 
     private def do_before_dequeue : Bool
@@ -37,7 +39,7 @@ module Mel::Task::CallbackHelpers
       true
     rescue error
       log_callback_failed("before_dequeue", error)
-      false
+      raise_or(error, false)
     end
 
     private def do_after_dequeue(success) : Bool
@@ -45,7 +47,7 @@ module Mel::Task::CallbackHelpers
       true
     rescue error
       log_callback_failed("after_dequeue", error)
-      false
+      raise_or(error, false)
     end
   end
 end
