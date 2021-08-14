@@ -33,7 +33,7 @@ end
 Log.setup(Mel.log.source, :none)
 
 struct DoNothing
-  include Mel::Job
+  include Mel::Job::Now
 
   def run
   end
