@@ -6,7 +6,7 @@ module Mel::Task
     include Mel::Task::CallbackHelpers
 
     property id : String
-    property job : Mel::Job
+    property job : Mel::Job::Template
     property time : Time
     property attempts : Int32 = 0
 
@@ -186,7 +186,7 @@ module Mel::Task
   def from_json(value) : self?
     json = JSON.parse(value)
 
-    job_type = {{ Job.includers }}.find do |type|
+    job_type = {{ Job::Template.includers }}.find do |type|
       type.name == json["job"]["__type__"].as_s
     end
 

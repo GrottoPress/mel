@@ -230,11 +230,11 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    # ...
    ```
 
-### Schedule templates
+### Job templates
 
 A job's `.run_*` methods allow scheduling that single job in multiple ways. However, there may be situations where you need to schedule a job the same way, every time.
 
-*Mel* comes with `Mel::Job::Now`, `Mel::Job::In`, `Mel::Job::At`, `Mel::Job::Every` and `Mel::Job::On` schedule templates to do exactly this:
+*Mel* comes with `Mel::Job::Now`, `Mel::Job::In`, `Mel::Job::At`, `Mel::Job::Every` and `Mel::Job::On` templates to do exactly this:
 
 ```crystal
 # Define job
@@ -331,15 +331,17 @@ DoSomeWorkOn.run_on("0 8 1 * *", arg_1: 5, arg_2: "value")
 # <= Overload: `.run_on "0 8 1 * *", till: Time.local(2099, 12, 31)`
 ```
 
-A schedule template excludes all methods not relevant to that template. For instance, calling `.run_every` or `.run_now` for a `Mel::Job::At` template won't compile.
+A template excludes all methods not relevant to that template. For instance, calling `.run_every` or `.run_now` for a `Mel::Job::At` template won't compile.
 
-All other methods and callbacks usable in a regular job may be used in a schedule template, including `before_*` and `after_*` callbacks.
+All other methods and callbacks usable in a regular job may be used in a template, including `before_*` and `after_*` callbacks.
 
 You may `include` more than one template in a single job. For instance, including `Mel::Job::At` and `Mel::Job::Every` in a job means you can call `.run_at` and `.run_every` methods for that job.
 
 Additionally, *Mel* comes with two grouped templates: `Mel::Job::Instant` and `Mel::Job::Recurring`.
 
 `Mel::Job::Instant` is equivalent to `Mel::Job::Now`, `Mel::Job::In` and `Mel::Job::At` combined. `Mel::Job::Recurring` is the equivalent of `Mel::Job::Every` and `Mel::Job::On` combined.
+
+`Mel::Job` is itself a grouped template that combines all the other templates.
 
 ### Specifying task IDs
 
