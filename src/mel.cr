@@ -19,8 +19,12 @@ module Mel
     class_property progress_expiry : Time::Span? = 1.day
     class_property! redis_url : String
     class_property redis_pool_size : Int32?
-    class_property rescue_mode : Bool = true
+    class_property rescue_errors : Bool = true
     class_property timezone : Time::Location?
+
+    def self.rescue_errors?
+      rescue_errors
+    end
   end
 
   def settings
