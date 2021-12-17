@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Add support for *Crystal* v1.2
 - Add `redis_key_prefix` setting
+- Add `Mel.start_async(&)` spec helper
 
 ## [0.5.0] - 2021-08-17
 

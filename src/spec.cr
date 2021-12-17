@@ -6,15 +6,13 @@ module Mel
   end
 
   def start_and_stop
-    spawn do
-      until state.started?
-        Fiber.yield
-      end
+    start_async {}
+  end
 
-      stop
-    end
-
-    start
+  def start_async
+    start_async
+    yield
+    stop
   end
 
   def start_async
