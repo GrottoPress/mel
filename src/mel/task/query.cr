@@ -4,7 +4,7 @@ module Mel::Task::Query
   include Mel::Helpers
 
   def key : String
-    "mel:tasks"
+    "#{Mel.settings.redis_key_prefix}:tasks"
   end
 
   def key(*parts : String) : String

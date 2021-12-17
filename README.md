@@ -44,6 +44,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    Mel.configure do |settings|
      settings.redis_pool_size = 25
      settings.redis_url = "redis://localhost:6379/0"
+     settings.redis_key_prefix = "mel"
      settings.rescue_errors = true
      settings.timezone = Time::Location.load("Africa/Accra")
    end

@@ -53,7 +53,7 @@ struct Mel::Progress
     end
 
     def self.key
-      "mel:progress"
+      "#{Mel.settings.redis_key_prefix}:progress"
     end
 
     def self.key(*parts : String)
