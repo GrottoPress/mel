@@ -1,8 +1,6 @@
 require "./worker"
 
 module Mel
-  extend self
-
   def start_and_stop(count : Int)
     count.times { start_and_stop }
   end
