@@ -1,12 +1,8 @@
 require "./worker"
 
 module Mel
-  def start_and_stop(count : Int)
-    count.times { start_and_stop }
-  end
-
-  def start_and_stop
-    start_async {}
+  def start_and_stop(count : Int = 1)
+    count.times { start_async {} }
   end
 
   def start_async
