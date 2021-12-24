@@ -2,6 +2,8 @@ require "./mel"
 require "./worker/**"
 
 module Mel
+  @@mutex = Mutex.new
+
   private module Settings
     class_property batch_size : Int32 = 10
     class_property poll_interval : Time::Span = 3.seconds
@@ -31,7 +33,7 @@ module Mel
     return log_not_started unless state.started?
 
     log_stopping
-    @@state = State::Stopping unless state.stopped?
+    sync { @@state = State::Stopping } unless state.stopped?
 
     until state.stopped?
       Fiber.yield
@@ -46,7 +48,7 @@ module Mel
 
   private def run_tasks(pond)
     log_started
-    @@state = State::Started
+    sync { @@state = State::Started }
 
     while state.started?
       Task.find_lte(Time.local, batch_size(pond), delete: nil).try do |tasks|
@@ -60,7 +62,7 @@ module Mel
     pond.drain
 
     log_stopped
-    @@state = State::Stopped
+    sync { @@state = State::Stopped }
   end
 
   private def handle_signal
@@ -70,5 +72,9 @@ module Mel
   private def batch_size(pond)
     return settings.batch_size if settings.batch_size > -2
     {0, settings.batch_size.abs - pond.size}.max
+  end
+
+  private def sync
+    @@mutex.synchronize { yield }
   end
 end

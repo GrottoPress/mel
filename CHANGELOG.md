@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add `redis_key_prefix` setting
 - Add `Mel.start_async(&)` spec helper
 
+### Fixed
+- Use `Mutex` when updating worker state
+
 ## [0.5.0] - 2021-08-17
 
 ### Added
