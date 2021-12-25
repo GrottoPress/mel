@@ -19,7 +19,7 @@ dependencies:
     version: ~> 0.3.2
   redis:
     github: jgaskins/redis
-    version: ~> 0.1.9
+    version: ~> 0.3.0
 
 development_dependencies:
   carbon:
