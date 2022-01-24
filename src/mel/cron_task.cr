@@ -29,4 +29,16 @@ class Mel::CronTask
   private def next_time : Time
     CronParser.new(schedule).next(time.to_local)
   end
+
+  private def log_args
+    {
+      id: id,
+      job: job.class.name,
+      time: time.to_unix,
+      retries: retries,
+      attempts: attempts,
+      schedule: schedule,
+      till: till.try(&.to_unix)
+    }
+  end
 end

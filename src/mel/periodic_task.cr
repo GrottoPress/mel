@@ -37,4 +37,16 @@ class Mel::PeriodicTask
   private def next_time : Time
     time + interval
   end
+
+  private def log_args
+    {
+      id: id,
+      job: job.class.name,
+      time: time.to_unix,
+      retries: retries,
+      attempts: attempts,
+      interval: interval.total_seconds.to_i64,
+      till: till.try(&.to_unix)
+    }
+  end
 end

@@ -23,4 +23,14 @@ class Mel::InstantTask
   private def schedule_next
     dequeue
   end
+
+  private def log_args
+    {
+      id: id,
+      job: job.class.name,
+      time: time.to_unix,
+      retries: retries,
+      attempts: attempts
+    }
+  end
 end
