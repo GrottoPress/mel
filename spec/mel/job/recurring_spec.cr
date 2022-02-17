@@ -54,7 +54,7 @@ describe Mel::Job::Recurring do
       task.try(&.job.as(SendEmailRecurringJob).sent).should be_false
     end
 
-    Timecop.travel(time = cron.next(time)) do
+    Timecop.travel(cron.next(time)) do
       task = Mel::CronTask.find(id, delete: true)
       Mel.sync(task)
       task.try(&.job.as(SendEmailRecurringJob).sent).should be_true

@@ -21,24 +21,30 @@ module Mel::Task::Query
 
   def create(task : Task, redis = nil)
     connect do
+      # ameba:disable Lint/ShadowingOuterLocalVar
       command = ->(redis : Redis::Commands) do
         redis.run({"ZADD", key, "NX", task.time.to_unix.to_s, task.id})
         redis.set(task.key, task.to_json, nx: true)
       end
 
       return command.call(redis) if redis
+
+      # ameba:disable Lint/ShadowingOuterLocalVar
       Mel.redis.multi { |redis| command.call(redis) }
     end
   end
 
   def update(task : Task, redis = nil)
     connect do
+      # ameba:disable Lint/ShadowingOuterLocalVar
       command = ->(redis : Redis::Commands) do
         redis.run({"ZADD", key, task.time.to_unix.to_s, task.id})
         redis.set(task.key, task.to_json)
       end
 
       return command.call(redis) if redis
+
+      # ameba:disable Lint/ShadowingOuterLocalVar
       Mel.redis.multi { |redis| command.call(redis) }
     end
   end

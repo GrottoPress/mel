@@ -34,7 +34,7 @@ describe Mel::Job::On do
       task.try(&.job.as(SendEmailOnJob).sent).should be_false
     end
 
-    Timecop.travel(time = cron.next(time)) do
+    Timecop.travel(cron.next(time)) do
       task = Mel::CronTask.find(id, delete: true)
       Mel.sync(task)
       task.try(&.job.as(SendEmailOnJob).sent).should be_true

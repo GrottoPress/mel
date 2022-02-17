@@ -178,8 +178,7 @@ module Mel::Task
   def from_json(values : Array)
     values = values.each
       .map { |value| from_json(value.to_s) if value }
-      .reject(&.nil?)
-      .map(&.not_nil!)
+      .reject(Nil)
       .to_a
 
     values unless values.empty?

@@ -2,8 +2,6 @@ require "./spec_helper"
 
 describe Mel do
   it "runs tasks" do
-    address = "user@domain.tld"
-
     CollectJobsJob.run
     CollectJobsJob.run_every(2.hours, for: 4.hours)
 

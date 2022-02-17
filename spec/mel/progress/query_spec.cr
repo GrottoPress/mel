@@ -12,7 +12,6 @@ describe Mel::Progress::Query do
     end
 
     it "does not delete non-progress data" do
-      address = "user@domain.tld"
       not_mel_keys = ["#{Mel::Task::Query.key}:1", "not_mel_2"]
       not_mel_all = not_mel_keys.zip(not_mel_keys).flat_map(&.to_a)
 
