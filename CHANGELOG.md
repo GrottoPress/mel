@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Ensure support for *Crystal* v1.3.0
 
-### Changed
+### Fixed
 - Include only specific data in logs to avoid exposing sensitive data
 
 ## [0.6.0] - 2022-01-03
