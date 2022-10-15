@@ -80,7 +80,7 @@ module Mel::Task
       return if count.zero?
 
       Mel::Task.find_lt(time, -1, delete: false).try do |tasks|
-        tasks = Mel::Task.resize(tasks.select(&.is_a? self), count)
+        tasks = Mel::Task.resize(tasks.select(self), count)
         return if tasks.empty?
         Mel::Task.delete(tasks, delete).try &.map(&.as self)
       end
@@ -90,7 +90,7 @@ module Mel::Task
       return if count.zero?
 
       Mel::Task.find_lte(time, -1, delete: false).try do |tasks|
-        tasks = Mel::Task.resize(tasks.select(&.is_a? self), count)
+        tasks = Mel::Task.resize(tasks.select(self), count)
         return if tasks.empty?
         Mel::Task.delete(tasks, delete).try &.map(&.as self)
       end
@@ -100,7 +100,7 @@ module Mel::Task
       return if count.zero?
 
       Mel::Task.find(-1, delete: false).try do |tasks|
-        tasks = Mel::Task.resize(tasks.select(&.is_a? self), count)
+        tasks = Mel::Task.resize(tasks.select(self), count)
         return if tasks.empty?
         Mel::Task.delete(tasks, delete).try &.map(&.as self)
       end
@@ -115,7 +115,7 @@ module Mel::Task
 
     def self.find(ids : Array, *, delete = false) : Array(self)?
       Mel::Task.find(ids, delete: false).try do |tasks|
-        tasks = tasks.select(&.is_a? self)
+        tasks = tasks.select(self)
         return if tasks.empty?
         Mel::Task.delete(tasks, delete).try &.map(&.as self)
       end
@@ -123,7 +123,7 @@ module Mel::Task
 
     def self.from_json(values) : Array(self)?
       Mel::Task.from_json(values).try do |tasks|
-        tasks = tasks.each.select(&.is_a? self).map(&.as self).to_a
+        tasks = tasks.each.select(self).map(&.as self).to_a
         tasks unless tasks.empty?
       end
     end

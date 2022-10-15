@@ -6,7 +6,7 @@ module Mel::Task
       return if count.zero?
 
       Mel::Task.find_pending(-1, delete: false).try do |tasks|
-        tasks = Mel::Task.resize(tasks.select(&.is_a? self), count)
+        tasks = Mel::Task.resize(tasks.select(self), count)
         return if tasks.empty?
         Mel::Task.delete(tasks, delete).try &.map(&.as self)
       end
