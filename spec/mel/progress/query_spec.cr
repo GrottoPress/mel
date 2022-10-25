@@ -16,7 +16,7 @@ describe Mel::Progress::Query do
       not_mel_all = not_mel_keys.zip(not_mel_keys).flat_map(&.to_a)
 
       Mel.redis.run(["MSET"] + not_mel_all)
-      Mel.redis.run(["MGET"] + not_mel_keys).as(Array).size.should eq(2)
+      Mel.redis.mget(not_mel_keys).as(Array).size.should eq(2)
 
       progress = Mel::Progress.new("some_job_12")
       progress.move(10)
@@ -25,7 +25,7 @@ describe Mel::Progress::Query do
       Mel::Progress::Query.truncate
 
       progress.track.should eq(0)
-      Mel.redis.run(["MGET"] + not_mel_keys).as(Array).should_not contain(nil)
+      Mel.redis.mget(not_mel_keys).as(Array).should_not contain(nil)
 
       # Clean up
       Mel.redis.run(["DEL"] + not_mel_keys)

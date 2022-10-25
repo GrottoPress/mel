@@ -36,7 +36,7 @@ struct Mel::Progress
       redis.incrby(key, value)
 
       Mel.settings.progress_expiry.try do |expiry|
-        redis.run({"EXPIRE", key, expiry.total_seconds.to_i64.to_s})
+        redis.expire(key, expiry.total_seconds.to_i64)
       end
     end
 
@@ -48,7 +48,7 @@ struct Mel::Progress
       redis.decrby(key, value)
 
       Mel.settings.progress_expiry.try do |expiry|
-        redis.run({"EXPIRE", key, expiry.total_seconds.to_i64.to_s})
+        redis.expire(key, expiry.total_seconds.to_i64)
       end
     end
 

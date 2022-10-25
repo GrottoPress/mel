@@ -4,15 +4,12 @@ module Mel::Task::Query
     delete = false if delete.nil?
 
     connect do
-      ids = Mel.redis.run({
-        "ZRANGEBYSCORE",
+      ids = Mel.redis.zrangebyscore(
         key,
         worker_score,
         worker_score,
-        "LIMIT",
-        "0",
-        count.to_s
-      }).as(Array)
+        {"0", count.to_s}
+      ).as(Array)
 
       find(ids, delete: delete)
     end
@@ -26,8 +23,8 @@ module Mel::Task::Query
       scores_ids = ids.join(",#{worker_score},").split(',')
 
       values = Mel.redis.multi do |redis|
-        redis.run(["MGET"] + keys(ids))
-        redis.run(["ZADD", key, "XX", worker_score] + scores_ids)
+        redis.mget(keys ids)
+        redis.zadd(key, ["XX", worker_score] + scores_ids)
       end
 
       values = values[0].as(Array)

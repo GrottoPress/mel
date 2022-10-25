@@ -23,7 +23,7 @@ module Mel::Task::Query
     connect do
       # ameba:disable Lint/ShadowingOuterLocalVar
       command = ->(redis : Redis::Commands) do
-        redis.run({"ZADD", key, "NX", task.time.to_unix.to_s, task.id})
+        redis.zadd(key, {"NX", task.time.to_unix.to_s, task.id})
         redis.set(task.key, task.to_json, nx: true)
       end
 
@@ -38,7 +38,7 @@ module Mel::Task::Query
     connect do
       # ameba:disable Lint/ShadowingOuterLocalVar
       command = ->(redis : Redis::Commands) do
-        redis.run({"ZADD", key, task.time.to_unix.to_s, task.id})
+        redis.zadd(key, task.time.to_unix.to_s, task.id)
         redis.set(task.key, task.to_json)
       end
 
@@ -61,15 +61,12 @@ module Mel::Task::Query
     return if count.zero?
 
     connect do
-      ids = Mel.redis.run({
-        "ZRANGEBYSCORE",
+      ids = Mel.redis.zrangebyscore(
         key,
         "0",
         "(#{time.to_unix}",
-        "LIMIT",
-        "0",
-        count.to_s
-      }).as(Array)
+        {"0", count.to_s}
+      ).as(Array)
 
       find(ids, delete: delete)
     end
@@ -79,15 +76,12 @@ module Mel::Task::Query
     return if count.zero?
 
     connect do
-      ids = Mel.redis.run({
-        "ZRANGEBYSCORE",
+      ids = Mel.redis.zrangebyscore(
         key,
         "0",
         time.to_unix.to_s,
-        "LIMIT",
-        "0",
-        count.to_s
-      }).as(Array)
+        {"0", count.to_s}
+      ).as(Array)
 
       find(ids, delete: delete)
     end
@@ -97,15 +91,12 @@ module Mel::Task::Query
     return if count.zero?
 
     connect do
-      ids = Mel.redis.run({
-        "ZRANGEBYSCORE",
+      ids = Mel.redis.zrangebyscore(
         key,
         "0",
         "+inf",
-        "LIMIT",
-        "0",
-        count.to_s
-      }).as(Array)
+        {"0", count.to_s}
+      ).as(Array)
 
       find(ids, delete: delete)
     end
@@ -122,7 +113,7 @@ module Mel::Task::Query
       keys = keys(ids)
 
       values = Mel.redis.multi do |redis|
-        redis.run(["MGET"] + keys)
+        redis.mget(keys)
 
         if delete
           redis.run(["ZREM", key] + ids)
