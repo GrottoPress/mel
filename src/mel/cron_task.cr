@@ -9,17 +9,19 @@ class Mel::CronTask
   end
 
   def to_json : String
-    tuple = {
-      id: id,
-      job: job,
-      time: time.to_unix,
-      retries: retries,
-      attempts: attempts,
-      schedule: schedule
-    }
+    JSON.build { |json| to_json(json) }
+  end
 
-    tuple = tuple.merge(till: till.try(&.to_unix)) if till
-    tuple.to_json
+  def to_json(json)
+    json.object do
+      json.field("id", id)
+      json.field("job", job)
+      json.field("time", time.to_unix)
+      json.field("retries", retries)
+      json.field("attempts", attempts)
+      json.field("schedule", schedule)
+      json.field("till", till.try(&.to_unix)) if till
+    end
   end
 
   def clone

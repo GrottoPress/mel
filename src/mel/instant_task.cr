@@ -7,13 +7,17 @@ class Mel::InstantTask
   end
 
   def to_json : String
-    {
-      id: id,
-      job: job,
-      time: time.to_unix,
-      retries: retries,
-      attempts: attempts
-    }.to_json
+    JSON.build { |json| to_json(json) }
+  end
+
+  def to_json(json)
+    json.object do
+      json.field("id", id)
+      json.field("job", job)
+      json.field("time", time.to_unix)
+      json.field("retries", retries)
+      json.field("attempts", attempts)
+    end
   end
 
   def clone
