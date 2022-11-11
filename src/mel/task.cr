@@ -5,8 +5,8 @@ module Mel::Task
     include Mel::Task::LogHelpers
     include Mel::Task::CallbackHelpers
 
-    property id : String
-    property job : Mel::Job::Template
+    getter id : String
+    getter job : Mel::Job::Template
     property time : Time
     property attempts : Int32 = 0
 
