@@ -167,7 +167,7 @@ module Mel::Task
     Query.find(count, delete: delete).try { |values| from_json(values) }
   end
 
-  def find(id : String, *, delete = false) : self?
+  def find(id : String, *, delete = false)
     Query.find(id, delete: delete).try { |value| from_json(value) }
   end
 
@@ -184,7 +184,7 @@ module Mel::Task
     values unless values.empty?
   end
 
-  def from_json(value) : self?
+  def from_json(value)
     json = JSON.parse(value)
 
     job_type = {{ Job::Template.includers }}.find do |type|
