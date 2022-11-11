@@ -149,6 +149,8 @@ module Mel::Task
     end
   end
 
+  alias Any = CronTask | InstantTask | PeriodicTask
+
   extend self
 
   def find_lt(time : Time, count = -1, *, delete = false)

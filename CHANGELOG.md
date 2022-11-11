@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased] - 
 
+### Added
+- Add `Mel::Task::Any` alias
+
 ### Changed
 - Upgrade `jgaskins/redis` shard to v0.5.4
 - Make `Mel::Task#id` and `Mel::Task#job` read-only
