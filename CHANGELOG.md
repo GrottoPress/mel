@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Upgrade `jgaskins/redis` shard to v0.5.4
 - Make `Mel::Task#id` and `Mel::Task#job` read-only
+- Return the whole task (not just the `id`) from `Mel::Job.run_*` methods
 
 ## [0.6.1] - 2022-03-17
 

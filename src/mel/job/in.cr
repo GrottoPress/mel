@@ -14,7 +14,7 @@ module Mel::Job::In
       time = delay.from_now
       task = Mel::InstantTask.new(id.to_s, job, time, retries)
 
-      task.id if task.enqueue(redis, force: force)
+      task if task.enqueue(redis, force: force)
     end
   end
 end

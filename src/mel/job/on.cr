@@ -28,7 +28,7 @@ module Mel::Job::On
       time = CronParser.new(schedule).next
       task = Mel::CronTask.new(id.to_s, job, time, retries, till, schedule)
 
-      task.id if task.enqueue(redis, force: force)
+      task if task.enqueue(redis, force: force)
     end
   end
 end

@@ -36,7 +36,7 @@ module Mel::Job::Every
         interval
       )
 
-      task.id if task.enqueue(redis, force: force)
+      task if task.enqueue(redis, force: force)
     end
   end
 end
