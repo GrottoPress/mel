@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Add `Mel::Task::Any` alias
+- Add `Mel::Progress.failure?(Number)`
 - Add `Mel::Progress.moving?(Number)`
 - Add `Mel::Progress.success?(Number)`
 
