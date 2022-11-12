@@ -20,7 +20,11 @@ struct Mel::Progress
   end
 
   def success?(redis = nil) : Bool
-    track(redis) >= END
+    self.class.success? track(redis)
+  end
+
+  def self.success?(value : Number)
+    value >= END
   end
 
   def failure?(redis = nil) : Bool
