@@ -28,7 +28,11 @@ struct Mel::Progress
   end
 
   def moving?(redis = nil) : Bool
-    END > track(redis) >= START
+    self.class.moving? track(redis)
+  end
+
+  def self.moving?(value : Number)
+    END > value >= START
   end
 
   def track(redis = nil)
