@@ -31,7 +31,7 @@ describe Mel::Task::Query do
       Mel.redis.mget(not_mel_keys).as(Array).should_not contain(nil)
 
       # Clean up
-      Mel.redis.run(["DEL"] + not_mel_keys)
+      Mel.redis.del(not_mel_keys)
     end
   end
 end

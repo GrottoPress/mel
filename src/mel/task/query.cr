@@ -117,7 +117,7 @@ module Mel::Task::Query
 
         if delete
           redis.run(["ZREM", key] + ids)
-          redis.run(["DEL"] + keys)
+          redis.del(keys)
         end
       end
 
@@ -131,7 +131,7 @@ module Mel::Task::Query
 
     Mel.redis.multi do |redis|
       redis.del(key)
-      redis.run(["DEL"] + keys) unless keys.empty?
+      redis.del(keys.map &.to_s) unless keys.empty?
     end
   end
 

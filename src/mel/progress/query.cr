@@ -62,7 +62,7 @@ struct Mel::Progress
 
     def self.truncate
       keys = Mel.redis.keys("#{key}*")
-      Mel.redis.run(["DEL"] + keys) unless keys.empty?
+      Mel.redis.del(keys.map &.to_s) unless keys.empty?
     end
   end
 end

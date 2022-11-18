@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add `Mel::Progress.success?(Number)`
 
 ### Changed
-- Upgrade `jgaskins/redis` shard to v0.5.4
+- Upgrade `jgaskins/redis` shard to v0.6
 - Make `Mel::Task#id` and `Mel::Task#job` read-only
 - Return the whole task (not just the `id`) from `Mel::Job.run_*` methods
 
