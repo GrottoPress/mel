@@ -2,20 +2,18 @@ require "./mel"
 require "./worker/**"
 
 module Mel
-  @@mutex = Mutex.new
-
-  private module Settings
-    class_property batch_size : Int32 = 10
-    class_property poll_interval : Time::Span = 3.seconds
-    class_property! worker_id : Int32
-  end
-
   private enum State
     Ready
     Started
     Stopping
     Stopped
   end
+
+  setting batch_size : Int32 = 10
+  setting poll_interval : Time::Span = 3.seconds
+  setting worker_id : Int32
+
+  @@mutex = Mutex.new
 
   class_getter state = State::Ready
 

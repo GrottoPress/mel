@@ -27,3 +27,5 @@ Spec.after_suite do
   Mel::Task::Query.truncate
   Mel::Progress::Query.truncate
 end
+
+# Habitat.raise_if_missing_settings!
