@@ -2,7 +2,7 @@ require "./mel"
 require "./worker/**"
 
 module Mel
-  private enum State
+  enum State
     Ready
     Started
     Stopping
