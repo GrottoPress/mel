@@ -33,7 +33,14 @@ class Mel::PeriodicTask
   end
 
   def clone
-    self.class.new(id, job.dup, time, retries, till, interval)
+    self.class.new(
+      id,
+      job.class.from_json(job.to_json),
+      time,
+      retries,
+      till,
+      interval
+    )
   end
 
   private def next_time : Time

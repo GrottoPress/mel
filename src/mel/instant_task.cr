@@ -21,7 +21,7 @@ class Mel::InstantTask
   end
 
   def clone
-    self.class.new(id, job.dup, time, retries)
+    self.class.new(id, job.class.from_json(job.to_json), time, retries)
   end
 
   private def schedule_next

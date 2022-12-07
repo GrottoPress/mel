@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Switch to [`luckyframework/habitat`](https://github.com/luckyframework/habitat) for managing configuration
 - Make `Mel::State` enum public
 
+### Fixed
+- Ensure jobs cannot be mutated in cloned tasks
+
 ## [0.7.0] - 2022-11-21
 
 ### Added
