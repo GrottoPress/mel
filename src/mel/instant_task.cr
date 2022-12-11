@@ -6,11 +6,7 @@ class Mel::InstantTask
   def initialize(@id, @job, @time, @retries)
   end
 
-  def to_json : String
-    JSON.build { |json| to_json(json) }
-  end
-
-  def to_json(json)
+  def to_json(json : JSON::Builder)
     json.object do
       json.field("id", id)
       json.field("job", job)
