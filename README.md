@@ -50,6 +50,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    end
 
    Log.setup(Mel.log.source, :info, Log::IOBackend.new)
+   Redis::Connection::LOG.level = :info
 
    # ...
    ```
