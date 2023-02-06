@@ -35,7 +35,7 @@ module Mel
     return log_already_started if state.started?
 
     log_starting
-    handle_signal
+    run_handlers
 
     run_pending_tasks(pond = Pond.new)
     run_tasks(pond)
@@ -77,7 +77,9 @@ module Mel
     sync { @@state = State::Stopped }
   end
 
-  private def handle_signal
+  private def run_handlers
+    at_exit { stop }
+
     {Signal::INT, Signal::TERM}.each &.trap { stop }
   end
 

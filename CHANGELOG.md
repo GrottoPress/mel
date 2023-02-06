@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Make `Mel.start_async` methods available outside specs
+- Automatically stop *Mel* when program exits
 
 ## [0.8.0] - 2023-01-12
 
