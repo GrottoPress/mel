@@ -17,6 +17,20 @@ module Mel
 
   class_getter state = State::Ready
 
+  def start_async
+    start_async
+    yield
+    stop
+  end
+
+  def start_async
+    spawn { start }
+
+    until state.started?
+      Fiber.yield
+    end
+  end
+
   def start
     return log_already_started if state.started?
 
