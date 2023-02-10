@@ -32,6 +32,9 @@ module Mel::Task
         do_after_enqueue(false)
         nil
       end
+    rescue error
+      do_after_enqueue(false)
+      raise_or(error)
     end
 
     def dequeue
@@ -46,6 +49,9 @@ module Mel::Task
         do_after_dequeue(false)
         nil
       end
+    rescue error
+      do_after_enqueue(false)
+      raise_or(error)
     end
 
     def run(*, force = false) : Fiber?

@@ -139,6 +139,6 @@ module Mel::Task::Query
     yield
   rescue error : IO::Error
     Mel.log.error(exception: error, &.emit("Redis connection failed"))
-    raise_or(error)
+    raise error
   end
 end
