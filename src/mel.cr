@@ -17,6 +17,7 @@ module Mel
   include LogHelpers
 
   Habitat.create do
+    setting error_handler : Exception -> = ->(__ : Exception) { }
     setting progress_expiry : Time::Span? = 1.day
     setting redis_url : String
     setting redis_pool_size : Int32?

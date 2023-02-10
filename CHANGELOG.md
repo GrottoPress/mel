@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased] - 
 
+### Added
+- Add `.error_handler` setting
+
 ### Changed
 - Make `Mel.start_async` methods available outside specs
 - Automatically stop *Mel* when program exits

@@ -42,6 +42,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    require "../jobs/**"
 
    Mel.configure do |settings|
+     settings.error_handler = ->(error : Exception) { puts error.message }
      settings.redis_pool_size = 25
      settings.redis_url = "redis://localhost:6379/0"
      settings.redis_key_prefix = "mel"
