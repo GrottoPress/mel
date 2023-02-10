@@ -18,12 +18,12 @@ module Mel::Job::Now
       redis = nil,
       force = false,
       **job_args
-    )
+    ) : String?
       job = new(**job_args)
       time = Time.local
       task = Mel::InstantTask.new(id.to_s, job, time, retries)
 
-      task if task.enqueue(redis, force: force)
+      task.id if task.enqueue(redis, force: force)
     end
   end
 end

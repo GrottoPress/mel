@@ -23,12 +23,12 @@ module Mel::Job::On
       redis = nil,
       force = false,
       **job_args
-    )
+    ) : String?
       job = new(**job_args)
       time = CronParser.new(schedule).next
       task = Mel::CronTask.new(id.to_s, job, time, retries, till, schedule)
 
-      task if task.enqueue(redis, force: force)
+      task.id if task.enqueue(redis, force: force)
     end
   end
 end

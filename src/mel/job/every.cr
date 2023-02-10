@@ -23,7 +23,7 @@ module Mel::Job::Every
       redis = nil,
       force = false,
       **job_args
-    )
+    ) : String?
       job = new(**job_args)
       time = interval.abs.from_now
 
@@ -36,7 +36,7 @@ module Mel::Job::Every
         interval
       )
 
-      task if task.enqueue(redis, force: force)
+      task.id if task.enqueue(redis, force: force)
     end
   end
 end

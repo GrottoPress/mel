@@ -9,10 +9,10 @@ module Mel::Job::At
       redis = nil,
       force = false,
       **job_args
-    )
+    ) : String?
       job = new(**job_args)
       task = Mel::InstantTask.new(id.to_s, job, time, retries)
-      task if task.enqueue(redis, force: force)
+      task.id if task.enqueue(redis, force: force)
     end
   end
 end
