@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Make `Mel.start_async` methods available outside specs
 - Automatically stop *Mel* when program exits
 - Return just the task ID (not the whole task) from `Mel::Job.run_*` methods
+- Make task objects externally immutable
 
 ## [0.8.0] - 2023-01-12
 

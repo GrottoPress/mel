@@ -7,8 +7,11 @@ module Mel::Task
 
     getter id : String
     getter job : Mel::Job::Template
-    property time : Time
-    property attempts : Int32 = 0
+    getter time : Time
+    getter attempts : Int32 = 0
+
+    protected setter time : Time
+    protected setter attempts : Int32
 
     @retries : Int32
 
@@ -16,7 +19,7 @@ module Mel::Task
       self.retries = @retries
     end
 
-    def retries=(retries)
+    protected def retries=(retries)
       @retries = retries < 0 ? 0 : retries
     end
 
