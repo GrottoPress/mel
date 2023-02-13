@@ -31,6 +31,10 @@ struct Mel::Progress
     Report.find(id, redis)
   end
 
+  def self.track(ids : Indexable, redis = nil)
+    Report.find(ids, redis)
+  end
+
   struct Report
     include JSON::Serializable
 
@@ -55,13 +59,18 @@ struct Mel::Progress
     end
 
     def self.find(id : String, redis = nil) : self?
-      query = Query.new(id)
-      values = redis ? query.get(redis).as(Array) : query.get.as(Array)
+      find([id]).try(&.first?)
+    end
 
-      values[1]?.try(&.as? String).try do |description|
-        values[3]?.try(&.as? String).try do |_id|
-          values[5]?.try(&.as? String).try do |value|
-            new(_id, description, value)
+    def self.find(ids : Indexable, redis = nil)
+      rows = redis ? Query.get(ids, redis) : Query.get(ids)
+
+      rows.map(&.as? Array).try &.map &.try do |row|
+        row[1]?.try(&.as? String).try do |description|
+          row[3]?.try(&.as? String).try do |id|
+            row[5]?.try(&.as? String).try do |value|
+              new(id, description, value)
+            end
           end
         end
       end

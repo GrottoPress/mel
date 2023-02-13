@@ -34,6 +34,14 @@ struct Mel::Progress
       end
     end
 
+    def self.get(ids)
+      Mel.redis.multi { |redis| get(ids, redis) }
+    end
+
+    def self.get(ids : Indexable, redis)
+      ids.map { |id| Query.new(id).get(redis) }
+    end
+
     def self.key
       "#{Mel.settings.redis_key_prefix}:progress"
     end
