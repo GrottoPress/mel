@@ -11,7 +11,7 @@ module Mel::Task::Query
     "#{key}:#{parts.join(':')}"
   end
 
-  def keys(ids : Array)
+  def keys(ids : Indexable)
     ids.map { |id| key(id.to_s) }
   end
 
@@ -53,7 +53,7 @@ module Mel::Task::Query
     delete([id]).try &.first?.try &.as(String)
   end
 
-  def delete(ids : Array)
+  def delete(ids : Indexable)
     find(ids, delete: true)
   end
 
@@ -106,7 +106,7 @@ module Mel::Task::Query
     find([id], delete: delete).try &.first?.try &.as(String)
   end
 
-  def find(ids : Array, *, delete = false)
+  def find(ids : Indexable, *, delete = false)
     return if ids.empty?
 
     connect do

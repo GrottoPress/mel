@@ -15,7 +15,7 @@ module Mel::Task::Query
     end
   end
 
-  def find(ids : Array, *, delete = false)
+  def find(ids : Indexable, *, delete = false)
     return if ids.empty?
     return previous_def unless delete.nil?
 

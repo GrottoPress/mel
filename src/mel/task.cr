@@ -122,7 +122,7 @@ module Mel::Task
       end
     end
 
-    def self.find(ids : Array, *, delete = false) : Array(self)?
+    def self.find(ids : Indexable, *, delete = false) : Array(self)?
       Mel::Task.find(ids, delete: false).try do |tasks|
         tasks = tasks.select(self)
         return if tasks.empty?
@@ -182,11 +182,11 @@ module Mel::Task
     Query.find(id, delete: delete).try { |value| from_json(value) }
   end
 
-  def find(ids : Array, *, delete = false)
+  def find(ids : Indexable, *, delete = false)
     Query.find(ids, delete: delete).try { |values| from_json(values) }
   end
 
-  def from_json(values : Array)
+  def from_json(values : Indexable)
     values = values.each
       .map { |value| from_json(value.to_s) if value }
       .reject(Nil)
@@ -231,7 +231,7 @@ module Mel::Task
     count < 0 ? items : items.first(count)
   end
 
-  protected def delete(tasks : Array, delete)
+  protected def delete(tasks : Indexable, delete)
     delete == false ? tasks : Mel::Task.find(tasks.map(&.id), delete: delete)
   end
 
