@@ -62,18 +62,22 @@ struct Mel::Progress
       find([id]).try(&.first?)
     end
 
-    def self.find(ids : Indexable, redis = nil)
+    def self.find(ids : Indexable, redis = nil) : Array(Mel::Progress::Report)?
+      return if ids.empty?
+
       rows = redis ? Query.get(ids, redis) : Query.get(ids)
 
-      rows.map(&.as? Array).try &.map &.try do |row|
-        row[1]?.try(&.as? String).try do |description|
-          row[3]?.try(&.as? String).try do |id|
-            row[5]?.try(&.as? String).try do |value|
+      reports = rows.each.map(&.as(Array).map &.as(String)).map do |row|
+        row[1]?.try do |description|
+          row[3]?.try do |id|
+            row[5]?.try do |value|
               new(id, description, value)
             end
           end
         end
-      end
+      end.reject(Nil).to_a
+
+      reports unless reports.empty?
     end
 
     protected def save(redis = nil)
