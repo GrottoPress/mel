@@ -59,9 +59,9 @@ struct Mel::Progress
       values = redis ? query.get(redis).as(Array) : query.get.as(Array)
 
       values[1]?.try(&.as? String).try do |description|
-        values[3]?.try(&.as? String).try do |id|
+        values[3]?.try(&.as? String).try do |_id|
           values[5]?.try(&.as? String).try do |value|
-            new(id, description, value)
+            new(_id, description, value)
           end
         end
       end
