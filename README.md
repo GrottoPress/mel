@@ -536,7 +536,7 @@ struct SomeJob
   include Mel::Job
 
   def initialize
-    @progress = Mel::Progress.new("some_job")
+    @progress = Mel::Progress.new(id: "some_job", description: "Awesome job")
   end
 
   # ...
@@ -561,12 +561,6 @@ struct SomeJob
 
       SomeOtherStep.run(progress: @progress)
       @progress.move(80) # <= Move to 80%
-      # <= Same as: `@progress.forward(30)`
-      # <=   Moves forward by 30%, from previous 50%.
-      # <=
-      # <=   WARNING: Use `#forward` *only* to increment an earlier `#move`.
-      # <=   `#forward` does not check if the key exists (has a value) before
-      # <=   a workflow starts.
     end
   end
 
@@ -593,8 +587,18 @@ SomeJob.run
 # This may, for instance, be used in a route in a web application.
 # Client-side javascipt can query this route periodically, and
 # show response using a progress tracker UI.
-progress = Mel::Progress.new("some_job")
-progress.track # <= Returns current progress
+#
+report = Mel::Progress.track("some_job")
+
+report.try do |_report|
+  _report.description
+  _report.id
+  _report.value
+
+  _report.failure?
+  _report.moving?
+  _report.success?
+end
 ```
 
 You may delete progress data in specs thus:

@@ -1,14 +1,17 @@
 struct Mel::Progress
   include JSON::Serializable
 
+  START = 0
+  END = 100
+  FAIL = -1
+
   getter :id
 
-  private START = 0
-  private END = 100
-  private FAIL = -1
+  def initialize(@id : String, @description : String)
+  end
 
-  def initialize(@id : String)
-    @query = Query.new(@id)
+  def key : String
+    Query.new(@id).key
   end
 
   def succeed(redis = nil)
@@ -19,45 +22,57 @@ struct Mel::Progress
     move(FAIL, redis)
   end
 
-  def success?(redis = nil) : Bool
-    self.class.success? track(redis)
+  def move(to value : Int, redis = nil)
+    value = value.clamp(FAIL, END)
+    Report.new(id, @description, value).save(redis)
   end
 
-  def self.success?(value : Number)
-    value >= END
+  def self.track(id : String, redis = nil)
+    Report.find(id, redis)
   end
 
-  def failure?(redis = nil) : Bool
-    self.class.failure? track(redis)
-  end
+  struct Report
+    include JSON::Serializable
 
-  def self.failure?(value : Number)
-    value < START
-  end
+    getter id : String
+    getter description : String
+    getter value : Int32
 
-  def moving?(redis = nil) : Bool
-    self.class.moving? track(redis)
-  end
+    def initialize(@id, @description, value)
+      @value = value.to_i
+    end
 
-  def self.moving?(value : Number)
-    END > value >= START
-  end
+    def success? : Bool
+      value >= Progress::END
+    end
 
-  def track(redis = nil)
-    redis ? @query.get(redis) : @query.get
-  end
+    def failure? : Bool
+      value < Progress::START
+    end
 
-  def move(to value : Number, redis = nil)
-    value = END if value > END
-    value = FAIL if value < START
-    redis ? @query.set(value, redis) : @query.set(value)
-  end
+    def moving? : Bool
+      Progress::END > value >= Progress::START
+    end
 
-  def forward(by value : Number, redis = nil)
-    redis ? @query.increment(value, redis) : @query.increment(value)
-  end
+    def self.find(id : String, redis = nil) : self?
+      query = Query.new(id)
+      values = redis ? query.get(redis).as(Array) : query.get.as(Array)
 
-  def backward(by value : Number, redis = nil)
-    redis ? @query.decrement(value, redis) : @query.decrement(value)
+      values[1]?.try(&.as? String).try do |description|
+        values[3]?.try(&.as? String).try do |id|
+          values[5]?.try(&.as? String).try do |value|
+            new(id, description, value)
+          end
+        end
+      end
+    end
+
+    protected def save(redis = nil)
+      query = Query.new(id)
+
+      redis ?
+        query.set(value, description, redis) :
+        query.set(value, description)
+    end
   end
 end

@@ -3,12 +3,14 @@ require "../../spec_helper"
 describe Mel::Progress::Query do
   describe ".truncate" do
     it "deletes all progress data" do
-      progress = Mel::Progress.new("some_job_11")
+      progress_id = "some_job_11"
+      progress = Mel::Progress.new(progress_id, "Some job description")
+
       progress.move(10)
-      progress.track.should eq(10)
+      Mel::Progress.track(progress_id).try(&.value).should eq(10)
 
       Mel::Progress::Query.truncate
-      progress.track.should eq(0)
+      Mel::Progress.track(progress_id).try(&.value).should be_nil
     end
 
     it "does not delete non-progress data" do
@@ -18,13 +20,15 @@ describe Mel::Progress::Query do
       Mel.redis.run(["MSET"] + not_mel_all)
       Mel.redis.mget(not_mel_keys).as(Array).size.should eq(2)
 
-      progress = Mel::Progress.new("some_job_12")
+      progress_id = "some_job_12"
+      progress = Mel::Progress.new(progress_id, "Some job description")
+
       progress.move(10)
-      progress.track.should eq(10)
+      Mel::Progress.track(progress_id).try(&.value).should eq(10)
 
       Mel::Progress::Query.truncate
 
-      progress.track.should eq(0)
+      Mel::Progress.track(progress_id).try(&.value).should be_nil
       Mel.redis.mget(not_mel_keys).as(Array).should_not contain(nil)
 
       # Clean up

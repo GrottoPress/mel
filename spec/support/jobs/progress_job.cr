@@ -2,7 +2,10 @@ struct ProgressJob
   include Mel::Job::Now
 
   def initialize
-    @progress = Mel::Progress.new(self.class.progress_id)
+    @progress = Mel::Progress.new(
+      self.class.progress_id,
+      self.class.progress_description
+    )
   end
 
   def run
@@ -19,6 +22,10 @@ struct ProgressJob
     "progress_job"
   end
 
+  def self.progress_description
+    "Progress job"
+  end
+
   struct SomeStep
     include Mel::Job::Now
 
@@ -31,7 +38,7 @@ struct ProgressJob
     def after_run(success)
       redis.multi do |redis|
         SomeOtherStep.run(redis: redis, progress: @progress, retries: 0)
-        @progress.forward(30, redis)
+        @progress.move(80, redis)
       end
     end
   end

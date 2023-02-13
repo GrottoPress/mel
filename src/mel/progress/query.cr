@@ -1,7 +1,5 @@
 struct Mel::Progress
   struct Query
-    include JSON::Serializable
-
     getter :id
 
     def initialize(@id : String)
@@ -11,41 +9,25 @@ struct Mel::Progress
       self.class.key(id)
     end
 
-    def set(value)
-      set(value, Mel.redis)
-    end
-
-    def set(value, redis)
-      expiry = Mel.settings.progress_expiry.try(&.total_seconds.to_i64)
-      redis.set(key, value.to_s, ex: expiry)
-    end
-
     def get
       get(Mel.redis)
     end
 
     def get(redis)
-      redis.incrby(key, 0)
+      redis.hgetall(key)
     end
 
-    def increment(by value)
-      Mel.redis.multi { |redis| increment(value, redis) }
+    def set(value, description)
+      Mel.redis.multi { |redis| set(value, description, redis) }
     end
 
-    def increment(by value, redis)
-      redis.incrby(key, value)
-
-      Mel.settings.progress_expiry.try do |expiry|
-        redis.expire(key, expiry.total_seconds.to_i64)
-      end
-    end
-
-    def decrement(by value)
-      Mel.redis.multi { |redis| decrement(value, redis) }
-    end
-
-    def decrement(by value, redis)
-      redis.decrby(key, value)
+    def set(value : Int, description : String, redis)
+      redis.hset(
+        key,
+        description: description,
+        id: id,
+        value: value.to_s
+      )
 
       Mel.settings.progress_expiry.try do |expiry|
         redis.expire(key, expiry.total_seconds.to_i64)

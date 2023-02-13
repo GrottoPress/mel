@@ -9,12 +9,23 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Add `.error_handler` setting
+- Add `Mel::Progress::Report`
 
 ### Changed
 - Make `Mel.start_async` methods available outside specs
 - Automatically stop *Mel* when program exits
 - Return just the task ID (not the whole task) from `Mel::Job.run_*` methods
 - Make task objects externally immutable
+
+### Removed
+- Remove `Mel::Progress#backward`
+- Remove `Mel::Progress#forward`
+- Remove `Mel::Progress#failure?`
+- Remove `Mel::Progress#moving?`
+- Remove `Mel::Progress#success?`
+- Remove `Mel::Progress.failure?(Number)`
+- Remove `Mel::Progress.moving?(Number)`
+- Remove `Mel::Progress.success?(Number)`
 
 ## [0.8.0] - 2023-01-12
 
