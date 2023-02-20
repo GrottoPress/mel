@@ -19,7 +19,7 @@ describe Mel::Progress do
     end
   end
 
-  describe "#track" do
+  describe ".track" do
     it "tracks progress" do
       ProgressJob.run(retries: 0)
 
