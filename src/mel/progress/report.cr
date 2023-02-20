@@ -19,7 +19,7 @@ struct Mel::Progress
     end
 
     def moving? : Bool
-      Progress::END > value >= Progress::START
+      !success? && !failure?
     end
 
     def self.find(id : String, redis = nil) : self?
