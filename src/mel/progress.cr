@@ -22,13 +22,17 @@ struct Mel::Progress
     move(FAIL, redis)
   end
 
+  def start(redis = nil)
+    move(0, redis)
+  end
+
   def move(to value : Int, redis = nil)
     value = value.clamp(FAIL, END)
     Report.new(id, @description, value).save(redis)
   end
 
   def self.start(id : String, description : String, redis = nil) : self
-    new(id, description).tap(&.move 0, redis)
+    new(id, description).tap(&.start redis)
   end
 
   def self.track(id : String, redis = nil)
