@@ -10,6 +10,14 @@ struct Mel::Progress
       @value = value.to_i
     end
 
+    def started? : Bool
+      moving?
+    end
+
+    def ended? : Bool
+      success? || failure?
+    end
+
     def success? : Bool
       value >= Progress::END
     end

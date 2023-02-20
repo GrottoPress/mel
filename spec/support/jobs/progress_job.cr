@@ -2,7 +2,7 @@ struct ProgressJob
   include Mel::Job::Now
 
   def initialize
-    @progress = Mel::Progress.new(
+    @progress = Mel::Progress.start(
       self.class.progress_id,
       self.class.progress_description
     )

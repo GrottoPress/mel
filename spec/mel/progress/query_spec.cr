@@ -4,7 +4,7 @@ describe Mel::Progress::Query do
   describe ".truncate" do
     it "deletes all progress data" do
       progress_id = "some_job_11"
-      progress = Mel::Progress.new(progress_id, "Some job description")
+      progress = Mel::Progress.start(progress_id, "Some job description")
 
       progress.move(10)
       Mel::Progress.track(progress_id).try(&.value).should eq(10)
@@ -21,7 +21,7 @@ describe Mel::Progress::Query do
       Mel.redis.mget(not_mel_keys).as(Array).size.should eq(2)
 
       progress_id = "some_job_12"
-      progress = Mel::Progress.new(progress_id, "Some job description")
+      progress = Mel::Progress.start(progress_id, "Some job description")
 
       progress.move(10)
       Mel::Progress.track(progress_id).try(&.value).should eq(10)

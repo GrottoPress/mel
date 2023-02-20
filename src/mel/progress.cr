@@ -27,6 +27,10 @@ struct Mel::Progress
     Report.new(id, @description, value).save(redis)
   end
 
+  def self.start(id : String, description : String) : self
+    new(id, description).tap(&.move 0)
+  end
+
   def self.track(id : String, redis = nil)
     Report.find(id, redis)
   end

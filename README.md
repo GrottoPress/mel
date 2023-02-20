@@ -536,7 +536,7 @@ struct SomeJob
   include Mel::Job
 
   def initialize
-    @progress = Mel::Progress.new(id: "some_job", description: "Awesome job")
+    @progress = Mel::Progress.start(id: "some_job", description: "Awesome job")
   end
 
   # ...
@@ -598,6 +598,9 @@ report.try do |_report|
   _report.failure?
   _report.moving?
   _report.success?
+
+  _report.started?
+  _report.ended?
 end
 ```
 
