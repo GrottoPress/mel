@@ -1,8 +1,7 @@
 module Mel::Helpers
   macro included
-    private def raise_or(error, value = nil)
+    private def handle_error(error) : Nil
       Mel.settings.error_handler.call(error)
-      Mel.settings.rescue_errors? ? value : raise error
     end
   end
 end

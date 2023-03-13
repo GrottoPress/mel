@@ -37,7 +37,7 @@ module Mel::Task
       end
     rescue error
       do_after_enqueue(false)
-      raise_or(error)
+      handle_error(error)
     end
 
     def dequeue
@@ -54,7 +54,7 @@ module Mel::Task
       end
     rescue error
       do_after_enqueue(false)
-      raise_or(error)
+      handle_error(error)
     end
 
     def run(*, force = false) : Fiber?
@@ -147,8 +147,8 @@ module Mel::Task
       schedule_next
       log_failed
 
+      handle_error(error)
       do_after_run(false)
-      raise_or(error)
     end
 
     private def schedule_failed_task : Nil

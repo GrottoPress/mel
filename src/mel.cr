@@ -22,7 +22,6 @@ module Mel
     setting redis_url : String
     setting redis_pool_size : Int32?
     setting redis_key_prefix : String = "mel"
-    setting rescue_errors : Bool = true
     setting timezone : Time::Location?
   end
 

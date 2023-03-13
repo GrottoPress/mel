@@ -26,6 +26,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Remove `Mel::Progress.failure?(Number)`
 - Remove `Mel::Progress.moving?(Number)`
 - Remove `Mel::Progress.success?(Number)`
+- Remove `.rescue_errors` setting
 
 ## [0.8.0] - 2023-01-12
 
