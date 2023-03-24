@@ -11,7 +11,7 @@ module Mel
 
   setting batch_size : Int32 = 10
   setting poll_interval : Time::Span = 3.seconds
-  setting worker_id : Int32
+  setting worker_id : Int32 = ENV["WORKER_ID"].to_i
 
   @@mutex = Mutex.new
 
