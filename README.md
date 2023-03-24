@@ -634,7 +634,53 @@ Jobs are not lost even if there is a force shutdown of the worker process, since
 
 Once a task enters the *pending* state, only the worker that put it in that state can run it. So if you need to take down a worker permanently, ensure that it completes all pending tasks by sending the appropriate signal.
 
-<!-- TODO: Add notes on setting different env vars for different replicas in swarm (https://stackoverflow.com/questions/56203272/docker-compose-scaling-with-unique-environment-variable#56209034). OR starting each worker as it's own service, where you can set it's own env vars. -->
+### Scaling out
+
+Because each worker requires it's own unique `.worker_id`, autoscaling as used in classic distributed architectures should not be used, since auto-scaled replicas would inherit the same configuration as the original instance.
+
+This would lead to multiple workers using the same `.worker_id`, which could result in pending jobs being run multiple times; once each for each replica that starts up.
+
+Instead, it is recommended that a new service be registered for each worker that is to be deployed, and the appropriate `.worker_id` set for each.
+
+- An example using `Procfile`:
+
+  ```procfile
+  # ->> Procfile
+
+  # ...
+  worker_1: export WORKER_ID=1 && ./bin/worker
+  worker_2: export WORKER_ID=2 && ./bin/worker
+  worker_3: export WORKER_ID=3 && ./bin/worker
+  # ...
+  ```
+
+- An example using docker compose for swarm:
+
+  ```yaml
+  # ->> docker-compose.yml
+
+  # ...
+  services:
+    worker_1:
+      command: ./bin/worker
+      environment:
+        WORKER_ID: "1"
+      deploy:
+        replicas: 1
+    worker_2:
+      command: ./bin/worker
+      environment:
+        WORKER_ID: "2"
+      deploy:
+        replicas: 1
+    worker_3:
+      command: ./bin/worker
+      environment:
+        WORKER_ID: "3"
+      deploy:
+        replicas: 1
+  # ...
+  ```
 
 ### Smart polling
 
