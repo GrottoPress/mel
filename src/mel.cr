@@ -2,7 +2,6 @@ require "json"
 require "uri"
 require "uuid"
 
-require "habitat"
 require "cron_parser"
 require "redis"
 require "pond"
@@ -16,17 +15,21 @@ module Mel
 
   include LogHelpers
 
-  Habitat.create do
-    setting error_handler : Exception -> = ->(__ : Exception) { }
-    setting progress_expiry : Time::Span? = 1.day
-    setting redis_url : String
-    setting redis_pool_size : Int32?
-    setting redis_key_prefix : String = "mel"
-    setting timezone : Time::Location?
+  private module Settings
+    class_property error_handler : Exception -> = ->(__ : Exception) { }
+    class_property progress_expiry : Time::Span? = 1.day
+    class_property! redis_url : String
+    class_property redis_pool_size : Int32?
+    class_property redis_key_prefix : String = "mel"
+    class_property timezone : Time::Location?
+  end
+
+  def settings
+    Settings
   end
 
   def configure : Nil
-    previous_def { yield }
+    yield settings
 
     settings.timezone.try { |location| Time::Location.local = location }
   end

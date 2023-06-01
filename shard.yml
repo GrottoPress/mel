@@ -14,9 +14,6 @@ dependencies:
   cron_parser:
     github: kostya/cron_parser
     version: ~> 0.4.0
-  habitat:
-    github: luckyframework/habitat
-    version: ~> 0.4.0
   pond:
     github: GrottoPress/pond
     version: ~> 1.0

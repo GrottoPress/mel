@@ -9,5 +9,3 @@ require "./support/**"
 require "../src/carbon"
 
 include Carbon::Expectations
-
-# Habitat.raise_if_missing_settings!
