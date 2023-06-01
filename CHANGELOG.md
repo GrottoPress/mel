@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased] - 
 
 ### Changed
-- Upgrade `GrottoPress/mel` shard to v1.0
+- Upgrade `GrottoPress/pond` shard to v1.0
 - Upgrade `jgaskins/redis` shard to v0.7
 
 ## [0.9.1] - 2023-05-02
