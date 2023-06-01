@@ -1,9 +1,7 @@
-# WARNING!!! -- This will clear all Mel data in Redis
-#
 # 1. Build: `crystal build \
 #          --release \
 #          -D preview_mt \
-#          -o melb \
+#          -o melbench \
 #          benchmark/main.cr`
 #
 # 2. Set env vars:
@@ -13,9 +11,7 @@
 #    - REDIS_URL
 #    - WORKER_ID
 #
-# 3. Run: `./melb --delete-my-data`
-
-abort "Missing --delete-my-data flag" unless ARGV.includes? "--delete-my-data"
+# 3. Run: `./melbench`
 
 require "benchmark"
 
@@ -26,6 +22,7 @@ ITERATIONS = ENV["ITERATIONS"]?.try(&.to_i) || 100_000
 Mel.configure do |settings|
   settings.batch_size = ENV["BATCH_SIZE"]?.try(&.to_i) || 10_000
   settings.poll_interval = 1.microsecond
+  settings.redis_key_prefix = "melbench"
   settings.redis_url = ENV["REDIS_URL"]
   settings.worker_id = ENV["WORKER_ID"].to_i
 end
