@@ -642,7 +642,7 @@ This would lead to multiple workers using the same `.worker_id`, which could res
 
 Instead, it is recommended that a new service be registered for each worker that is to be deployed, and the appropriate `.worker_id` set for each.
 
-- An example using `Procfile`:
+- Using `Procfile`:
 
   ```procfile
   # ->> Procfile
@@ -654,7 +654,7 @@ Instead, it is recommended that a new service be registered for each worker that
   # ...
   ```
 
-- An example using docker compose for swarm:
+- Using docker compose for swarm:
 
   ```yaml
   # ->> docker-compose.yml
@@ -681,6 +681,66 @@ Instead, it is recommended that a new service be registered for each worker that
         replicas: 1
   # ...
   ```
+
+Another option is to accept the worker ID as a command argument:
+
+```crystal
+# ->> src/worker.cr
+
+# ...
+ARGV.first?.try { |worker_id| Mel.configure &.worker_id = worker_id.to_i }
+
+Mel.start
+```
+
+- Using `Procfile`:
+
+  ```procfile
+  # ->> Procfile
+
+  # ...
+  worker_1: ./bin/worker 1
+  worker_2: ./bin/worker 2
+  worker_3: ./bin/worker 3
+  # ...
+  ```
+
+- Using docker compose for swarm:
+
+  ```yaml
+  # ->> docker-compose.yml
+
+  # ...
+  services:
+    worker_1:
+      command: ./bin/worker 1
+      deploy:
+        replicas: 1
+    worker_2:
+      command: ./bin/worker 2
+      deploy:
+        replicas: 1
+    worker_3:
+      command: ./bin/worker 3
+      deploy:
+        replicas: 1
+  # ...
+  ```
+
+- Using config for [Fly.io](https://fly.io):
+
+  ```toml
+  # ->> fly.toml
+
+  # ...
+  [processes]
+    worker_1 = './bin/worker 1'
+    worker_2 = './bin/worker 2'
+    worker_3 = './bin/worker 3'
+  # ...
+  ```
+
+  Ensure no spare machines are created by passing `--ha=false` to `fly deploy` command.
 
 ### Smart polling
 
