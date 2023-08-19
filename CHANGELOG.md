@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased] - 
 
 ### Changed
+- Set default `.batch_size` to `-100`
 - Increase default `.poll_interval` to 15 seconds
 
 ## [0.10.0] - 2023-06-01
