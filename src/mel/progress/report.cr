@@ -39,7 +39,7 @@ struct Mel::Progress
 
       rows = redis ? Query.get(ids, redis) : Query.get(ids)
 
-      reports = rows.each.map(&.as(Array).map &.as(String)).map do |row|
+      reports = rows.each.map(&.as(Array).map &.as(String)).compact_map do |row|
         row[1]?.try do |description|
           row[3]?.try do |id|
             row[5]?.try do |value|
@@ -47,7 +47,7 @@ struct Mel::Progress
             end
           end
         end
-      end.reject(Nil).to_a
+      end.to_a
 
       reports unless reports.empty?
     end

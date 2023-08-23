@@ -187,11 +187,7 @@ module Mel::Task
   end
 
   def from_json(values : Indexable)
-    values = values.each
-      .map { |value| from_json(value.to_s) if value }
-      .reject(Nil)
-      .to_a
-
+    values = values.compact_map { |value| from_json(value.to_s) if value }
     values unless values.empty?
   end
 
