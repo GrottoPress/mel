@@ -23,7 +23,7 @@ struct Mel::Progress
   end
 
   def start(redis = nil)
-    move(0, redis)
+    move(START, redis)
   end
 
   def move(to value : Int, redis = nil)
