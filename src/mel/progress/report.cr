@@ -10,7 +10,7 @@ struct Mel::Progress
       @value = value.to_i
     end
 
-    def self.new(hash : Hash)
+    def self.new(hash : Hash(String, _))
       new(hash["id"], hash["description"], hash["value"])
     end
 
