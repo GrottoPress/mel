@@ -10,6 +10,10 @@ struct Mel::Progress
       @value = value.to_i
     end
 
+    def self.new(hash : Hash)
+      new(hash["id"], hash["description"], hash["value"])
+    end
+
     def started? : Bool
       moving?
     end
@@ -36,17 +40,11 @@ struct Mel::Progress
 
     def self.find(ids : Indexable, redis = nil) : Array(Mel::Progress::Report)?
       return if ids.empty?
-
       rows = redis ? Query.get(ids, redis) : Query.get(ids)
 
       reports = rows.each.map(&.as(Array).map &.as(String)).compact_map do |row|
-        row[1]?.try do |description|
-          row[3]?.try do |id|
-            row[5]?.try do |value|
-              new(id, description, value)
-            end
-          end
-        end
+        next unless row.size == 6
+        new row.each_slice(2).to_h
       end.to_a
 
       reports unless reports.empty?

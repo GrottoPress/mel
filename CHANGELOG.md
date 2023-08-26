@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Set default `.batch_size` to `-100`
 - Increase default `.poll_interval` to 15 seconds
 
+### Fixed
+- Fix `Invalid Int32` error when tracking progress
+
 ## [0.10.0] - 2023-06-01
 
 ### Changed
