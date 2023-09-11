@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Add `Mel::Progress::Report.new(Indexable(String))` overload
 
+## Removed
+- Remove `Mel::Job::Template#run`
+
 ## [0.11.0] - 2023-08-26
 
 ### Changed

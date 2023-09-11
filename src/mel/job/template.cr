@@ -15,10 +15,6 @@ module Mel::Job::Template
 
     @__type__ : String = name
 
-    def run
-      \{% raise "#{@type}#run not implemented" %}
-    end
-
     def before_run
     end
 
