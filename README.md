@@ -688,7 +688,7 @@ Another option is to accept the worker ID as a command argument:
 # ->> src/worker.cr
 
 # ...
-ARGV.first?.try { |worker_id| Mel.configure &.worker_id = worker_id.to_i }
+ARGV.first?.try { |worker_id| Mel.settings.worker_id = worker_id.to_i }
 
 Mel.start
 ```
