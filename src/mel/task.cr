@@ -20,7 +20,7 @@ module Mel::Task
     end
 
     protected def retries=(retries)
-      @retries = retries < 0 ? 0 : retries
+      @retries = {0, retries}.max
     end
 
     def enqueue(redis = nil, *, force = false)
