@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Add `Mel::Progress::Report.new(Indexable)` overload
 
+### Changed
+- Make task objects externally immutable
+
 ## Removed
 - Remove `Mel::Job::Template#run`
 - Remove `.redis_pool_size` setting

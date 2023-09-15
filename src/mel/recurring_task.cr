@@ -4,7 +4,9 @@ module Mel::RecurringTask
   macro included
     include Mel::Task
 
-    property till : Time?
+    getter till : Time?
+
+    protected setter till : Time?
 
     private def schedule_next
       return dequeue if till.try(&.< next_time)

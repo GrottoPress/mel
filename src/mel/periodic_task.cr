@@ -12,7 +12,7 @@ class Mel::PeriodicTask
     self.interval = @interval
   end
 
-  def interval=(interval)
+  protected def interval=(interval)
     @interval = interval.abs
   end
 

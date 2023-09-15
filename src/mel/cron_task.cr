@@ -3,7 +3,9 @@ require "./recurring_task"
 class Mel::CronTask
   include RecurringTask
 
-  property schedule : String
+  getter schedule : String
+
+  protected setter schedule : String
 
   def initialize(@id, @job, @time, @retries, @till, @schedule)
   end
