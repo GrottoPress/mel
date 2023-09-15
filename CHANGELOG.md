@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased] - 
 
 ### Added
-- Add `Mel::Progress::Report.new(Indexable(String))` overload
+- Add `Mel::Progress::Report.new(Indexable)` overload
 
 ## Removed
 - Remove `Mel::Job::Template#run`

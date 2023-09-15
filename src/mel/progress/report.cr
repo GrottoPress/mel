@@ -14,7 +14,7 @@ struct Mel::Progress
       new(hash["id"], hash["description"], hash["value"])
     end
 
-    def self.new(row : Indexable(String))
+    def self.new(row : Indexable)
       new row.each_slice(2).to_h
     end
 
