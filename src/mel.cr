@@ -19,7 +19,6 @@ module Mel
     class_property error_handler : Exception -> = ->(__ : Exception) { }
     class_property progress_expiry : Time::Span? = 1.day
     class_property! redis_url : String
-    class_property redis_pool_size : Int32?
     class_property redis_key_prefix : String = "mel"
     class_property timezone : Time::Location?
   end
@@ -39,14 +38,6 @@ module Mel
   end
 
   def redis
-    @@redis ||= begin
-      uri = URI.parse(settings.redis_url)
-
-      settings.redis_pool_size.try do |size|
-        uri.query_params["max_idle_pool_size"] = size.to_s
-      end
-
-      Redis::Client.new(uri)
-    end
+    @@redis ||= Redis::Client.new(URI.parse settings.redis_url)
   end
 end
