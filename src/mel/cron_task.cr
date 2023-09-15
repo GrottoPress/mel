@@ -18,7 +18,7 @@ class Mel::CronTask
       json.field("retries", retries)
       json.field("attempts", attempts)
       json.field("schedule", schedule)
-      json.field("till", till.try(&.to_unix)) if till
+      json.field("till", till.try(&.to_unix))
     end
   end
 

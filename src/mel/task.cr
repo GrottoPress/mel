@@ -207,7 +207,7 @@ module Mel::Task
     time = Time.unix(json["time"].as_i64)
     retries = json["retries"].as_i
     attempts = json["attempts"].as_i
-    till = json["till"]?.try { |timestamp| Time.unix(timestamp.as_i64) }
+    till = json["till"]?.try &.as_i64?.try { |timestamp| Time.unix(timestamp) }
     schedule = json["schedule"]?.try(&.as_s)
     interval = json["interval"]?.try(&.as_i64.seconds)
 

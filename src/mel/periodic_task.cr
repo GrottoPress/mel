@@ -24,7 +24,7 @@ class Mel::PeriodicTask
       json.field("retries", retries)
       json.field("attempts", attempts)
       json.field("interval", interval.total_seconds.to_i64)
-      json.field("till", till.try(&.to_unix)) if till
+      json.field("till", till.try(&.to_unix))
     end
   end
 
