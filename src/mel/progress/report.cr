@@ -19,14 +19,14 @@ struct Mel::Progress
     end
 
     def started? : Bool
-      pending? || moving?
+      pending? || running?
     end
 
     def pending? : Bool
       value == Progress::START
     end
 
-    def moving? : Bool
+    def running? : Bool
       Progress::START < value < Progress::END
     end
 

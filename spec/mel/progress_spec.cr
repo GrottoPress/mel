@@ -33,7 +33,7 @@ describe Mel::Progress do
       report.try do |_report|
         _report.value.should eq(50)
         _report.description.should eq(ProgressJob.progress_description)
-        _report.moving?.should be_true
+        _report.running?.should be_true
       end
 
       Mel.start_and_stop
@@ -43,7 +43,7 @@ describe Mel::Progress do
 
       report.try do |_report|
         _report.value.should eq(80)
-        _report.moving?.should be_true
+        _report.running?.should be_true
       end
 
       Mel.start_and_stop

@@ -593,7 +593,7 @@ report.try do |_report|
   _report.value
 
   _report.failure?
-  _report.moving?
+  _report.running?
   _report.success?
 
   _report.started?

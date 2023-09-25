@@ -11,7 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add `Mel::Progress::Report#pending?`
 
 ### Changed
-- Redefine `Mel::Progress::Report#moving?` to mean the progress is started and is greater than zero
+- Rename `Mel::Progress::Report#moving?` to `#running?`
+- Redefine `Mel::Progress::Report#running?` to mean the progress is started and is greater than zero
 
 ## [0.12.0] - 2023-09-19
 
