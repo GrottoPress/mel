@@ -50,7 +50,7 @@ module Mel::Task::Query
   end
 
   def delete(id : String)
-    delete([id]).try &.first?.try &.as(String)
+    delete({id}).try &.first?.try &.as(String)
   end
 
   def delete(ids : Indexable)
@@ -103,7 +103,7 @@ module Mel::Task::Query
   end
 
   def find(id : String, *, delete = false)
-    find([id], delete: delete).try &.first?.try &.as(String)
+    find({id}, delete: delete).try &.first?.try &.as(String)
   end
 
   def find(ids : Indexable, *, delete = false)
@@ -116,7 +116,7 @@ module Mel::Task::Query
         redis.mget(keys)
 
         if delete
-          redis.run(["ZREM", key] + ids)
+          redis.run(["ZREM", key] + ids.to_a)
           redis.del(keys)
         end
       end

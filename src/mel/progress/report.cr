@@ -43,7 +43,7 @@ struct Mel::Progress
     end
 
     def self.find(id : String, redis = nil) : self?
-      find([id]).try(&.first?)
+      find({id}).try(&.first?)
     end
 
     def self.find(ids : Indexable, redis = nil) : Array(Mel::Progress::Report)?
