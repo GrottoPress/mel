@@ -9,37 +9,28 @@ struct Mel::Progress
       self.class.key(id)
     end
 
-    def get
-      get(Mel.redis)
-    end
-
-    def get(redis)
+    def get(redis = nil)
+      redis ||= Mel.redis
       redis.hgetall(key)
     end
 
-    def set(value, description)
-      Mel.redis.multi { |redis| set(value, description, redis) }
-    end
-
-    def set(value : Int, description : String, redis)
-      redis.hset(
-        key,
-        description: description,
-        id: id,
-        value: value.to_s
-      )
-
-      Mel.settings.progress_expiry.try do |expiry|
-        redis.expire(key, expiry.total_seconds.to_i64)
+    def set(value : Int, description : String, redis = nil)
+      command = ->(_redis : Redis::Commands) do
+        _redis.hset(key, description: description, id: id, value: value.to_s)
+        Mel.settings.progress_expiry.try { |expiry| _redis.expire(key, expiry) }
       end
+
+      return command.call(redis) if redis
+      Mel.redis.multi { |_redis| command.call(_redis) }
     end
 
-    def self.get(ids)
-      Mel.redis.multi { |redis| get(ids, redis) }
-    end
+    def self.get(ids : Indexable, redis = nil)
+      command = ->(_redis : Redis::Commands) do
+        ids.map { |id| Query.new(id).get(_redis) }
+      end
 
-    def self.get(ids : Indexable, redis)
-      ids.map { |id| Query.new(id).get(redis) }
+      return command.call(redis) if redis
+      Mel.redis.multi { |_redis| command.call(_redis) }
     end
 
     def self.key

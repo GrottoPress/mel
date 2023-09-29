@@ -48,7 +48,7 @@ struct Mel::Progress
 
     def self.find(ids : Indexable, redis = nil) : Array(Mel::Progress::Report)?
       return if ids.empty?
-      rows = redis ? Query.get(ids, redis) : Query.get(ids)
+      rows = Query.get(ids, redis)
 
       reports = rows.each.map(&.as(Array).map &.as(String)).compact_map do |row|
         new(row) if row.size == 6
@@ -58,11 +58,7 @@ struct Mel::Progress
     end
 
     protected def save(redis = nil)
-      query = Query.new(id)
-
-      redis ?
-        query.set(value, description, redis) :
-        query.set(value, description)
+      Query.new(id).set(value, description, redis)
     end
   end
 end
