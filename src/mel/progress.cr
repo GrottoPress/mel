@@ -28,7 +28,7 @@ struct Mel::Progress
 
   def move(to value : Int, redis = nil)
     value = value.clamp(FAIL, END)
-    Report.new(id, @description, value).save(redis)
+    Query.new(id).set(value, @description, redis)
   end
 
   def self.start(id : String, description : String, redis = nil) : self
@@ -36,10 +36,14 @@ struct Mel::Progress
   end
 
   def self.track(id : String, redis = nil)
-    Report.find(id, redis)
+    track({id}).try(&.first?)
   end
 
   def self.track(ids : Indexable, redis = nil)
-    Report.find(ids, redis)
+    Query.get(ids, redis).try &.compact_map do |value|
+      Report.from_json(value.as(String)) if value
+    end.try do |reports|
+      reports unless reports.empty?
+    end
   end
 end

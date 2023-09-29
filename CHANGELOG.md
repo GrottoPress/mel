@@ -11,7 +11,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fix compile error when querying with tuple IDs instead of array IDs
 
 ### Changed
-- Remove `JSON::Serializable` from `Mel::Progress::Report`
+- Save progress report in redis as JSON-serialized string instead of hash
+
+### Removed
+- Remove `Mel::Progress::Report.find` methods
 
 ## [0.13.0] - 2023-09-26
 
