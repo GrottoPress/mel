@@ -36,7 +36,7 @@ struct Mel::Progress
   end
 
   def self.track(id : String, redis = nil)
-    track({id}).try(&.first?)
+    track({id}, redis).try(&.first?)
   end
 
   def self.track(ids : Indexable, redis = nil)
