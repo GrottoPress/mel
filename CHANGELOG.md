@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Fix compile error when querying with tuple IDs instead of array IDs
 
+### Changed
+- Remove `JSON::Serializable` from `Mel::Progress::Report`
+
 ## [0.13.0] - 2023-09-26
 
 ### Added

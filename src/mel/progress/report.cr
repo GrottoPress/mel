@@ -1,7 +1,5 @@
 struct Mel::Progress
   struct Report
-    include JSON::Serializable
-
     getter id : String
     getter description : String
     getter value : Int32
