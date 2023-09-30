@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased] - 
 
 ### Fixed
-- Forward `redis` argument to `Query.get` call in `Mel::Progress.track(String)`
+- Fix compile error from query `#get` methods if passed a `redis` argument
+- Fix wrong return values from query `#get` methods if passed a `redis` argument
+
+### Changed
+- Remove `redis` parameter from all query `#get` methods
 
 ## [0.14.0] - 2023-09-29
 

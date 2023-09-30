@@ -9,9 +9,8 @@ struct Mel::Progress
       self.class.key(id)
     end
 
-    def get(redis = nil)
-      redis ||= Mel.redis
-      redis.get(key)
+    def get
+      Mel.redis.get(key)
     end
 
     def set(value : Int, description : String, redis = nil)
@@ -21,15 +20,12 @@ struct Mel::Progress
       redis.set(key, report.to_json, ex: Mel.settings.progress_expiry)
     end
 
-    def self.get(ids : Indexable, redis = nil)
+    def self.get(ids : Indexable)
       return if ids.empty?
 
-      command = ->(_redis : Redis::Commands) do
-        ids.map { |id| Query.new(id).get(_redis) }
+      Mel.redis.multi do |redis|
+        ids.each { |id| redis.get(key id) }
       end
-
-      return command.call(redis) if redis
-      Mel.redis.multi { |_redis| command.call(_redis) }
     end
 
     def self.key

@@ -35,12 +35,12 @@ struct Mel::Progress
     new(id, description).tap(&.start redis)
   end
 
-  def self.track(id : String, redis = nil)
-    track({id}, redis).try(&.first?)
+  def self.track(id : String)
+    track({id}).try(&.first?)
   end
 
-  def self.track(ids : Indexable, redis = nil)
-    Query.get(ids, redis).try &.compact_map do |value|
+  def self.track(ids : Indexable)
+    Query.get(ids).try &.compact_map do |value|
       Report.from_json(value.as(String)) if value
     end.try do |reports|
       reports unless reports.empty?
