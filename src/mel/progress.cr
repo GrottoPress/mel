@@ -40,8 +40,8 @@ struct Mel::Progress
   end
 
   def self.track(ids : Indexable)
-    Query.get(ids).try &.compact_map do |value|
-      Report.from_json(value.as(String)) if value
+    Query.get(ids).try &.map do |value|
+      Report.from_json(value)
     end.try do |reports|
       reports unless reports.empty?
     end
