@@ -12,7 +12,7 @@ struct FailCallbacksJob
     raise "Fail on purpose"
   end
 
-  def after_run
+  def after_run(success)
     raise "Fail on purpose"
   end
 
@@ -20,7 +20,7 @@ struct FailCallbacksJob
     raise "Fail on purpose"
   end
 
-  def after_enqueue
+  def after_enqueue(success)
     raise "Fail on purpose"
   end
 
@@ -28,7 +28,7 @@ struct FailCallbacksJob
     raise "Fail on purpose"
   end
 
-  def after_dequeue
+  def after_dequeue(success)
     raise "Fail on purpose"
   end
 end
