@@ -130,7 +130,7 @@ module Mel::Task
       end
     end
 
-    def self.from_json(values) : Array(self)?
+    def self.from_json(values : Indexable) : Array(self)?
       Mel::Task.from_json(values).try do |tasks|
         tasks = tasks.each.select(self).map(&.as self).to_a
         tasks unless tasks.empty?
