@@ -201,9 +201,9 @@ module Mel::Task
     job_type.try { |type| from_json(json, type) }
   end
 
-  private def from_json(json, type)
+  private def from_json(json, job_type)
     id = json["id"].as_s
-    job = type.from_json(json["job"].to_json)
+    job = job_type.from_json(json["job"].to_json)
     time = Time.unix(json["time"].as_i64)
     retries = json["retries"].as_i
     attempts = json["attempts"].as_i
