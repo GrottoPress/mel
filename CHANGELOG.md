@@ -47,7 +47,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Make task objects externally immutable
 
-## Removed
+### Removed
 - Remove `Mel::Job::Template#run`
 - Remove `.redis_pool_size` setting
 
