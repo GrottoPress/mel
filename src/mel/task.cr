@@ -68,8 +68,7 @@ module Mel::Task
         job.run
       rescue error
         log_errored(error)
-        next fail_task(error) if attempts > retries
-        schedule_failed_task
+        retry_failed_task(error)
       else
         schedule_next
         log_ran
@@ -143,18 +142,20 @@ module Mel::Task
       end
     end
 
+    private def retry_failed_task(error) : Nil
+      return fail_task(error) if attempts > retries
+
+      original = clone
+      original.attempts = attempts
+      original.enqueue(force: true)
+    end
+
     private def fail_task(error) : Nil
       schedule_next
       log_failed
 
       handle_error(error)
       do_after_run(false)
-    end
-
-    private def schedule_failed_task : Nil
-      original = clone
-      original.attempts = attempts
-      original.enqueue(force: true)
     end
   end
 
