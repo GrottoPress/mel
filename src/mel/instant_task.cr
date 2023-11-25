@@ -12,7 +12,7 @@ class Mel::InstantTask
       json.field("id", id)
       json.field("job", job)
       json.field("time", time.to_unix)
-      json.field("retries", retries.map(&.total_seconds.to_i64))
+      json.field("retries", retries.map(&.total_seconds.to_i))
       json.field("attempts", attempts)
     end
   end
@@ -35,7 +35,7 @@ class Mel::InstantTask
       id: id,
       job: job.class.name,
       time: time.to_unix,
-      retries: retries.map(&.total_seconds.to_i64),
+      retries: retries.map(&.total_seconds.to_i),
       attempts: attempts
     }
   end
