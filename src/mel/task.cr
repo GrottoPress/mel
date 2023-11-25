@@ -8,7 +8,7 @@ module Mel::Task
     getter id : String
     getter job : Mel::Job::Template
     getter time : Time
-    getter retries : Array(Time::Span)?
+    getter retries : Array(Time::Span)
     getter attempts : Int32 = 0
 
     protected setter time : Time
@@ -154,17 +154,14 @@ module Mel::Task
       do_after_run(false)
     end
 
-    private def retries_count
-      retries.try(&.size) || 0
-    end
-
     private def normalize_retries(retries)
       case retries
       in Int
-        Array.new(retries, 0.seconds) if retries > 0
+        retries > 0 ? Array.new(retries, 0.seconds) : Array(Time::Span).new
       in Indexable
         retries.map { |time| time.is_a?(Time::Span) ? time : time.seconds }.to_a
       in Nil
+        [1.second, 2.seconds]
       end
     end
   end
@@ -216,7 +213,7 @@ module Mel::Task
     id = json["id"].as_s
     job = job_type.from_json(json["job"].to_json)
     time = Time.unix(json["time"].as_i64)
-    retries = json["retries"]?.try &.as_a?.try &.map(&.as_i64.seconds)
+    retries = json["retries"].as_a?.try &.map(&.as_i64.seconds)
     attempts = json["attempts"].as_i
     till = json["till"]?.try &.as_i64?.try { |timestamp| Time.unix(timestamp) }
     schedule = json["schedule"]?.try(&.as_s)

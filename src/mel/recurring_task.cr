@@ -9,15 +9,13 @@ module Mel::RecurringTask
     protected setter till : Time?
 
     private def next_retry_time
-      return if attempts > retries_count
+      return if attempts > retries.size
 
-      retries.try do |_retries|
-        time = Time.local + _retries[attempts - 1]
-        # Allow retry if task will not be rescheduled
-        return time if till.try(&.< next_time)
-        # Disallow retry beyond next schedule if task will be reschedduled
-        time if time < next_time
-      end
+      time = Time.local + retries[attempts - 1]
+      # Allow retry if task will not be rescheduled
+      return time if till.try(&.< next_time)
+      # Disallow retry beyond next schedule if task will be reschedduled
+      time if time < next_time
     end
 
     private def schedule_next

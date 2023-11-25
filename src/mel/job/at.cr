@@ -5,7 +5,7 @@ module Mel::Job::At
     def self.run_at(
       time : Time,
       id = UUID.random.to_s,
-      retries = {1, 2},
+      retries = nil,
       redis = nil,
       force = false,
       **job_args

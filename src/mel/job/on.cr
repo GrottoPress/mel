@@ -6,7 +6,7 @@ module Mel::Job::On
       schedule : String,
       for : Time::Span?,
       id = UUID.random.to_s,
-      retries = {1, 2},
+      retries = nil,
       redis = nil,
       force = false,
       **job_args
@@ -19,7 +19,7 @@ module Mel::Job::On
       schedule : String,
       till : Time? = nil,
       id = UUID.random.to_s,
-      retries = {1, 2},
+      retries = nil,
       redis = nil,
       force = false,
       **job_args

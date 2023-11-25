@@ -12,7 +12,7 @@ class Mel::InstantTask
       json.field("id", id)
       json.field("job", job)
       json.field("time", time.to_unix)
-      json.field("retries", retries.try(&.map &.total_seconds.to_i64))
+      json.field("retries", retries.map(&.total_seconds.to_i64))
       json.field("attempts", attempts)
     end
   end
@@ -22,8 +22,8 @@ class Mel::InstantTask
   end
 
   private def next_retry_time
-    return if attempts > retries_count
-    retries.try { |_retries| Time.local + _retries[attempts - 1] }
+    return if attempts > retries.size
+    Time.local + retries[attempts - 1]
   end
 
   private def schedule_next
@@ -35,7 +35,7 @@ class Mel::InstantTask
       id: id,
       job: job.class.name,
       time: time.to_unix,
-      retries: retries.try(&.map &.total_seconds.to_i64),
+      retries: retries.map(&.total_seconds.to_i64),
       attempts: attempts
     }
   end
