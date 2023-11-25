@@ -163,7 +163,7 @@ module Mel::Task
       in Int
         Array.new(retries, 0.seconds) if retries > 0
       in Indexable
-        retries.to_a.map { |time| time.is_a?(Time::Span) ? time : time.seconds }
+        retries.map { |time| time.is_a?(Time::Span) ? time : time.seconds }.to_a
       in Nil
       end
     end
