@@ -6,7 +6,7 @@ module Mel::Job::Every
       interval : Time::Span,
       for : Time::Span?,
       id = UUID.random.to_s,
-      retries = 2,
+      retries = {1, 2},
       redis = nil,
       force = false,
       **job_args
@@ -19,7 +19,7 @@ module Mel::Job::Every
       interval : Time::Span,
       till : Time? = nil,
       id = UUID.random.to_s,
-      retries = 2,
+      retries = {1, 2},
       redis = nil,
       force = false,
       **job_args

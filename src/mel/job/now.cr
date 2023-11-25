@@ -4,7 +4,7 @@ module Mel::Job::Now
 
     def self.run(
       id = UUID.random.to_s,
-      retries = 2,
+      retries = {1, 2},
       redis = nil,
       force = false,
       **job_args
@@ -14,7 +14,7 @@ module Mel::Job::Now
 
     def self.run_now(
       id = UUID.random.to_s,
-      retries = 2,
+      retries = {1, 2},
       redis = nil,
       force = false,
       **job_args

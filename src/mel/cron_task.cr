@@ -7,7 +7,8 @@ class Mel::CronTask
 
   protected setter schedule : String
 
-  def initialize(@id, @job, @time, @retries, @till, @schedule)
+  def initialize(@id, @job, @time, retries, @till, @schedule)
+    @retries = normalize_retries(retries)
   end
 
   def to_json(json : JSON::Builder)
@@ -15,7 +16,7 @@ class Mel::CronTask
       json.field("id", id)
       json.field("job", job)
       json.field("time", time.to_unix)
-      json.field("retries", retries)
+      json.field("retries", retries.try(&.map &.total_seconds.to_i64))
       json.field("attempts", attempts)
       json.field("schedule", schedule)
       json.field("till", till.try(&.to_unix))
@@ -42,7 +43,7 @@ class Mel::CronTask
       id: id,
       job: job.class.name,
       time: time.to_unix,
-      retries: retries,
+      retries: retries.try(&.map &.total_seconds.to_i64),
       attempts: attempts,
       schedule: schedule,
       till: till.try(&.to_unix)

@@ -19,6 +19,77 @@ describe Mel::Task do
 
       Mel::InstantTask.find(id).should be_nil
     end
+
+    it "retries failed tasks with backoffs" do
+      id = "1001"
+
+      FailedJob.run(id, retries: {1.minute, 2.minutes})
+
+      Mel.settings.worker_id = 7
+
+      Timecop.freeze(Time.local) do
+        Mel.start_and_stop(4)
+        Mel::InstantTask.find(id).should_not be_nil
+      end
+
+      Timecop.travel(1.minute.from_now) do
+        Mel.start_and_stop
+        Mel::InstantTask.find(id).should_not be_nil
+      end
+
+      Timecop.travel(2.minutes.from_now) do
+        Mel.start_and_stop
+        Mel::InstantTask.find(id).should_not be_nil
+      end
+
+      Timecop.travel(3.minutes.from_now) do
+        Mel.start_and_stop
+        Mel::InstantTask.find(id).should be_nil
+      end
+    end
+  end
+
+  it "does not retry beyond current schedule window" do
+    id = "1001"
+
+    FailedJob.run_every(2.minutes, id: id, retries: {1.minute, 2.minutes})
+
+    Mel.settings.worker_id = 8
+
+    Timecop.freeze(2.minutes.from_now) do
+      Mel.start_and_stop
+      Mel::PeriodicTask.find(id).should_not be_nil
+    end
+
+    Timecop.freeze(3.minutes.from_now) do
+      Mel.start_and_stop
+      # Expect failed task to NOT be retried
+      Mel::PeriodicTask.find(id).try(&.attempts.> 0).should be_false
+    end
+  end
+
+  it "retries beyond current schedule window if task not rescheduled" do
+    id = "1001"
+
+    FailedJob.run_every(
+      2.minutes,
+      for: 2.minutes, # Ensures task is not rescheduled
+      id: id,
+      retries: {1.minute, 2.minutes}
+    )
+
+    Mel.settings.worker_id = 9
+
+    Timecop.freeze(2.minutes.from_now) do
+      Mel.start_and_stop
+      Mel::PeriodicTask.find(id).should_not be_nil
+    end
+
+    Timecop.freeze(3.minutes.from_now) do
+      Mel.start_and_stop
+      # Expect failed task to be retried
+      Mel::PeriodicTask.find(id).try(&.attempts.> 0).should be_true
+    end
   end
 
   describe "#enqueue" do

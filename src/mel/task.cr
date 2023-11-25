@@ -8,20 +8,13 @@ module Mel::Task
     getter id : String
     getter job : Mel::Job::Template
     getter time : Time
+    getter retries : Array(Time::Span)?
     getter attempts : Int32 = 0
 
     protected setter time : Time
     protected setter attempts : Int32
 
-    @retries : Int32
-
-    def retries : Int32
-      self.retries = @retries
-    end
-
-    protected def retries=(retries)
-      @retries = {0, retries}.max
-    end
+    protected property retry_time : Time?
 
     def enqueue(redis = nil, *, force = false)
       do_before_enqueue
@@ -143,11 +136,14 @@ module Mel::Task
     end
 
     private def retry_failed_task(error) : Nil
-      return fail_task(error) if attempts > retries
+      return if attempts < 1
 
-      original = clone
-      original.attempts = attempts
-      original.enqueue(force: true)
+      next_retry_time.try do |time|
+        original = clone
+        original.attempts = attempts
+        original.retry_time = time
+        original.enqueue(force: true)
+      end || fail_task(error)
     end
 
     private def fail_task(error) : Nil
@@ -156,6 +152,20 @@ module Mel::Task
 
       handle_error(error)
       do_after_run(false)
+    end
+
+    private def retries_count
+      retries.try(&.size) || 0
+    end
+
+    private def normalize_retries(retries)
+      case retries
+      in Int
+        Array.new(retries, 0.seconds) if retries > 0
+      in Indexable
+        retries.to_a.map { |time| time.is_a?(Time::Span) ? time : time.seconds }
+      in Nil
+      end
     end
   end
 
@@ -206,7 +216,7 @@ module Mel::Task
     id = json["id"].as_s
     job = job_type.from_json(json["job"].to_json)
     time = Time.unix(json["time"].as_i64)
-    retries = json["retries"].as_i
+    retries = json["retries"]?.try &.as_a?.try &.map(&.as_i64.seconds)
     attempts = json["attempts"].as_i
     till = json["till"]?.try &.as_i64?.try { |timestamp| Time.unix(timestamp) }
     schedule = json["schedule"]?.try(&.as_s)

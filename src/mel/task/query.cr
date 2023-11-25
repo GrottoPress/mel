@@ -34,7 +34,8 @@ module Mel::Task::Query
   def update(task : Task, redis = nil)
     connect do
       command = ->(_redis : Redis::Commands) do
-        _redis.zadd(key, task.time.to_unix.to_s, task.id)
+        time = task.retry_time || task.time
+        _redis.zadd(key, time.to_unix.to_s, task.id)
         _redis.set(task.key, task.to_json)
       end
 

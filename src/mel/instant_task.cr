@@ -3,7 +3,8 @@ require "./task"
 class Mel::InstantTask
   include Task
 
-  def initialize(@id, @job, @time, @retries)
+  def initialize(@id, @job, @time, retries)
+    @retries = normalize_retries(retries)
   end
 
   def to_json(json : JSON::Builder)
@@ -11,13 +12,18 @@ class Mel::InstantTask
       json.field("id", id)
       json.field("job", job)
       json.field("time", time.to_unix)
-      json.field("retries", retries)
+      json.field("retries", retries.try(&.map &.total_seconds.to_i64))
       json.field("attempts", attempts)
     end
   end
 
   def clone
     self.class.new(id, job.class.from_json(job.to_json), time, retries)
+  end
+
+  private def next_retry_time
+    return if attempts > retries_count
+    retries.try { |_retries| Time.local + _retries[attempts - 1] }
   end
 
   private def schedule_next
@@ -29,7 +35,7 @@ class Mel::InstantTask
       id: id,
       job: job.class.name,
       time: time.to_unix,
-      retries: retries,
+      retries: retries.try(&.map &.total_seconds.to_i64),
       attempts: attempts
     }
   end

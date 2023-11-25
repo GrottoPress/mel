@@ -5,7 +5,7 @@ module Mel::Job::In
     def self.run_in(
       delay : Time::Span,
       id = UUID.random.to_s,
-      retries = 2,
+      retries = {1, 2},
       redis = nil,
       force = false,
       **job_args
