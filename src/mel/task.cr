@@ -91,6 +91,11 @@ abstract class Mel::Task
     end || fail_task(error)
   end
 
+  private def next_retry_time
+    return if attempts > retries.size
+    Time.local + retries[attempts - 1]
+  end
+
   private def fail_task(error) : Nil
     schedule_next
     log_failed

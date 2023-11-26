@@ -6,13 +6,12 @@ module Mel
     protected setter till : Time?
 
     private def next_retry_time
-      return if attempts > retries.size
-
-      time = Time.local + retries[attempts - 1]
-      # Allow retry if task will not be rescheduled
-      return time if till.try(&.< next_time)
-      # Disallow retry beyond next schedule if task will be reschedduled
-      time if time < next_time
+      super.try do |time|
+        # Allow retry if task will not be rescheduled
+        return time if till.try(&.< next_time)
+        # Disallow retry beyond next schedule if task will be reschedduled
+        time if time < next_time
+      end
     end
 
     private def schedule_next

@@ -19,11 +19,6 @@ module Mel
       self.class.new(id, job.class.from_json(job.to_json), time, retries)
     end
 
-    private def next_retry_time
-      return if attempts > retries.size
-      Time.local + retries[attempts - 1]
-    end
-
     private def schedule_next
       dequeue
     end
