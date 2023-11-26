@@ -12,6 +12,7 @@ describe Mel::PeriodicTask do
       SendEmailJob.run_on("0 2 * * *", address: address)
 
       Mel::PeriodicTask.find(-1).try(&.size).should eq(1)
+      Mel::RecurringTask.find(-1).try(&.size).should eq(2)
     end
   end
 end

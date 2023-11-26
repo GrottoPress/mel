@@ -10,6 +10,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Add support for retries with backoffs
 
+### Changed
+- Convert `Mel::Task` module to an `abstract class`
+- Convert `Mel::RecurringTask` module to an `abstract class`
+
+### Removed
+- Remove `Mel::Task::Any` alias
+
 ## [0.16.0] - 2023-10-09
 
 ### Changed

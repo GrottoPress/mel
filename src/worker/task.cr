@@ -1,7 +1,7 @@
 require "./task/**"
 
-module Mel::Task
-  macro included
+abstract class Mel::Task
+  macro inherited
     def self.find_pending(count = -1, *, delete = false) : Array(self)?
       return if count.zero?
 
@@ -13,7 +13,7 @@ module Mel::Task
     end
   end
 
-  def find_pending(count = -1, *, delete = false)
+  def self.find_pending(count = -1, *, delete = false)
     Query.find_pending(count, delete: delete).try { |values| from_json(values) }
   end
 end

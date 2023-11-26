@@ -1,11 +1,8 @@
 require "./task"
 
-module Mel::RecurringTask
-  macro included
-    include Mel::Task
-
+module Mel
+  abstract class RecurringTask < Task
     getter till : Time?
-
     protected setter till : Time?
 
     private def next_retry_time
@@ -29,7 +26,6 @@ module Mel::RecurringTask
       log_scheduled
     end
 
-    private def next_time : Time
-    end
+    private abstract def next_time : Time
   end
 end
