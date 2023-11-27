@@ -74,7 +74,7 @@ module Mel
         tasks.each &.run(force: true).try { |fiber| pond << fiber }
       end
 
-      sleep settings.poll_interval
+      sleep jittered_poll_interval
     end
 
     log_waiting
@@ -97,5 +97,14 @@ module Mel
 
   private def sync
     @@mutex.synchronize { yield }
+  end
+
+  private def jittered_poll_interval
+    interval = settings.poll_interval.total_milliseconds
+    delta = interval / 3
+    min = interval - delta
+    max = interval + delta
+
+    Random.rand(min..max).milliseconds
   end
 end

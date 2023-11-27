@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Add support for retries with backoffs
+- Add jitter to poll interval
 
 ### Changed
 - Convert `Mel::Task` module to an `abstract class`
