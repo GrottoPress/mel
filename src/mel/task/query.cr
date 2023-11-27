@@ -112,7 +112,7 @@ abstract class Mel::Task
           redis.mget(keys)
 
           if delete
-            redis.run(["ZREM", key] + ids.to_a)
+            redis.zrem(key, ids.map(&.to_s))
             redis.del(keys)
           end
         end
