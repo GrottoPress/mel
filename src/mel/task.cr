@@ -136,7 +136,7 @@ abstract class Mel::Task
       end
     end
 
-    def self.find(count : Int32, *, delete = false) : Array(self)?
+    def self.find(count : Int, *, delete = false) : Array(self)?
       return if count.zero?
 
       Mel::Task.find(-1, delete: false).try do |tasks|
@@ -199,7 +199,7 @@ abstract class Mel::Task
     end
   end
 
-  def self.find(count : Int32, *, delete = false)
+  def self.find(count : Int, *, delete = false)
     Query.find(count, delete: delete).try { |values| from_json(values) }
   end
 

@@ -83,7 +83,7 @@ abstract class Mel::Task
       end
     end
 
-    def find(count : Int32, *, delete = false)
+    def find(count : Int, *, delete = false)
       return if count.zero?
 
       connect do
