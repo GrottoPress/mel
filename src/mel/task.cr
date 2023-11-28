@@ -19,13 +19,9 @@ abstract class Mel::Task
     do_before_enqueue
     log_enqueueing
 
-    if values = Query.add(self, redis, force: force)
+    Query.add(self, redis, force: force).tap do
       log_enqueued
       do_after_enqueue(true)
-      values
-    else
-      do_after_enqueue(false)
-      nil
     end
   rescue error
     do_after_enqueue(false)
@@ -36,13 +32,9 @@ abstract class Mel::Task
     do_before_dequeue
     log_dequeueing
 
-    if value = Query.delete(id)
+    Query.delete(id).tap do
       log_dequeued
       do_after_dequeue(true)
-      value
-    else
-      do_after_dequeue(false)
-      nil
     end
   rescue error
     do_after_enqueue(false)
