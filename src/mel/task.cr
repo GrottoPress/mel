@@ -124,11 +124,11 @@ abstract class Mel::Task
     end
 
     private def self.delete(tasks : Indexable, delete)
-      delete == false ? tasks : Mel::Task.find(tasks.map(&.id), delete: delete)
+      false == delete ? tasks : Mel::Task.find(tasks.map(&.id), delete: delete)
     end
 
     private def self.delete(task, delete)
-      delete == false ? task : Mel::Task.find(task.id, delete: delete)
+      false == delete ? task : Mel::Task.find(task.id, delete: delete)
     end
   end
 
