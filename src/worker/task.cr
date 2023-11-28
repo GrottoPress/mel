@@ -1,6 +1,19 @@
 require "./task/**"
 
 abstract class Mel::Task
+  def dequeue_pending
+    do_before_dequeue
+    log_dequeueing
+
+    Query.delete_pending(id).tap do
+      log_dequeued
+      do_after_dequeue(true)
+    end
+  rescue error
+    handle_error(error)
+    do_after_enqueue(false)
+  end
+
   def run(*, force = false) : Fiber?
     return log_not_due unless force || due?
 
@@ -48,19 +61,6 @@ abstract class Mel::Task
 
     handle_error(error)
     do_after_run(false)
-  end
-
-  def dequeue_pending
-    do_before_dequeue
-    log_dequeueing
-
-    Query.delete_pending(id).tap do
-      log_dequeued
-      do_after_dequeue(true)
-    end
-  rescue error
-    handle_error(error)
-    do_after_enqueue(false)
   end
 
   macro inherited
