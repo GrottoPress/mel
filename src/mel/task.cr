@@ -2,7 +2,7 @@ require "./task/**"
 
 abstract class Mel::Task
   getter id : String
-  getter job : Mel::Job::Template
+  getter job : Job::Template
   getter time : Time
   getter retries : Array(Time::Span)
   getter attempts : Int32 = 0
@@ -19,7 +19,7 @@ abstract class Mel::Task
     do_before_enqueue
     log_enqueueing
 
-    if values = Mel::Task::Query.add(self, redis, force: force)
+    if values = Query.add(self, redis, force: force)
       log_enqueued
       do_after_enqueue(true)
       values
@@ -36,7 +36,7 @@ abstract class Mel::Task
     do_before_dequeue
     log_dequeueing
 
-    if value = Mel::Task::Query.delete(id)
+    if value = Query.delete(id)
       log_dequeued
       do_after_dequeue(true)
       value
@@ -73,7 +73,7 @@ abstract class Mel::Task
   end
 
   def key : String
-    Mel::Task::Query.key(id)
+    Query.key(id)
   end
 
   abstract def clone : self
