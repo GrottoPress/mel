@@ -60,7 +60,7 @@ module Mel
   end
 
   private def run_pending_tasks(pond)
-    Task.find_pending.try do |tasks|
+    Task.find_pending(-1).try do |tasks|
       tasks.each &.run(force: true).try { |fiber| pond << fiber }
     end
   end

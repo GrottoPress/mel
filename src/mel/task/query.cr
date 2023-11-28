@@ -117,7 +117,7 @@ abstract class Mel::Task
           end
         end
 
-        values = values[0].as(Array).compact_map(&.as? String)
+        values = values.first.as(Array).compact_map(&.as? String)
         values unless values.empty?
       end
     end

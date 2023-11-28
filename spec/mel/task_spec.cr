@@ -179,20 +179,20 @@ describe Mel::Task do
 
       Mel.settings.worker_id = 5
 
-      Mel::InstantTask.find_pending.should be_nil
-      Mel::PeriodicTask.find_pending.should be_nil
-      Mel::CronTask.find_pending.should be_nil
-      Mel::Task.find_pending.should be_nil
+      Mel::InstantTask.find_pending(-1).should be_nil
+      Mel::PeriodicTask.find_pending(-1).should be_nil
+      Mel::CronTask.find_pending(-1).should be_nil
+      Mel::Task.find_pending(-1).should be_nil
 
       Mel::InstantTask.find(2, delete: nil).try(&.size).should eq(2)
       Mel::InstantTask.find(-1).try(&.size).should eq(1)
 
-      Mel::InstantTask.find_pending.try(&.size).should eq(2)
+      Mel::InstantTask.find_pending(-1).try(&.size).should eq(2)
       Mel::InstantTask.find_pending(1).try(&.size).should eq(1)
 
-      Mel::PeriodicTask.find_pending.should be_nil
-      Mel::CronTask.find_pending.should be_nil
-      Mel::Task.find_pending.should_not be_nil
+      Mel::PeriodicTask.find_pending(-1).should be_nil
+      Mel::CronTask.find_pending(-1).should be_nil
+      Mel::Task.find_pending(-1).should_not be_nil
     end
   end
 

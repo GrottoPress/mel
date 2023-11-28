@@ -11,9 +11,11 @@ abstract class Mel::Task
       log_running
       job.run
     rescue error
-      log_errored(error)
+      dequeue_pending
       retry_failed_task(error)
+      log_errored(error)
     else
+      dequeue_pending
       schedule_next
       log_ran
       do_after_run(true)
@@ -48,19 +50,65 @@ abstract class Mel::Task
     do_after_run(false)
   end
 
+  def dequeue_pending
+    do_before_dequeue
+    log_dequeueing
+
+    Query.delete_pending(id).tap do
+      log_dequeued
+      do_after_dequeue(true)
+    end
+  rescue error
+    do_after_enqueue(false)
+    handle_error(error)
+  end
+
   macro inherited
-    def self.find_pending(count = -1, *, delete = false) : Array(self)?
+    def self.find_pending(count : Int, *, delete = false) : Array(self)?
       return if count.zero?
 
       Mel::Task.find_pending(-1, delete: false).try do |tasks|
         tasks = resize(tasks.select(self), count)
         return if tasks.empty?
-        delete(tasks, delete).try &.map(&.as self)
+        delete_pending(tasks, delete).try &.map(&.as self)
       end
+    end
+
+    def self.find_pending(id : String, *, delete = false) : self?
+      Mel::Task.find_pending(id, delete: false).try do |task|
+        return unless task.is_a?(self)
+        delete_pending(task, delete).try &.as(self)
+      end
+    end
+
+    def self.find_pending(ids : Indexable, *, delete = false) : Array(self)?
+      Mel::Task.find_pending(ids, delete: false).try do |tasks|
+        tasks = tasks.select(self)
+        return if tasks.empty?
+        delete_pending(tasks, delete).try &.map(&.as self)
+      end
+    end
+
+    private def self.delete_pending(tasks : Indexable, delete)
+      false == delete ?
+        tasks :
+        Mel::Task.find_pending(tasks.map(&.id), delete: delete)
+    end
+
+    private def self.delete_pending(task, delete)
+      false == delete ? task : Mel::Task.find_pending(task.id, delete: delete)
     end
   end
 
-  def self.find_pending(count = -1, *, delete = false)
+  def self.find_pending(count : Int, *, delete = false)
     Query.find_pending(count, delete: delete).try { |values| from_json(values) }
+  end
+
+  def self.find_pending(id : String, *, delete = false)
+    Query.find_pending(id, delete: delete).try { |value| from_json(value) }
+  end
+
+  def self.find_pending(ids : Indexable, *, delete = false)
+    Query.find_pending(ids, delete: delete).try { |values| from_json(values) }
   end
 end
