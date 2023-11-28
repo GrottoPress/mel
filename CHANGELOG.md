@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Convert `Mel::Task` module to an `abstract class`
 - Convert `Mel::RecurringTask` module to an `abstract class`
 - Upgrade `jgaskins/redis` shard to v0.8
+- Make `Mel::Task#run` method only available to workers
 
 ### Removed
 - Remove `Mel::Task::Any` alias

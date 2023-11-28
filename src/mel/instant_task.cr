@@ -19,10 +19,6 @@ module Mel
       self.class.new(id, job.class.from_json(job.to_json), time, retries)
     end
 
-    private def schedule_next
-      dequeue
-    end
-
     private def log_args
       {
         id: id,

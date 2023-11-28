@@ -41,29 +41,6 @@ abstract class Mel::Task
     handle_error(error)
   end
 
-  def run(*, force = false) : Fiber?
-    return log_not_due unless force || due?
-
-    do_before_run
-    @attempts += 1
-
-    spawn(name: id) do
-      log_running
-      job.run
-    rescue error
-      log_errored(error)
-      retry_failed_task(error)
-    else
-      schedule_next
-      log_ran
-      do_after_run(true)
-    end
-  end
-
-  def due? : Bool
-    time <= Time.local
-  end
-
   def key : String
     Query.key(id)
   end
@@ -71,30 +48,6 @@ abstract class Mel::Task
   abstract def clone : self
 
   abstract def to_json(json : JSON::Builder)
-
-  private def retry_failed_task(error) : Nil
-    return if attempts < 1
-
-    next_retry_time.try do |time|
-      original = clone
-      original.attempts = attempts
-      original.retry_time = time
-      original.enqueue(force: true)
-    end || fail_task(error)
-  end
-
-  private def next_retry_time
-    return if attempts > retries.size
-    Time.local + retries[attempts - 1]
-  end
-
-  private def fail_task(error) : Nil
-    schedule_next
-    log_failed
-
-    handle_error(error)
-    do_after_run(false)
-  end
 
   private def normalize_retries(retries)
     case retries
