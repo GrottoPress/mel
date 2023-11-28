@@ -1,6 +1,6 @@
 abstract class Mel::Task
   module Query
-    def find_pending(count = -1, *, delete = false)
+    def find_pending(count = -1, *, delete = false) : Array(String)?
       return if count.zero?
       delete = false if delete.nil?
 
@@ -16,7 +16,7 @@ abstract class Mel::Task
       end
     end
 
-    def find(ids : Indexable, *, delete = false)
+    def find(ids : Indexable, *, delete = false) : Array(String)?
       return if ids.empty?
       return previous_def unless delete.nil?
 
@@ -28,7 +28,7 @@ abstract class Mel::Task
           redis.zadd(key, ["XX", worker_score] + scores_ids)
         end
 
-        values = values[0].as(Array)
+        values = values[0].as(Array).compact_map(&.as? String)
         values unless values.empty?
       end
     end

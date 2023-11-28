@@ -45,15 +45,15 @@ abstract class Mel::Task
       end
     end
 
-    def delete(id : String)
-      delete({id}).try &.first?.try &.as(String)
+    def delete(id : String) : String?
+      find(id, delete: true)
     end
 
-    def delete(ids : Indexable)
+    def delete(ids : Indexable) : String?
       find(ids, delete: true)
     end
 
-    def find_lt(time : Time, count = -1, *, delete = false)
+    def find_lt(time : Time, count = -1, *, delete = false) : Array(String)?
       return if count.zero?
 
       connect do
@@ -68,7 +68,7 @@ abstract class Mel::Task
       end
     end
 
-    def find_lte(time : Time, count = -1, *, delete = false)
+    def find_lte(time : Time, count = -1, *, delete = false) : Array(String)?
       return if count.zero?
 
       connect do
@@ -83,7 +83,7 @@ abstract class Mel::Task
       end
     end
 
-    def find(count : Int, *, delete = false)
+    def find(count : Int, *, delete = false) : Array(String)?
       return if count.zero?
 
       connect do
@@ -98,11 +98,11 @@ abstract class Mel::Task
       end
     end
 
-    def find(id : String, *, delete = false)
-      find({id}, delete: delete).try &.first?.try &.as(String)
+    def find(id : String, *, delete = false) : String?
+      find({id}, delete: delete).try(&.first?)
     end
 
-    def find(ids : Indexable, *, delete = false)
+    def find(ids : Indexable, *, delete = false) : Array(String)?
       return if ids.empty?
 
       connect do
@@ -117,7 +117,7 @@ abstract class Mel::Task
           end
         end
 
-        values = values[0].as(Array)
+        values = values[0].as(Array).compact_map(&.as? String)
         values unless values.empty?
       end
     end

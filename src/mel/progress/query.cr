@@ -5,7 +5,7 @@ struct Mel::Progress
     def initialize(@id : String)
     end
 
-    def key
+    def key : String
       self.class.key(id)
     end
 
@@ -25,18 +25,16 @@ struct Mel::Progress
 
       values = Mel.redis.multi do |redis|
         ids.each { |id| redis.get(key id) }
-      end.compact_map do |value|
-        value.as(String) if value
-      end
+      end.compact_map(&.as? String)
 
       values unless values.empty?
     end
 
-    def self.key
+    def self.key : String
       "#{Mel.settings.redis_key_prefix}:progress"
     end
 
-    def self.key(*parts : String)
+    def self.key(*parts : String) : String
       "#{key}:#{parts.join(':')}"
     end
 
