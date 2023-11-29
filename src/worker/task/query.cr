@@ -5,16 +5,14 @@ abstract class Mel::Task
       return previous_def unless delete.nil?
 
       connect do
-        scores_ids = ids.flat_map { |id| {worker_score, id.to_s}.each }
+        ids = ids.map(&.to_s)
+        scores_ids = ids.flat_map { |id| {worker_score, id}.each }
 
         values = Mel.redis.multi do |redis|
           redis.mget(keys ids)
           redis.zadd(pending_key, ["NX"] + scores_ids)
-          redis.zrem(key, ids.map(&.to_s))
-
-          ids.each do |id|
-            redis.run({"RENAME", key(id.to_s), pending_key(id.to_s)})
-          end
+          redis.zrem(key, ids)
+          ids.each { |id| redis.run({"RENAME", key(id), pending_key(id)}) }
         end
 
         values = values.first.as(Array).compact_map(&.as? String)
