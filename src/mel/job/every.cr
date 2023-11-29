@@ -5,7 +5,7 @@ module Mel::Job::Every
     def self.run_every(
       interval : Time::Span,
       for : Time::Span?,
-      id = UUID.random.to_s,
+      id = UUID.random.hexstring,
       retries = nil,
       redis = nil,
       force = false,
@@ -18,7 +18,7 @@ module Mel::Job::Every
     def self.run_every(
       interval : Time::Span,
       till : Time? = nil,
-      id = UUID.random.to_s,
+      id = UUID.random.hexstring,
       retries = nil,
       redis = nil,
       force = false,

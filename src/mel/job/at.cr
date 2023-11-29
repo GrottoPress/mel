@@ -4,7 +4,7 @@ module Mel::Job::At
 
     def self.run_at(
       time : Time,
-      id = UUID.random.to_s,
+      id = UUID.random.hexstring,
       retries = nil,
       redis = nil,
       force = false,
@@ -12,6 +12,7 @@ module Mel::Job::At
     ) : String?
       job = new(**job_args)
       task = Mel::InstantTask.new(id.to_s, job, time, retries)
+
       task.id if task.enqueue(redis, force: force)
     end
   end

@@ -3,7 +3,7 @@ module Mel::Job::Now
     include Mel::Job::Template
 
     def self.run(
-      id = UUID.random.to_s,
+      id = UUID.random.hexstring,
       retries = nil,
       redis = nil,
       force = false,
@@ -13,7 +13,7 @@ module Mel::Job::Now
     end
 
     def self.run_now(
-      id = UUID.random.to_s,
+      id = UUID.random.hexstring,
       retries = nil,
       redis = nil,
       force = false,

@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Convert `Mel::RecurringTask` module to an `abstract class`
 - Upgrade `jgaskins/redis` shard to v0.8
 - Make `Mel::Task#run` method only available to workers
+- Remove hyphens from default task IDs (UUIDs)
 
 ### Fixed
 - Avoid a single task running multiple times if using multiple workers

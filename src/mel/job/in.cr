@@ -4,7 +4,7 @@ module Mel::Job::In
 
     def self.run_in(
       delay : Time::Span,
-      id = UUID.random.to_s,
+      id = UUID.random.hexstring,
       retries = nil,
       redis = nil,
       force = false,

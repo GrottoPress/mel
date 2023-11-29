@@ -5,7 +5,7 @@ module Mel::Job::On
     def self.run_on(
       schedule : String,
       for : Time::Span?,
-      id = UUID.random.to_s,
+      id = UUID.random.hexstring,
       retries = nil,
       redis = nil,
       force = false,
@@ -18,7 +18,7 @@ module Mel::Job::On
     def self.run_on(
       schedule : String,
       till : Time? = nil,
-      id = UUID.random.to_s,
+      id = UUID.random.hexstring,
       retries = nil,
       redis = nil,
       force = false,
@@ -27,6 +27,7 @@ module Mel::Job::On
       job = new(**job_args)
       time = CronParser.new(schedule).next
       task = Mel::CronTask.new(id.to_s, job, time, retries, till, schedule)
+
       task.id if task.enqueue(redis, force: force)
     end
   end
