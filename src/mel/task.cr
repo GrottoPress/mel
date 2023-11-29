@@ -38,7 +38,7 @@ abstract class Mel::Task
     end
   rescue error
     handle_error(error)
-    do_after_enqueue(false)
+    do_after_dequeue(false)
   end
 
   def key : String
