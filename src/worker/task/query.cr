@@ -1,86 +1,90 @@
 abstract class Mel::Task
   module Query
-    def find(ids : Indexable, *, delete = false) : Array(String)?
-      return if ids.empty?
+    private LUA = <<-'LUA'
+      local function scores_ids(ids, score)
+        local results = {}
+
+        for _, value in ipairs(ids) do
+          table.insert(results, score)
+          table.insert(results, value)
+        end
+
+        return results
+      end
+
+      local unpack = table.unpack or unpack
+      local ids = redis.call('ZRANGEBYSCORE', KEYS[1], 0, ARGV[1], 'LIMIT', 0, ARGV[2])
+
+      if #ids ~= 0 then
+        redis.call('ZADD', KEYS[1], 'XX', unpack(scores_ids(ids, ARGV[3])))
+      end
+
+      return ids
+      LUA
+
+    def find_lt(
+      time : Time,
+      count : Int = -1,
+      *,
+      delete : Bool? = false
+    ) : Array(String)?
+      return if count.zero?
       return previous_def unless delete.nil?
 
       connect do
-        ids = ids.map(&.to_s)
-        scores_ids = ids.flat_map { |id| {worker_score, id}.each }
+        ids = Mel.redis
+          .eval(LUA, {key}, {"(#{time.to_unix}", count.to_s, worker_score})
+          .as(Array)
 
-        values = Mel.redis.multi do |redis|
-          redis.mget(keys ids)
-          redis.zadd(pending_key, ["NX"] + scores_ids)
-          redis.zrem(key, ids)
-          ids.each { |id| redis.run({"RENAME", key(id), pending_key(id)}) }
-        end
-
-        values = values.first.as(Array).compact_map(&.as? String)
-        values unless values.empty?
+        find(ids, delete: false)
       end
     end
 
-    def find_pending(count : Int, *, delete = false) : Array(String)?
+    def find_lte(
+      time : Time,
+      count : Int = -1,
+      *,
+      delete : Bool? = false
+    ) : Array(String)?
+      return if count.zero?
+      return previous_def unless delete.nil?
+
+      connect do
+        ids = Mel.redis
+          .eval(LUA, {key}, {time.to_unix.to_s, count.to_s, worker_score})
+          .as(Array)
+
+        find(ids, delete: false)
+      end
+    end
+
+    def find(count : Int, *, delete : Bool? = false) : Array(String)?
+      return if count.zero?
+      return previous_def unless delete.nil?
+
+      connect do
+        ids = Mel.redis
+          .eval(LUA, {key}, {"+inf", count.to_s, worker_score})
+          .as(Array)
+
+        find(ids, delete: false)
+      end
+    end
+
+    def find_pending(count : Int, *, delete : Bool = false) : Array(String)?
       return if count.zero?
 
       connect do
-        ids = Mel.redis.zrangebyscore(
-          pending_key,
-          worker_score,
-          worker_score,
-          {"0", count.to_s}
-        ).as(Array)
+        ids = Mel.redis
+          .zrangebyscore(key, worker_score, worker_score, {"0", count.to_s})
+          .as(Array)
 
-        find_pending(ids, delete: delete)
+        find(ids, delete: delete)
       end
-    end
-
-    def find_pending(id : String, *, delete = false) : String?
-      find_pending({id}, delete: delete).try(&.first?)
-    end
-
-    def find_pending(ids : Indexable, *, delete = false) : Array(String)?
-      return if ids.empty?
-
-      connect do
-        pending_keys = pending_keys(ids)
-
-        values = Mel.redis.multi do |redis|
-          redis.mget(pending_keys)
-
-          if delete
-            redis.zrem(pending_key, ids.map(&.to_s))
-            redis.del(pending_keys)
-          end
-        end
-
-        values = values.first.as(Array).compact_map(&.as? String)
-        values unless values.empty?
-      end
-    end
-
-    def delete_pending(id : String)
-      find_pending(id, delete: true)
-    end
-
-    def delete_pending(ids : Indexable)
-      find_pending(ids, delete: true)
-    end
-
-    def pending_key : String
-      key("pending")
-    end
-
-    def pending_key(*parts : String) : String
-      "#{pending_key}:#{parts.join(':')}"
-    end
-
-    def pending_keys(ids : Indexable)
-      ids.map { |id| pending_key(id.to_s) }
     end
 
     private def worker_score
-      Mel.settings.worker_id.to_s
+      "-#{Mel.settings.worker_id.abs}"
     end
   end
 end

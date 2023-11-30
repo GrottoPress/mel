@@ -53,22 +53,29 @@ abstract class Mel::Task
       find(ids, delete: true)
     end
 
-    def find_lt(time : Time, count = -1, *, delete = false) : Array(String)?
+    def find_lt(
+      time : Time,
+      count : Int = -1,
+      *,
+      delete : Bool = false
+    ) : Array(String)?
       return if count.zero?
 
       connect do
-        ids = Mel.redis.zrangebyscore(
-          key,
-          "0",
-          "(#{time.to_unix}",
-          {"0", count.to_s}
-        ).as(Array)
+        ids = Mel.redis
+          .zrangebyscore(key, "0", "(#{time.to_unix}", {"0", count.to_s})
+          .as(Array)
 
         find(ids, delete: delete)
       end
     end
 
-    def find_lte(time : Time, count = -1, *, delete = false) : Array(String)?
+    def find_lte(
+      time : Time,
+      count : Int = -1,
+      *,
+      delete : Bool = false
+    ) : Array(String)?
       return if count.zero?
 
       connect do
@@ -83,26 +90,23 @@ abstract class Mel::Task
       end
     end
 
-    def find(count : Int, *, delete = false) : Array(String)?
+    def find(count : Int, *, delete : Bool = false) : Array(String)?
       return if count.zero?
 
       connect do
-        ids = Mel.redis.zrangebyscore(
-          key,
-          "0",
-          "+inf",
-          {"0", count.to_s}
-        ).as(Array)
+        ids = Mel.redis
+          .zrangebyscore(key, "0", "+inf", {"0", count.to_s})
+          .as(Array)
 
         find(ids, delete: delete)
       end
     end
 
-    def find(id : String, *, delete = false) : String?
+    def find(id : String, *, delete : Bool = false) : String?
       find({id}, delete: delete).try(&.first?)
     end
 
-    def find(ids : Indexable, *, delete = false) : Array(String)?
+    def find(ids : Indexable, *, delete : Bool = false) : Array(String)?
       return if ids.empty?
 
       connect do

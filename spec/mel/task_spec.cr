@@ -184,7 +184,7 @@ describe Mel::Task do
       Mel::CronTask.find_pending(-1).should be_nil
       Mel::Task.find_pending(-1).should be_nil
 
-      Mel::InstantTask.find(2, delete: nil).try(&.size).should eq(2)
+      Mel::Task.find(2, delete: nil).try(&.size).should eq(2)
       Mel::InstantTask.find(-1).try(&.size).should eq(1)
 
       Mel::InstantTask.find_pending(-1).try(&.size).should eq(2)

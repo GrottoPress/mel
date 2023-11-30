@@ -61,7 +61,28 @@ abstract class Mel::Task
   end
 
   macro inherited
-    def self.find_lt(time : Time, count = -1, *, delete = false) : Array(self)?
+    def self.find_lt(
+      time : Time,
+      count : Int = -1,
+      *,
+      delete : Nil
+    ) : Array(self)?
+      \{% raise <<-ERROR %}
+        no overload matches '#{@type.name}.#{@def.name}' with types \
+        Time, Int, delete: Nil
+
+        Overloads are:
+         - #{@type.name}.#{@def.name}(time : Time, count : Int = -1, *, \
+         delete : Bool = false)
+        ERROR
+    end
+
+    def self.find_lt(
+      time : Time,
+      count : Int = -1,
+      *,
+      delete : Bool = false
+    ) : Array(self)?
       return if count.zero?
 
       Mel::Task.find_lt(time, -1, delete: false).try do |tasks|
@@ -71,7 +92,28 @@ abstract class Mel::Task
       end
     end
 
-    def self.find_lte(time : Time, count = -1, *, delete = false) : Array(self)?
+    def self.find_lte(
+      time : Time,
+      count : Int = -1,
+      *,
+      delete : Nil
+    ) : Array(self)?
+      \{% raise <<-ERROR %}
+        no overload matches '#{@type.name}.#{@def.name}' with types \
+        Time, Int, delete: Nil
+
+        Overloads are:
+         - #{@type.name}.#{@def.name}(time : Time, count : Int = -1, *, \
+           delete : Bool = false)
+        ERROR
+    end
+
+    def self.find_lte(
+      time : Time,
+      count : Int = -1,
+      *,
+      delete : Bool = false
+    ) : Array(self)?
       return if count.zero?
 
       Mel::Task.find_lte(time, -1, delete: false).try do |tasks|
@@ -81,7 +123,17 @@ abstract class Mel::Task
       end
     end
 
-    def self.find(count : Int, *, delete = false) : Array(self)?
+    def self.find(count : Int, *, delete : Nil)
+      \{% raise <<-ERROR %}
+        no overload matches '#{@type.name}.#{@def.name}' with types \
+        Int, delete: Nil
+
+        Overloads are:
+         - #{@type.name}.#{@def.name}(count : Int, *, delete : Bool = false)
+        ERROR
+    end
+
+    def self.find(count : Int, *, delete : Bool = false) : Array(self)?
       return if count.zero?
 
       Mel::Task.find(-1, delete: false).try do |tasks|
@@ -91,14 +143,14 @@ abstract class Mel::Task
       end
     end
 
-    def self.find(id : String, *, delete = false) : self?
+    def self.find(id : String, *, delete : Bool = false) : self?
       Mel::Task.find(id, delete: false).try do |task|
         return unless task.is_a?(self)
         delete(task, delete).try &.as(self)
       end
     end
 
-    def self.find(ids : Indexable, *, delete = false) : Array(self)?
+    def self.find(ids : Indexable, *, delete : Bool = false) : Array(self)?
       Mel::Task.find(ids, delete: false).try do |tasks|
         tasks = tasks.select(self)
         return if tasks.empty?
@@ -132,27 +184,27 @@ abstract class Mel::Task
     end
   end
 
-  def self.find_lt(time : Time, count = -1, *, delete = false)
+  def self.find_lt(time : Time, count : Int = -1, *, delete : Bool? = false)
     Query.find_lt(time, count, delete: delete).try do |values|
       from_json(values)
     end
   end
 
-  def self.find_lte(time : Time, count = -1, *, delete = false)
+  def self.find_lte(time : Time, count : Int = -1, *, delete : Bool? = false)
     Query.find_lte(time, count, delete: delete).try do |values|
       from_json(values)
     end
   end
 
-  def self.find(count : Int, *, delete = false)
+  def self.find(count : Int, *, delete : Bool? = false)
     Query.find(count, delete: delete).try { |values| from_json(values) }
   end
 
-  def self.find(id : String, *, delete = false)
+  def self.find(id : String, *, delete : Bool = false)
     Query.find(id, delete: delete).try { |value| from_json(value) }
   end
 
-  def self.find(ids : Indexable, *, delete = false)
+  def self.find(ids : Indexable, *, delete : Bool = false)
     Query.find(ids, delete: delete).try { |values| from_json(values) }
   end
 
