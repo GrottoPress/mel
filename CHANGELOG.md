@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Upgrade `jgaskins/redis` shard to v0.8
 - Make `Mel::Task#run` method only available to workers
 - Remove hyphens from default task IDs (UUIDs)
+- Revert default `.poll_interval` to 3 seconds
 
 ### Fixed
 - Avoid a single task running multiple times if using multiple workers

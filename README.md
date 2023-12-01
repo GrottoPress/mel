@@ -178,7 +178,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
 
      Mel.configure do |settings|
        settings.batch_size = -100
-       settings.poll_interval = 15.seconds
+       settings.poll_interval = 3.seconds
        settings.worker_id = ENV["WORKER_ID"].to_i
      end
 

@@ -4,7 +4,7 @@ require "./worker/**"
 module Mel
   private module Settings
     class_property batch_size : Int32 = -100
-    class_property poll_interval : Time::Span = 15.seconds
+    class_property poll_interval : Time::Span = 3.seconds
 
     class_setter worker_id : Int32?
 
