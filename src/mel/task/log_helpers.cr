@@ -30,7 +30,7 @@ abstract class Mel::Task
       end
 
       private def log_ran : Nil
-        Mel.log.info &.emit("Task complete", **log_args)
+        Mel.log.info &.emit("Task completed successfully", **log_args)
       end
 
       private def log_errored(error) : Nil
@@ -41,7 +41,12 @@ abstract class Mel::Task
       end
 
       private def log_failed : Nil
-        Mel.log.error &.emit("Task failed after #{attempts} attempts", **log_args)
+        attempts_str = 1 == attempts ? "attempt" : "attempts"
+
+        Mel.log.error &.emit(
+          "Task failed after #{attempts} #{attempts_str}",
+          **log_args
+        )
       end
 
       private def log_scheduling : Nil

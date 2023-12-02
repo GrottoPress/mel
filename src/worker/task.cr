@@ -11,11 +11,11 @@ abstract class Mel::Task
       log_running
       job.run
     rescue error
-      retry_failed_task(error)
       log_errored(error)
+      retry_failed_task(error)
     else
-      schedule_next
       log_ran
+      schedule_next
       do_after_run(true)
     end
   end
@@ -41,8 +41,8 @@ abstract class Mel::Task
   end
 
   private def fail_task(error) : Nil
-    schedule_next
     log_failed
+    schedule_next
 
     handle_error(error)
     do_after_run(false)
