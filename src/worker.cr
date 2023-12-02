@@ -52,7 +52,7 @@ module Mel
     return log_not_started unless state.started?
 
     log_stopping
-    sync { @@state = State::Stopping } unless state.stopped?
+    lock { @@state = State::Stopping } unless state.stopped?
 
     until state.stopped?
       Fiber.yield
@@ -67,7 +67,7 @@ module Mel
 
   private def run_tasks(pond)
     log_started
-    sync { @@state = State::Started }
+    lock { @@state = State::Started }
 
     while state.started?
       Task.find_lte(Time.local, batch_size(pond), delete: nil).try do |tasks|
@@ -81,7 +81,7 @@ module Mel
     pond.drain
 
     log_stopped
-    sync { @@state = State::Stopped }
+    lock { @@state = State::Stopped }
   end
 
   private def run_handlers
@@ -95,7 +95,7 @@ module Mel
     {0, settings.batch_size.abs - pond.size}.max
   end
 
-  private def sync
+  private def lock
     @@mutex.synchronize { yield }
   end
 
