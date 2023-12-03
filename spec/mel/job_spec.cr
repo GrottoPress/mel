@@ -238,9 +238,6 @@ describe Mel::Job do
       task = Mel::InstantTask.find(id)
       task.try(&.job.as(SendEmailJob).enqueue_before).should be_true
     end
-
-    pending "runs even if enqueue fails" do
-    end
   end
 
   describe "#after_enqueue" do
@@ -253,9 +250,6 @@ describe Mel::Job do
       task = Mel::InstantTask.find(id)
       task.try(&.enqueue)
       task.try(&.job.as(SendEmailJob).enqueue_after).should be_true
-    end
-
-    pending "runs even if enqueue fails" do
     end
   end
 
@@ -271,9 +265,6 @@ describe Mel::Job do
       task.try(&.dequeue)
       task.try(&.job.as(SendEmailJob).dequeue_before).should be_true
     end
-
-    pending "runs even if dequeue fails" do
-    end
   end
 
   describe "#after_dequeue" do
@@ -287,9 +278,6 @@ describe Mel::Job do
       task.try(&.job.as(SendEmailJob).dequeue_after).should be_false
       task.try(&.dequeue)
       task.try(&.job.as(SendEmailJob).dequeue_after).should be_true
-    end
-
-    pending "runs even if dequeue fails" do
     end
   end
 
