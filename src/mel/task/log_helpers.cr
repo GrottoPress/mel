@@ -41,7 +41,7 @@ abstract class Mel::Task
       end
 
       private def log_failed : Nil
-        attempts_str = 1 == attempts ? "attempt" : "attempts"
+        attempts_str = first_attempt? ? "attempt" : "attempts"
 
         Mel.log.error &.emit(
           "Task failed after #{attempts} #{attempts_str}",

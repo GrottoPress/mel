@@ -9,6 +9,7 @@ abstract class Mel::Task
 
     spawn(name: id) do
       log_running
+      set_run_time
       job.run
     rescue error
       log_errored(error)
@@ -46,6 +47,14 @@ abstract class Mel::Task
 
     handle_error(error)
     do_after_run(false)
+  end
+
+  private def set_run_time
+    self.time = Time.local if first_attempt?
+  end
+
+  private def first_attempt?
+    1 == attempts
   end
 
   macro inherited

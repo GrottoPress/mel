@@ -90,6 +90,15 @@ describe Mel::Task do
         Mel::PeriodicTask.find(id).try(&.attempts.> 0).should be_true
       end
     end
+
+    it "skips missed schedules" do
+      SendEmailJob.run_every(1.hour, address: "aa@bb.cc")
+
+      Timecop.travel(10.hours.from_now) do
+        Mel.start_and_stop
+        Mel::Task.find_lte(Time.local, -1).should be_nil
+      end
+    end
   end
 
   describe "#enqueue" do
