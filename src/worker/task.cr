@@ -5,7 +5,7 @@ abstract class Mel::Task
     return log_not_due unless force || due?
 
     do_before_run
-    @attempts += 1
+    self.attempts += 1
 
     spawn(name: id) do
       log_running
