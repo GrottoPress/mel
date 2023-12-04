@@ -3,13 +3,13 @@ require "./task/**"
 abstract class Mel::Task
   def run(*, force = false) : Fiber?
     return log_not_due unless force || due?
-
     do_before_run
+
     self.attempts += 1
+    set_run_time
 
     spawn(name: id) do
       log_running
-      set_run_time
       job.run
     rescue error
       log_errored(error)
