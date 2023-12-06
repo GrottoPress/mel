@@ -149,6 +149,14 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      DoSomeWork.run_every(10.minutes, for: 1.hour, arg_1: 5, arg_2: "value")
      ```
 
+     This will do the first run 10 minutes from now. If you would like to do the first run some other time, specify that in a `from:` argument:
+
+     ```crystal
+     # ->>> src/app/some_file.cr
+
+     DoSomeWork.run_every(10.minutes, from: Time.local, for: 1.hour, arg_1: 5, arg_2: "value")
+     ```
+
      Instead of `for:`, you may use `till:` and specify a `Time`. Leave those out to run forever.
 
    - Run on a Cron schedule:

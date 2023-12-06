@@ -21,6 +21,30 @@ describe Mel::Job::Every do
     Mel::PeriodicTask.find(id).should be_a(Mel::PeriodicTask)
   end
 
+  it "starts at specified time" do
+    address = "user@domain.tld"
+    id = "1001"
+
+    SendEmailEveryJob.run_every(
+      2.hours,
+      from: 10.days.from_now,
+      id: id,
+      address: address
+    )
+
+    Time::Location.local = Time::Location.load("Europe/Berlin")
+
+    Timecop.travel(6.days.from_now) do
+      task = Mel::PeriodicTask.find(id)
+      task.try(&.due?).should be_false
+    end
+
+    Timecop.travel(10.days.from_now) do
+      task = Mel::PeriodicTask.find(id)
+      task.try(&.due?).should be_true
+    end
+  end
+
   it "deletes task after given time" do
     address = "user@domain.tld"
     id = "1001"

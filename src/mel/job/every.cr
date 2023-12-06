@@ -5,6 +5,7 @@ module Mel::Job::Every
     def self.run_every(
       interval : Time::Span,
       for : Time::Span,
+      from : Time? = nil,
       id = UUID.random.hexstring,
       retries = nil,
       redis = nil,
@@ -12,20 +13,21 @@ module Mel::Job::Every
       **job_args
     )
       till = for.from_now
-      run_every(interval, till, id, retries, redis, force, **job_args)
+      run_every(interval, till, from, id, retries, redis, force, **job_args)
     end
 
     def self.run_every(
       interval : Time::Span,
       till : Time? = nil,
+      from : Time? = nil,
       id = UUID.random.hexstring,
       retries = nil,
       redis = nil,
       force = false,
       **job_args
     ) : String?
+      time = from || interval.abs.from_now
       job = new(**job_args)
-      time = interval.abs.from_now
 
       task = Mel::PeriodicTask.new(
         id.to_s,
