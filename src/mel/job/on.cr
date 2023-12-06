@@ -4,14 +4,14 @@ module Mel::Job::On
 
     def self.run_on(
       schedule : String,
-      for : Time::Span?,
+      for : Time::Span,
       id = UUID.random.hexstring,
       retries = nil,
       redis = nil,
       force = false,
       **job_args
     )
-      till = for.try(&.from_now)
+      till = for.from_now
       run_on(schedule, till, id, retries, redis, force, **job_args)
     end
 
