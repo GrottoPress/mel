@@ -5,7 +5,6 @@ describe Mel::Job::On do
     address = "user@domain.tld"
     id = "1001"
     schedule = "0 */2 * * *"
-
     cron = CronParser.new(schedule)
 
     SendEmailOnJob.run_on(schedule, id: id, address: address)
@@ -41,6 +40,32 @@ describe Mel::Job::On do
     end
 
     Mel::CronTask.find(id).should be_a(Mel::CronTask)
+  end
+
+  it "starts at specified time" do
+    address = "user@domain.tld"
+    id = "1001"
+    schedule = "0 */2 * * *"
+    cron = CronParser.new(schedule)
+
+    SendEmailOnJob.run_on(
+      schedule,
+      id: id,
+      from: 10.days.from_now,
+      address: address
+    )
+
+    Time::Location.local = Time::Location.load("Europe/Berlin")
+
+    Timecop.travel(cron.next(6.days.from_now)) do
+      task = Mel::CronTask.find(id)
+      task.try(&.due?).should be_false
+    end
+
+    Timecop.travel(cron.next(10.days.from_now)) do
+      task = Mel::CronTask.find(id)
+      task.try(&.due?).should be_true
+    end
   end
 
   it "deletes task after given time" do

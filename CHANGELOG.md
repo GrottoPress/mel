@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Add `from:` parameter to `Mel::Job::Every#run_every` methods
+- Add `from:` parameter to `Mel::Job::On#run_on` methods
 
 ## [0.17.2] - 2023-12-04
 

@@ -167,6 +167,14 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      DoSomeWork.run_on("0 */2 * * *", for: 6.hours, arg_1: 5, arg_2: "value")
      ```
 
+     This will do the first run relative to now. For instance, if the time now is 03:00, the first run would be at 04:00, the next run at 06:00, and so on. If you would like to do the first run relative to some other time, specify that in a `from:` argument:
+
+     ```crystal
+     # ->>> src/app/some_file.cr
+
+     DoSomeWork.run_on("0 */2 * * *", from: 3.days.from_now, for: 6.hours, arg_1: 5, arg_2: "value")
+     ```
+
      Instead of `for:`, you may use `till:` and specify a `Time`. Leave those out to run forever.
 
    The `DoSomeWork.run_*` methods accept the following additional arguments:
