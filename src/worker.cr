@@ -34,7 +34,7 @@ module Mel
     spawn { start }
 
     until state.started?
-      Fiber.yield
+      sleep 1.microsecond
     end
   end
 
@@ -55,7 +55,7 @@ module Mel
     lock { @@state = State::Stopping } unless state.stopped?
 
     until state.stopped?
-      Fiber.yield
+      sleep 1.microsecond
     end
   end
 

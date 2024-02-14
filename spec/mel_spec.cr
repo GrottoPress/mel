@@ -24,7 +24,7 @@ describe Mel do
 
       100_000.times do
         break if Mel.state.stopped?
-        Fiber.yield
+        sleep 1.microsecond
       end
 
       Mel.state.stopped?.should be_true
@@ -39,7 +39,7 @@ describe Mel do
 
       100_000.times do
         break if Mel.state.stopped?
-        Fiber.yield
+        sleep 1.microsecond
       end
 
       Mel.state.stopped?.should be_true
