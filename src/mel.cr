@@ -34,7 +34,7 @@ module Mel
   end
 
   def log
-    @@log ||= Log.for(self)
+    Log.for(self)
   end
 
   def redis
