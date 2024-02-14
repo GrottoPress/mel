@@ -1,5 +1,5 @@
 name: mel
-version: 0.18.0
+version: 0.18.1
 description: A scalable asynchronous event-driven jobs engine
 
 authors:
