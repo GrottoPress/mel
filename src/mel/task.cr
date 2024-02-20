@@ -56,7 +56,7 @@ abstract class Mel::Task
     in Indexable
       retries.map { |time| time.is_a?(Time::Span) ? time : time.seconds }.to_a
     in Nil
-      [1.second, 2.seconds]
+      [2.seconds, 4.seconds, 8.seconds, 16.seconds, 32.seconds]
     end
   end
 
