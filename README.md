@@ -179,7 +179,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
 
    The `DoSomeWork.run_*` methods accept the following additional arguments:
 
-   - `retries`: Number of times to attempt a task after it fails, before giving up. This could be specified as a simple integer (eg: `3`), or a list of backoffs (eg: `{2, 4, 1}`, or `{2.seconds, 4.seconds, 1.second}`). Default: `{2, 4, 8, 16, 32}`. A task fails when any exception is raised during run.
+   - `retries`: Number of times to attempt a task after it fails, before giving up. This could be specified as a simple integer (eg: `3`), or a list of backoffs (eg: `{2, 4, 1}`, or `{2.seconds, 4.seconds, 1.second}`). Default: `{2, 4, 8, 16}`. A task fails when any exception is raised during run.
 
 1. Start *Mel*:
 

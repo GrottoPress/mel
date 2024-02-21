@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased] - 
 
 ### Changed
-- Change default task `retries` to `[2, 4, 8, 16, 32]`
+- Change default task `retries` to `[2, 4, 8, 16]`
 
 ## [0.18.1] - 2024-02-14
 
