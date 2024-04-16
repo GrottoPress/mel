@@ -16,7 +16,7 @@ dependencies:
     version: ~> 0.4.0
   pond:
     github: GrottoPress/pond
-    version: ~> 1.0
+    version: ~> 2.0
   redis:
     github: jgaskins/redis
     version: ~> 0.8.0

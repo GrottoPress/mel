@@ -60,9 +60,7 @@ module Mel
   end
 
   private def run_pending_tasks(pond)
-    Task.find_pending(-1).try do |tasks|
-      tasks.each &.run(force: true).try { |fiber| pond << fiber }
-    end
+    Task.find_pending(-1).try &.each &.run(pond, force: true)
   end
 
   private def run_tasks(pond)
@@ -71,7 +69,7 @@ module Mel
 
     while state.started?
       Task.find_lte(Time.local, batch_size(pond), delete: nil).try do |tasks|
-        tasks.each &.run(force: true).try { |fiber| pond << fiber }
+        tasks.each &.run(pond, force: true)
       end
 
       sleep jittered_poll_interval

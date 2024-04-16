@@ -6,6 +6,6 @@ module Mel
   end
 
   def sync(task : Task?)
-    task.try &.run.try { |fiber| Pond.drain(fiber) }
+    Pond.drain { |pond| task.try &.run(pond) }
   end
 end
