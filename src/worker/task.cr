@@ -29,10 +29,10 @@ abstract class Mel::Task
     return if attempts < 1
 
     next_retry_time.try do |time|
-      original = clone
-      original.attempts = attempts
-      original.retry_time = time
-      original.enqueue(force: true)
+      new_task = clone
+      new_task.attempts = attempts
+      new_task.retry_time = time
+      new_task.enqueue(force: true)
     end || fail_task(error)
   end
 
