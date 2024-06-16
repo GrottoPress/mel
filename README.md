@@ -557,8 +557,10 @@ struct SomeJob
   def after_run(success)
     return @progress.fail unless success
 
-    SomeStep.run(progress: @progress)
-    @progress.move(50) # <= Move to 50%
+    redis.multi do |redis|
+      SomeStep.run(redis: redis, progress: @progress)
+      @progress.move(50, redis) # <= Move to 50%
+    end
   end
 
   struct SomeStep
@@ -572,8 +574,10 @@ struct SomeJob
     def after_run(success)
       return @progress.fail unless success
 
-      SomeOtherStep.run(progress: @progress)
-      @progress.move(80) # <= Move to 80%
+      redis.multi do |redis|
+        SomeOtherStep.run(redis: redis, progress: @progress)
+        @progress.move(80, redis) # <= Move to 80%
+      end
     end
   end
 
