@@ -809,7 +809,7 @@ If it is a negative integer `-N`  (other than `-1`), the number of due tasks pul
 
    BaseEmail.configure do |settings|
      # ...
-     settings.deliver_later_strategy = Mel::Carbon::DeliverLaterStrategy.new
+     settings.deliver_later_strategy = Mel::Carbon::DeliverLater.new
      # ...
    end
    ```

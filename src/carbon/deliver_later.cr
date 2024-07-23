@@ -1,4 +1,4 @@
-class Mel::Carbon::DeliverLaterStrategy < Carbon::DeliverLaterStrategy
+class Mel::Carbon::DeliverLater < Carbon::DeliverLaterStrategy
   def run(email, &block)
     {% begin %}
     case email

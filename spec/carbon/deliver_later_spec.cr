@@ -1,6 +1,6 @@
 require "../spec_helper"
 
-describe Mel::Carbon::DeliverLaterStrategy do
+describe Mel::Carbon::DeliverLater do
   it "sends email" do
     email = WelcomeEmail.new("Mary", "mary@domain.tld")
 
