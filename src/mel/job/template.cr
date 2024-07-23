@@ -1,4 +1,6 @@
 module Mel::Job::Template
+  abstract def run
+
   macro included
     include JSON::Serializable
 
