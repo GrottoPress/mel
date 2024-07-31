@@ -4,9 +4,9 @@
 
 In *Mel*, a scheduled job is called a *task*. A single job may be scheduled in multiple ways, yielding multiple tasks from the same job.
 
-*Mel* schedules all tasks in *Redis*, as a set of task `id`s sorted by their times of next run. For recurring tasks, the next run is scheduled in *Redis* right after the current run completes.
+Mel schedules all tasks in the chosen storage backend as a set of task `id`s sorted by their times of next run. For recurring tasks, the next run is scheduled right after the current run completes.
 
-This makes *Redis* the *source of truth* for schedules, allowing to easily scale out *Mel* to multiple instances (called *workers*), or replace or stop workers without losing schedules.
+This makes the storage backend the *source of truth* for schedules, allowing to easily scale out *Mel* to multiple instances (called *workers*), or replace or stop workers without losing schedules.
 
 *Mel* supports *bulk scheduling* of jobs as a single atomic unit. There's also support for *sequential scheduling* to track a series of jobs and perform some action after they are all complete.
 
@@ -26,11 +26,13 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
    dependencies:
      mel:
        github: GrottoPress/mel
+     #redis: # Uncomment if using the Redis backend
+     #  github: jgaskins/redis
    ```
 
 1. Run `shards update`
 
-1. Require and configure *Mel*:
+1. Require and configure *Mel* in your app (we'll configure workers later):
 
    ```crystal
    # ->>> src/app/config.cr
@@ -43,16 +45,35 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
 
    Mel.configure do |settings|
      settings.error_handler = ->(error : Exception) { puts error.message }
-     settings.redis_url = "redis://localhost:6379/0?initial_pool_size=5&max_idle_pool_size=10"
-     settings.redis_key_prefix = "mel"
      settings.timezone = Time::Location.load("Africa/Accra")
    end
 
    Log.setup(Mel.log.source, :info, Log::IOBackend.new)
-   Redis::Connection::LOG.level = :info
+   # Redis::Connection::LOG.level = :info # Uncomment if using the Redis backend
 
    # ...
    ```
+
+   - Using the Redis backend
+
+     ```crystal
+     # ->>> src/app/config.cr
+
+     # ...
+
+     require "mel/redis"
+
+     Mel.configure do |settings|
+       # ...
+       settings.store = Mel::Redis.new(
+         "redis://localhost:6379/0",
+         namespace: "mel"
+       )
+       # ...
+     end
+
+     # ...
+     ```
 
 ## Usage
 
@@ -93,13 +114,13 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      end
 
      # Called in the main fiber before enqueueing the task in
-     # Redis.
+     # the store.
      def before_enqueue
        # ...
      end
 
      # Called in the main fiber after enqueueing the task in
-     # Redis. `success` is `true` only if the enqueue succeeded.
+     # the store. `success` is `true` only if the enqueue succeeded.
      def after_enqueue(success)
        if success
          # ...
@@ -188,7 +209,7 @@ This makes *Redis* the *source of truth* for schedules, allowing to easily scale
      ```crystal
      # ->>> src/worker.cr
 
-     require "mel/worker"
+     require "mel"
 
      require "./app/**"
 
@@ -369,7 +390,7 @@ Dynamic task IDs may be OK for *triggered* jobs (jobs triggered by some kind of 
 
 However, there may be jobs that are scheduled unconditionally when your app starts (*global* jobs). For example, sending invoices at the beginning of every month. You should specify unique **static** IDs for such tasks.
 
-Otherwise, every time the app (re)starts, jobs are scheduled again, each time with a different set of IDs. *Redis* would accept the new schedules because the IDs are different, resulting in duplicated scheduling of the same jobs.
+Otherwise, every time the app (re)starts, jobs are scheduled again, each time with a different set of IDs. The store would accept the new schedules because the IDs are different, resulting in duplicated scheduling of the same jobs.
 
 This is particularly important if you run multiple instances of your app. Hardcoding IDs for *global* jobs means that all instances hold the same IDs, so cannot reschedule a job that has already been scheduled by another instance.
 
@@ -418,10 +439,9 @@ struct SendAllEmails
 
     # Pushes all jobs atomically, at the end of the block.
     #
-    # There's also `redis#pipeline(&)`, if you do not need the atomicity.
-    redis.multi do |redis|
-      # Pass `redis` to `.run_*`.
-      @users.each { |user| SendEmail.run(redis: redis, user: user) }
+    transaction do |store|
+      # Pass `store` to `.run_*`.
+      @users.each { |user| SendEmail.run(store: store, user: user) }
     end
   end
 
@@ -557,9 +577,9 @@ struct SomeJob
   def after_run(success)
     return @progress.fail unless success
 
-    redis.multi do |redis|
-      SomeStep.run(redis: redis, progress: @progress)
-      @progress.move(50, redis) # <= Move to 50%
+    transaction do |store|
+      SomeStep.run(store: store, progress: @progress)
+      @progress.move(50, store) # <= Move to 50%
     end
   end
 
@@ -574,9 +594,9 @@ struct SomeJob
     def after_run(success)
       return @progress.fail unless success
 
-      redis.multi do |redis|
-        SomeOtherStep.run(redis: redis, progress: @progress)
-        @progress.move(80, redis) # <= Move to 80%
+      transaction do |store|
+        SomeOtherStep.run(store: store, progress: @progress)
+        @progress.move(80, store) # <= Move to 80%
       end
     end
   end
@@ -647,7 +667,7 @@ end
 
 A *Mel* worker waits for all running tasks to complete before exiting, if it received a `Signal::INT` or a `Signal::TERM`, or if you called `Mel.stop` somewhere in your code. This means jobs are never lost mid-flight.
 
-Jobs are not lost even if there is a force shutdown of the worker process, since *Mel* does not delete a task from *Redis* until it is complete. The worker can pick off where it left off when it comes back online.
+Jobs are not lost even if there is a force shutdown of the worker process, since *Mel* does not delete a task from the store until it is complete. The worker can pick off where it left off when it comes back online.
 
 *Mel* relies on the `worker_id` setting to achieve this. Each worker, therefore, must set a *unique*, *static* integer ID, so it knows which *pending* tasks it owns.
 

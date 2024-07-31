@@ -8,10 +8,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased] - 
 
 ### Added
+- Add support for custom storage backends
 - Add `Mel::Job::Template#run` abstract method
 
 ### Changed
 - Rename `Mel::Carbon::DeliverLaterStrategy` to `DeliverLater`
+- Remove `src/worker.cr`
 
 ## [0.20.0] - 2024-04-16
 

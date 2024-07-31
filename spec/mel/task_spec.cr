@@ -96,7 +96,7 @@ describe Mel::Task do
 
       Timecop.travel(10.hours.from_now) do
         Mel.start_and_stop
-        Mel::Task.find_lte(Time.local, -1).should be_nil
+        Mel::Task.find_due(Time.local, -1).should be_nil
       end
     end
   end
@@ -205,22 +205,7 @@ describe Mel::Task do
     end
   end
 
-  describe ".find_lt" do
-    it "returns all tasks whose times are past due" do
-      address = "user@domain.tld"
-      later = 2.hour.from_now
-
-      SendEmailJob.run(address: address)
-      SendEmailJob.run_in(1.hour, address: address)
-      SendEmailJob.run_at(later, address: address)
-
-      Mel::InstantTask.find(-1).try(&.size).should eq(3)
-      Mel::InstantTask.find_lt(later).try(&.size).should eq(2)
-      Mel::InstantTask.find_lt(later, 1).try(&.size).should eq(1)
-    end
-  end
-
-  describe ".find_lte" do
+  describe ".find_due" do
     it "returns all tasks whose times are either due or past due" do
       address = "user@domain.tld"
       later = 2.hours.from_now
@@ -230,8 +215,8 @@ describe Mel::Task do
       SendEmailJob.run_at(4.hours.from_now, address: address)
 
       Mel::InstantTask.find(-1).try(&.size).should eq(3)
-      Mel::InstantTask.find_lte(later).try(&.size).should eq(2)
-      Mel::InstantTask.find_lte(later, 1).try(&.size).should eq(1)
+      Mel::InstantTask.find_due(later).try(&.size).should eq(2)
+      Mel::InstantTask.find_due(later, 1).try(&.size).should eq(1)
     end
   end
 end

@@ -42,6 +42,10 @@ module Mel
       )
     end
 
+    private def next_time : Time
+      time + interval
+    end
+
     private def log_args
       {
         id: id,

@@ -8,12 +8,12 @@ module Mel::Job::On
       from : Time = Time.local,
       id = UUID.random.hexstring,
       retries = nil,
-      redis = nil,
+      store = nil,
       force = false,
       **job_args
     )
       till = for.from_now
-      run_on(schedule, till, from, id, retries, redis, force, **job_args)
+      run_on(schedule, till, from, id, retries, store, force, **job_args)
     end
 
     def self.run_on(
@@ -22,7 +22,7 @@ module Mel::Job::On
       from : Time = Time.local,
       id = UUID.random.hexstring,
       retries = nil,
-      redis = nil,
+      store = nil,
       force = false,
       **job_args
     ) : String?
@@ -30,7 +30,7 @@ module Mel::Job::On
       job = new(**job_args)
       task = Mel::CronTask.new(id.to_s, job, time, retries, till, schedule)
 
-      task.id if task.enqueue(redis, force: force)
+      task.id if task.enqueue(store, force: force)
     end
   end
 end

@@ -12,9 +12,9 @@ struct ProgressJob
   end
 
   def after_run(success)
-    redis.multi do |redis|
-      SomeStep.run(redis: redis, progress: @progress, retries: 0)
-      @progress.move(50, redis)
+    transaction do |store|
+      SomeStep.run(store: store, progress: @progress, retries: 0)
+      @progress.move(50, store)
     end
   end
 
@@ -36,9 +36,9 @@ struct ProgressJob
     end
 
     def after_run(success)
-      redis.multi do |redis|
-        SomeOtherStep.run(redis: redis, progress: @progress, retries: 0)
-        @progress.move(80, redis)
+      transaction do |store|
+        SomeOtherStep.run(store: store, progress: @progress, retries: 0)
+        @progress.move(80, store)
       end
     end
   end

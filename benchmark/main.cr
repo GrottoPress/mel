@@ -16,14 +16,14 @@
 require "benchmark"
 
 require "../src/spec"
+require "../src/redis"
 
 ITERATIONS = ENV["ITERATIONS"]?.try(&.to_i) || 100_000
 
 Mel.configure do |settings|
   settings.batch_size = ENV["BATCH_SIZE"]?.try(&.to_i) || 10_000
   settings.poll_interval = 1.microsecond
-  settings.redis_key_prefix = "melbench"
-  settings.redis_url = ENV["REDIS_URL"]
+  settings.store = Mel::Redis.new(ENV["REDIS_URL"], "melbench")
   settings.worker_id = ENV["WORKER_ID"].to_i
 end
 
@@ -37,17 +37,17 @@ struct DoNothing
 end
 
 Benchmark.bm do |job|
-  Mel::Task::Query.truncate
+  Mel.settings.store.try(&.truncate)
 
   job.report("Sequential schedule #{ITERATIONS} jobs") do
     ITERATIONS.times { DoNothing.run(retries: 0) }
   end
 
-  Mel::Task::Query.truncate
+  Mel.settings.store.try(&.truncate)
 
   job.report("Bulk schedule #{ITERATIONS} jobs") do
-    Mel.redis.multi do |redis|
-      ITERATIONS.times { DoNothing.run(redis: redis, retries: 0) }
+    Mel.transaction do |store|
+      ITERATIONS.times { DoNothing.run(store: store, retries: 0) }
     end
   end
 
@@ -56,5 +56,5 @@ Benchmark.bm do |job|
 
   job.report("Run #{ITERATIONS} scheduled jobs") { Mel.start_and_stop(batches) }
 
-  Mel::Task::Query.truncate
+  Mel.settings.store.try(&.truncate)
 end

@@ -7,8 +7,8 @@ class CounterJob
   def run
     return if @max < 1
 
-    redis.multi do |redis|
-      @max.times { |count| CountJob.run(count: count, redis: redis) }
+    transaction do |store|
+      @max.times { |count| CountJob.run(count: count, store: store) }
     end
   end
 end

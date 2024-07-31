@@ -8,5 +8,6 @@ require "../src/spec"
 require "./setup/**"
 require "./support/**"
 require "../src/carbon"
+require "../src/redis"
 
 include Carbon::Expectations

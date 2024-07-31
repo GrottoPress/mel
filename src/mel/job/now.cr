@@ -5,17 +5,17 @@ module Mel::Job::Now
     def self.run(
       id = UUID.random.hexstring,
       retries = nil,
-      redis = nil,
+      store = nil,
       force = false,
       **job_args
     )
-      run_now(id, retries, redis, force, **job_args)
+      run_now(id, retries, store, force, **job_args)
     end
 
     def self.run_now(
       id = UUID.random.hexstring,
       retries = nil,
-      redis = nil,
+      store = nil,
       force = false,
       **job_args
     ) : String?
@@ -23,7 +23,7 @@ module Mel::Job::Now
       time = Time.local
       task = Mel::InstantTask.new(id.to_s, job, time, retries)
 
-      task.id if task.enqueue(redis, force: force)
+      task.id if task.enqueue(store, force: force)
     end
   end
 end

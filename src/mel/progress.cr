@@ -10,29 +10,25 @@ struct Mel::Progress
   def initialize(@id : String, @description : String)
   end
 
-  def key : String
-    Query.new(@id).key
+  def succeed(store = nil)
+    move(END, store)
   end
 
-  def succeed(redis = nil)
-    move(END, redis)
+  def fail(store = nil)
+    move(FAIL, store)
   end
 
-  def fail(redis = nil)
-    move(FAIL, redis)
+  def start(store = nil)
+    move(START, store)
   end
 
-  def start(redis = nil)
-    move(START, redis)
-  end
-
-  def move(to value : Int, redis = nil)
+  def move(to value : Int, store = nil)
     value = value.clamp(FAIL, END)
-    Query.new(id).set(value, @description, redis)
+    Mel.settings.store.try &.set_progress(id, value, @description, store)
   end
 
-  def self.start(id : String, description : String, redis = nil) : self
-    new(id, description).tap(&.start redis)
+  def self.start(id : String, description : String, store = nil) : self
+    new(id, description).tap(&.start store)
   end
 
   def self.track(id : String)
@@ -40,7 +36,7 @@ struct Mel::Progress
   end
 
   def self.track(ids : Indexable)
-    Query.get(ids).try &.map do |value|
+    Mel.settings.store.try &.get_progress(ids).try &.map do |value|
       Report.from_json(value)
     end.try do |reports|
       reports unless reports.empty?

@@ -17,9 +17,6 @@ dependencies:
   pond:
     github: GrottoPress/pond
     version: ~> 2.0
-  redis:
-    github: jgaskins/redis
-    version: ~> 0.8.0
 
 development_dependencies:
   ameba:
@@ -28,6 +25,9 @@ development_dependencies:
   carbon:
     github: luckyframework/carbon
     version: ~> 0.2.0
+  redis:
+    github: jgaskins/redis
+    version: ~> 0.8.0
   timecop:
     github: crystal-community/timecop.cr
     version: ~> 0.5.0

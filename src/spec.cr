@@ -1,4 +1,4 @@
-require "./worker"
+require "./mel"
 
 module Mel
   def start_and_stop(count : Int = 1)

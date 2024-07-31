@@ -8,12 +8,12 @@ module Mel::Job::Every
       from : Time? = nil,
       id = UUID.random.hexstring,
       retries = nil,
-      redis = nil,
+      store = nil,
       force = false,
       **job_args
     )
       till = for.from_now
-      run_every(interval, till, from, id, retries, redis, force, **job_args)
+      run_every(interval, till, from, id, retries, store, force, **job_args)
     end
 
     def self.run_every(
@@ -22,7 +22,7 @@ module Mel::Job::Every
       from : Time? = nil,
       id = UUID.random.hexstring,
       retries = nil,
-      redis = nil,
+      store = nil,
       force = false,
       **job_args
     ) : String?
@@ -38,7 +38,7 @@ module Mel::Job::Every
         interval
       )
 
-      task.id if task.enqueue(redis, force: force)
+      task.id if task.enqueue(store, force: force)
     end
   end
 end

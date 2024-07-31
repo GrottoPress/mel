@@ -35,6 +35,10 @@ module Mel
       )
     end
 
+    private def next_time : Time
+      CronParser.new(schedule).next(time.to_local)
+    end
+
     private def log_args
       {
         id: id,

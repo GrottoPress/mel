@@ -11,15 +11,18 @@ abstract class Mel::Task
   protected setter attempts : Int32
   protected property retry_time : Time?
 
+  abstract def clone : self
+  abstract def to_json(json : JSON::Builder)
+
   def initialize(@id, @job, @time, retries)
     @retries = normalize_retries(retries)
   end
 
-  def enqueue(redis = nil, *, force = false)
+  def enqueue(store = nil, *, force = false)
     do_before_enqueue
     log_enqueueing
 
-    Query.add(self, redis, force: force).tap do
+    Mel.settings.store.try &.add(self, store, force: force).tap do
       log_enqueued
       do_after_enqueue(true)
     end
@@ -32,7 +35,7 @@ abstract class Mel::Task
     do_before_dequeue
     log_dequeueing
 
-    Query.delete(id).tap do
+    Mel.settings.store.try &.delete(id).tap do
       log_dequeued
       do_after_dequeue(true)
     end
@@ -41,13 +44,61 @@ abstract class Mel::Task
     do_after_dequeue(false)
   end
 
-  def key : String
-    Query.key(id)
+  def run(pond : Pond, *, force = false) : Fiber?
+    return log_not_due unless force || due?
+    do_before_run
+
+    self.attempts += 1
+    set_run_time
+
+    pond.fill(name: id) do
+      log_running
+      job.run
+    rescue error
+      log_errored(error)
+      retry_failed_task(error)
+    else
+      log_ran
+      schedule_next
+      do_after_run(true)
+    end
   end
 
-  abstract def clone : self
+  def due?(at time = Time.local) : Bool
+    self.time <= time
+  end
 
-  abstract def to_json(json : JSON::Builder)
+  private def retry_failed_task(error) : Nil
+    return if attempts < 1
+
+    next_retry_time.try do |time|
+      new_task = clone
+      new_task.attempts = attempts
+      new_task.retry_time = time
+      new_task.enqueue(force: true)
+    end || fail_task(error)
+  end
+
+  private def next_retry_time
+    return if attempts > retries.size
+    Time.local + retries[attempts - 1]
+  end
+
+  private def fail_task(error) : Nil
+    log_failed
+    schedule_next
+
+    handle_error(error)
+    do_after_run(false)
+  end
+
+  private def set_run_time
+    self.time = Time.local if first_attempt?
+  end
+
+  private def first_attempt?
+    1 == attempts
+  end
 
   private def normalize_retries(retries)
     case retries
@@ -61,76 +112,18 @@ abstract class Mel::Task
   end
 
   macro inherited
-    def self.find_lt(
-      time : Time,
-      count : Int = -1,
-      *,
-      delete : Nil
-    ) : Array(self)?
-      \{% raise <<-ERROR %}
-        no overload matches '#{@type.name}.#{@def.name}' with types \
-        Time, Int, delete: Nil
-
-        Overloads are:
-         - #{@type.name}.#{@def.name}(time : Time, count : Int = -1, *, \
-         delete : Bool = false)
-        ERROR
-    end
-
-    def self.find_lt(
-      time : Time,
-      count : Int = -1,
-      *,
+    def self.find_due(
+      at time = Time.local,
+      count : Int = -1, *,
       delete : Bool = false
     ) : Array(self)?
       return if count.zero?
 
-      Mel::Task.find_lt(time, -1, delete: false).try do |tasks|
+      Mel::Task.find_due(time, -1, delete: false).try do |tasks|
         tasks = resize(tasks.select(self), count)
         return if tasks.empty?
         delete(tasks, delete).try &.map(&.as self)
       end
-    end
-
-    def self.find_lte(
-      time : Time,
-      count : Int = -1,
-      *,
-      delete : Nil
-    ) : Array(self)?
-      \{% raise <<-ERROR %}
-        no overload matches '#{@type.name}.#{@def.name}' with types \
-        Time, Int, delete: Nil
-
-        Overloads are:
-         - #{@type.name}.#{@def.name}(time : Time, count : Int = -1, *, \
-           delete : Bool = false)
-        ERROR
-    end
-
-    def self.find_lte(
-      time : Time,
-      count : Int = -1,
-      *,
-      delete : Bool = false
-    ) : Array(self)?
-      return if count.zero?
-
-      Mel::Task.find_lte(time, -1, delete: false).try do |tasks|
-        tasks = resize(tasks.select(self), count)
-        return if tasks.empty?
-        delete(tasks, delete).try &.map(&.as self)
-      end
-    end
-
-    def self.find(count : Int, *, delete : Nil)
-      \{% raise <<-ERROR %}
-        no overload matches '#{@type.name}.#{@def.name}' with types \
-        Int, delete: Nil
-
-        Overloads are:
-         - #{@type.name}.#{@def.name}(count : Int, *, delete : Bool = false)
-        ERROR
     end
 
     def self.find(count : Int, *, delete : Bool = false) : Array(self)?
@@ -153,6 +146,16 @@ abstract class Mel::Task
     def self.find(ids : Indexable, *, delete : Bool = false) : Array(self)?
       Mel::Task.find(ids, delete: false).try do |tasks|
         tasks = tasks.select(self)
+        return if tasks.empty?
+        delete(tasks, delete).try &.map(&.as self)
+      end
+    end
+
+    def self.find_pending(count : Int, *, delete : Bool = false) : Array(self)?
+      return if count.zero?
+
+      Mel::Task.find_pending(-1, delete: false).try do |tasks|
+        tasks = resize(tasks.select(self), count)
         return if tasks.empty?
         delete(tasks, delete).try &.map(&.as self)
       end
@@ -184,28 +187,40 @@ abstract class Mel::Task
     end
   end
 
-  def self.find_lt(time : Time, count : Int = -1, *, delete : Bool? = false)
-    Query.find_lt(time, count, delete: delete).try do |values|
-      from_json(values)
-    end
-  end
-
-  def self.find_lte(time : Time, count : Int = -1, *, delete : Bool? = false)
-    Query.find_lte(time, count, delete: delete).try do |values|
-      from_json(values)
+  def self.find_due(
+    at time = Time.local,
+    count : Int = -1, *,
+    delete : Bool? = false
+  )
+    Mel.settings.store.try do |store|
+      store.find_due(time, count, delete: delete).try do |values|
+        from_json(values)
+      end
     end
   end
 
   def self.find(count : Int, *, delete : Bool? = false)
-    Query.find(count, delete: delete).try { |values| from_json(values) }
+    Mel.settings.store.try &.find(count, delete: delete).try do |values|
+      from_json(values)
+    end
   end
 
   def self.find(id : String, *, delete : Bool = false)
-    Query.find(id, delete: delete).try { |value| from_json(value) }
+    Mel.settings.store.try &.find(id, delete: delete).try do |value|
+      from_json(value)
+    end
   end
 
   def self.find(ids : Indexable, *, delete : Bool = false)
-    Query.find(ids, delete: delete).try { |values| from_json(values) }
+    Mel.settings.store.try &.find(ids, delete: delete).try do |values|
+      from_json(values)
+    end
+  end
+
+  def self.find_pending(count : Int, *, delete : Bool = false)
+    Mel.settings.store.try &.find_pending(count, delete: delete).try do |values|
+      from_json(values)
+    end
   end
 
   def self.from_json(values : Indexable)
