@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 - Add support for custom storage backends
+- Add memory storage backend
 - Add `Mel::Job::Template#run` abstract method
 
 ### Changed

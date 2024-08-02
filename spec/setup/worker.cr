@@ -19,7 +19,7 @@ Spec.around_each do |spec|
     next spec.run
   end
 
-  {Mel::Redis.new(ENV["REDIS_URL"])}.each do |store|
+  {Mel::Memory.new, Mel::Redis.new(ENV["REDIS_URL"])}.each do |store|
     Mel.settings.store = store
     tasks.call
     spec.run

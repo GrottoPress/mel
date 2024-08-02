@@ -75,6 +75,28 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
      # ...
      ```
 
+   - Using the Memory backend (Not for production use)
+
+     ```crystal
+     # ->>> src/app/config.cr
+
+     # ...
+
+     require "mel"
+
+     Mel.configure do |settings|
+       # ...
+       settings.store = Mel::Memory.new
+       # ...
+     end
+
+     # ...
+     ```
+
+   - Skip storage
+
+     You may disable storage altogether by setting `Mel.settings.store` to `nil` (This is the default).
+
 ## Usage
 
 1. Define job:
