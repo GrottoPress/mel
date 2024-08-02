@@ -8,7 +8,7 @@ module Mel
   #
   #   You may use this for tests or demos.
   class Memory
-    alias Progress = Hash(String, String)
+    alias Progress = Hash(String, ProgressEntry)
     alias Queue = Hash(String, Int64)
     alias Tasks = Hash(String, String)
 
@@ -103,7 +103,16 @@ module Mel
     def get_progress(ids : Indexable) : Array(String)?
       return if ids.empty?
 
-      values = ids.compact_map { |id| @progress[id]? }
+      values = lock do
+        ids.compact_map do |id|
+          @progress[id]?.try do |entry|
+            next entry.value unless entry.expired?
+            @progress.delete(id)
+            nil
+          end
+        end
+      end
+
       values unless values.empty?
     end
 
@@ -147,7 +156,21 @@ module Mel
 
       def set_progress(id : String, value : Int, description : String)
         report = Mel::Progress::Report.new(id, description, value)
-        @progress[id] = report.to_json
+        @progress[id] = ProgressEntry.new(report.to_json)
+      end
+    end
+
+    struct ProgressEntry
+      getter :value
+
+      getter expire : Time?
+
+      def initialize(@value : String)
+        @expire = Mel.settings.progress_expiry.try(&.from_now)
+      end
+
+      def expired? : Bool
+        !!expire.try { |expire| expire <= Time.local }
       end
     end
   end
