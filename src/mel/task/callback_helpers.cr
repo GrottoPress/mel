@@ -1,7 +1,7 @@
 abstract class Mel::Task
   module CallbackHelpers
     macro included
-      include Helpers
+      include Mel::Helpers
 
       private def do_before_run : Bool
         job.before_run
