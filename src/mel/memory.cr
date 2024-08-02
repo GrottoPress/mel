@@ -82,7 +82,10 @@ module Mel
       return if ids.empty?
 
       values = lock do
-        ids.compact_map { |id| delete ? @tasks.delete(id) : @tasks[id]? }
+        ids.compact_map do |id|
+          @queue.delete(id) if delete
+          delete ? @tasks.delete(id) : @tasks[id]?
+        end
       end
 
       values unless values.empty?
