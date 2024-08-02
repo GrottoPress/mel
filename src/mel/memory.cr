@@ -96,6 +96,7 @@ module Mel
     end
 
     def truncate
+      @queue.clear
       @tasks.clear
     end
 
