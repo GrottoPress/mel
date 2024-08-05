@@ -131,7 +131,7 @@ module Mel
 
     def transaction(& : Transaction -> _)
       @client.multi do |redis|
-        yield Transaction.new(redis, key)
+        yield Transaction.new(self, redis)
       end
     end
 
@@ -161,38 +161,42 @@ module Mel
     struct Transaction
       include Store::Transaction
 
-      def initialize(@client : ::Redis::Transaction, @key : Key)
+      def initialize(@redis : Redis, @client : ::Redis::Transaction)
       end
 
-      def self.new(url : String, namespace = :mel)
-        new URI.parse(url), namespace
+      def self.new(redis : Redis, url : String)
+        new redis, URI.parse(url)
       end
 
-      def self.new(url : URI, namespace = :mel)
-        new ::Redis::Connection.new(url), namespace
+      def self.new(redis : Redis, url : URI)
+        new redis, ::Redis::Connection.new(url)
       end
 
-      def self.new(connection : Redis::Connection, namespace = :mel)
-        new Redis::Transaction.new(connection), namespace
+      def self.new(redis : Redis, connection : Redis::Connection)
+        new redis, ::Redis::Transaction.new(connection)
       end
 
       def create(task : Task)
-        @client.zadd(@key.name, {"NX", task.time.to_unix.to_s, task.id})
-        @client.set(@key.name(task.id), task.to_json, nx: true)
+        @client.zadd(
+          @redis.key.name,
+          {"NX", task.time.to_unix.to_s, task.id}
+        )
+
+        @client.set(@redis.key.name(task.id), task.to_json, nx: true)
       end
 
       def update(task : Task)
         time = task.retry_time || task.time
 
-        @client.zadd(@key.name, time.to_unix.to_s, task.id)
-        @client.set(@key.name(task.id), task.to_json)
+        @client.zadd(@redis.key.name, time.to_unix.to_s, task.id)
+        @client.set(@redis.key.name(task.id), task.to_json)
       end
 
       def set_progress(id : String, value : Int, description : String)
         report = Progress::Report.new(id, description, value)
 
         @client.set(
-          @key.progress(id),
+          @redis.key.progress(id),
           report.to_json,
           ex: Mel.settings.progress_expiry
         )

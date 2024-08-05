@@ -92,7 +92,7 @@ module Mel
     end
 
     def transaction(& : Transaction -> _)
-      yield Transaction.new(queue, tasks, progress)
+      yield Transaction.new(self)
     end
 
     def truncate
@@ -139,24 +139,24 @@ module Mel
     struct Transaction
       include Store::Transaction
 
-      def initialize(@queue : Queue, @tasks : Tasks, @progress : Progress)
+      def initialize(@memory : Memory)
       end
 
       def create(task : Task)
-        @queue[task.id] ||= task.time.to_unix
-        @tasks[task.id] ||= task.to_json
+        @memory.queue[task.id] ||= task.time.to_unix
+        @memory.tasks[task.id] ||= task.to_json
       end
 
       def update(task : Task)
         time = task.retry_time || task.time
 
-        @queue[task.id] = time.to_unix
-        @tasks[task.id] = task.to_json
+        @memory.queue[task.id] = time.to_unix
+        @memory.tasks[task.id] = task.to_json
       end
 
       def set_progress(id : String, value : Int, description : String)
         report = Mel::Progress::Report.new(id, description, value)
-        @progress[id] = ProgressEntry.new(report.to_json)
+        @memory.progress[id] = ProgressEntry.new(report.to_json)
       end
     end
 
