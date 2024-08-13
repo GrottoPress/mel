@@ -13,12 +13,6 @@ end
 Spec.around_each do |spec|
   next spec.run if all_tags(spec.example).includes?("skip_around_each")
 
-  if find_parent(spec.example, "no store")
-    Mel.settings.store = nil
-    Mel.stop
-    next spec.run
-  end
-
   {Mel::Memory.new, Mel::Redis.new(ENV["REDIS_URL"])}.each do |store|
     Mel.settings.store = store
     tasks.call
@@ -27,12 +21,6 @@ Spec.around_each do |spec|
 end
 
 Spec.after_suite(&tasks)
-
-private def find_parent(example, description)
-  return unless example.is_a?(Spec::Item)
-  return example if example.description == description
-  find_parent(example.parent, description)
-end
 
 private def all_tags(example)
   return Set(String).new unless example.is_a?(Spec::Item)
