@@ -73,12 +73,13 @@ abstract class Mel::Task
   private def retry_failed_task(error) : Nil
     return if attempts < 1
 
-    next_retry_time.try do |time|
-      new_task = clone
-      new_task.attempts = attempts
-      new_task.retry_time = time
-      new_task.enqueue(force: true)
-    end || fail_task(error)
+    next_time = next_retry_time
+    return fail_task(error) unless next_time
+
+    new_task = clone
+    new_task.attempts = attempts
+    new_task.retry_time = next_time
+    new_task.enqueue(force: true)
   end
 
   private def next_retry_time
