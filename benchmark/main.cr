@@ -9,7 +9,6 @@
 #    - CRYSTAL_WORKERS
 #    - ITERATIONS
 #    - REDIS_URL
-#    - WORKER_ID
 #
 # 3. Run: `./melbench`
 
