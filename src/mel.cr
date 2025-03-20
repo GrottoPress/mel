@@ -17,7 +17,7 @@ module Mel
     Stopped
   end
 
-  private module Settings
+  module Settings
     class_property batch_size : Int32 = -100
     class_property error_handler : Exception -> = ->(__ : Exception) { }
     class_property poll_interval : Time::Span = 3.seconds
