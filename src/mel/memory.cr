@@ -38,43 +38,34 @@ module Mel
     ) : Array(String)?
       return if count.zero?
 
-      query = ->do
-        queue = sorted_queue.select { |_, value| 0 <= value <= time.to_unix }
-        count(queue, count).keys
-      end
-
       if delete.nil?
-        ids = lock do query.call.tap { |_ids| to_pending(_ids) } end
+        ids = lock do
+          to_running(Task::Env.fetch)
+          to_running query(count, delete, time)
+        end
+
+        Task::Env.update(ids)
         return find(ids, delete: false)
       end
 
-      ids = lock { query.call }
-      find(ids, delete: delete)
-    end
-
-    def find_pending(count : Int, *, delete : Bool = false) : Array(String)?
-      return if count.zero?
-
-      queue = self.queue.select { |_, value| value == worker_score }
-      ids = count(queue, count).keys
-
+      ids = lock { query(count, delete, time) }
       find(ids, delete: delete)
     end
 
     def find(count : Int, *, delete : Bool? = false) : Array(String)?
       return if count.zero?
 
-      query = ->do
-        queue = sorted_queue.select { |_, value| value >= 0 }
-        count(queue, count).keys
-      end
-
       if delete.nil?
-        ids = lock do query.call.tap { |_ids| to_pending(_ids) } end
+        ids = lock do
+          to_running(Task::Env.fetch)
+          to_running query(count, delete)
+        end
+
+        Task::Env.update(ids)
         return find(ids, delete: false)
       end
 
-      ids = lock { query.call }
+      ids = lock { query(count, delete) }
       find(ids, delete: delete)
     end
 
@@ -83,8 +74,12 @@ module Mel
 
       values = lock do
         ids.compact_map do |id|
-          @queue.delete(id) if delete
-          delete ? @tasks.delete(id) : @tasks[id]?
+          if delete
+            @queue.delete(id)
+            next @tasks.delete(id)
+          end
+
+          @tasks[id]?
         end
       end
 
@@ -120,6 +115,20 @@ module Mel
       @progress.clear
     end
 
+    private def query(count, delete, time = nil)
+      queue = sorted_queue.select do |_, value|
+        if delete.nil?
+          next orphan_score <= value <= time.to_unix if time
+          next value >= orphan_score
+        end
+
+        next 0 <= value <= time.to_unix if time
+        value >= 0
+      end
+
+      count(queue, count).keys
+    end
+
     private def count(queue, count)
       count < 0 ? queue.to_h : queue.first(count).to_h
     end
@@ -128,12 +137,20 @@ module Mel
       @mutex.synchronize { yield }
     end
 
-    private def to_pending(ids)
-      ids.each { |id| queue[id] = worker_score }
+    private def to_running(ids)
+      ids.each { |id| queue[id] = running_score }
+      ids
     end
 
-    private def worker_score
-      -Mel.settings.worker_id.abs.to_i64
+    # We assume a task is orphaned if its score has not been updated after
+    # 3 polls.
+    private def orphan_score
+      late = Mel.settings.poll_interval * 3
+      -late.ago.to_unix
+    end
+
+    private def running_score
+      -Time.local.to_unix
     end
 
     struct Transaction

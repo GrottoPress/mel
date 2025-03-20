@@ -61,6 +61,8 @@ abstract class Mel::Task
       log_ran
       schedule_next
       do_after_run(true)
+    ensure
+      Env.delete(id)
     end
   end
 
@@ -151,16 +153,6 @@ abstract class Mel::Task
       end
     end
 
-    def self.find_pending(count : Int, *, delete : Bool = false) : Array(self)?
-      return if count.zero?
-
-      Mel::Task.find_pending(-1, delete: false).try do |tasks|
-        tasks = resize(tasks.select(self), count)
-        return if tasks.empty?
-        delete(tasks, delete).try &.map(&.as self)
-      end
-    end
-
     def self.from_json(values : Indexable) : Array(self)?
       Mel::Task.from_json(values).try do |tasks|
         tasks = tasks.each.select(self).map(&.as self).to_a
@@ -213,12 +205,6 @@ abstract class Mel::Task
 
   def self.find(ids : Indexable, *, delete : Bool = false)
     Mel.settings.store.try &.find(ids, delete: delete).try do |values|
-      from_json(values)
-    end
-  end
-
-  def self.find_pending(count : Int, *, delete : Bool = false)
-    Mel.settings.store.try &.find_pending(count, delete: delete).try do |values|
       from_json(values)
     end
   end

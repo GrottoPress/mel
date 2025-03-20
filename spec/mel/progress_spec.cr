@@ -23,8 +23,6 @@ describe Mel::Progress do
     it "tracks progress" do
       ProgressJob.run(retries: 0)
 
-      Mel.settings.worker_id = 4
-
       Mel.start_and_stop
 
       report = Mel::Progress.track(ProgressJob.progress_id)

@@ -7,6 +7,8 @@ module Mel
     include Store
 
     private LUA = <<-'LUA'
+      local unpack = table.unpack or unpack
+
       local function scores_ids(ids, score)
         local results = {}
 
@@ -18,14 +20,19 @@ module Mel
         return results
       end
 
-      local unpack = table.unpack or unpack
-      local ids = redis.call('ZRANGEBYSCORE', KEYS[1], 0, ARGV[1], 'LIMIT', 0, ARGV[2])
-
-      if #ids ~= 0 then
-        redis.call('ZADD', KEYS[1], 'XX', unpack(scores_ids(ids, ARGV[3])))
+      local function update_score(ids, score)
+        if #ids ~= 0 then
+          redis.call('ZADD', KEYS[1], 'XX', unpack(scores_ids(ids, score)))
+        end
       end
 
-      return ids
+      local running_ids = loadstring('return ' .. ARGV[5])()
+      update_score(running_ids, ARGV[3])
+
+      local due_ids = redis.call('ZRANGEBYSCORE', KEYS[1], ARGV[4], ARGV[1], 'LIMIT', 0, ARGV[2])
+      update_score(due_ids, ARGV[3])
+
+      return due_ids
       LUA
 
     getter :client
@@ -56,12 +63,15 @@ module Mel
       return if count.zero?
 
       if delete.nil?
-        ids = @client.eval(
-          LUA,
-          {key.name},
-          {time.to_unix.to_s, count.to_s, worker_score}
-        ).as(Array)
+        ids = @client.eval(LUA, {key.name}, {
+          time.to_unix.to_s,
+          count.to_s,
+          running_score,
+          orphan_score,
+          env_to_lua
+        }).as(Array)
 
+        Task::Env.update(ids)
         return find(ids, delete: false)
       end
 
@@ -75,38 +85,26 @@ module Mel
       find(ids, delete: delete)
     end
 
-    def find_pending(count : Int, *, delete : Bool = false) : Array(String)?
-      return if count.zero?
-
-      ids = @client.zrangebyscore(
-        key.name,
-        worker_score,
-        worker_score,
-        {"0", count.to_s}
-      ).as(Array)
-
-      find(ids, delete: delete)
-    end
-
     def find(count : Int, *, delete : Bool? = false) : Array(String)?
       return if count.zero?
 
       if delete.nil?
-        ids = @client.eval(
-          LUA,
-          {key.name},
-          {"+inf", count.to_s, worker_score}
-        ).as(Array)
+        ids = @client.eval(LUA, {key.name}, {
+          "+inf",
+          count.to_s,
+          running_score,
+          orphan_score,
+          env_to_lua
+        }).as(Array)
 
+        Task::Env.update(ids)
         return find(ids, delete: false)
       end
 
-      ids = @client.zrangebyscore(
-        key.name,
+      ids = @client.zrangebyscore(key.name, "0", "+inf", {
         "0",
-        "+inf",
-        {"0", count.to_s}
-      ).as(Array)
+        count.to_s
+      }).as(Array)
 
       find(ids, delete: delete)
     end
@@ -154,8 +152,19 @@ module Mel
       @client.del(keys.map &.to_s) unless keys.empty?
     end
 
-    private def worker_score
-      "-#{Mel.settings.worker_id.abs}"
+    private def env_to_lua
+      "{#{Task::Env.fetch.to_json.lchop('[').rchop(']')}}"
+    end
+
+    # We assume a task is orphaned if its score has not been updated after
+    # 3 polls.
+    private def orphan_score
+      late = Mel.settings.poll_interval * 3
+      "-#{late.ago.to_unix}"
+    end
+
+    private def running_score
+      "-#{Time.local.to_unix}"
     end
 
     struct Transaction

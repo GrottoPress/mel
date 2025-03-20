@@ -3,7 +3,6 @@ module Mel
     abstract def find(count : Int, *, delete : Bool?)
     abstract def find(ids : Indexable, *, delete : Bool)
     abstract def find_due(at time : Time, count : Int, *, delete : Bool?)
-    abstract def find_pending(count : Int, *, delete : Bool)
     abstract def get_progress(ids : Indexable)
     abstract def transaction(& : Transaction -> _)
     abstract def truncate

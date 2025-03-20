@@ -25,8 +25,6 @@ describe Mel::Task do
 
       FailedJob.run(id, retries: {1.minute, 2.minutes})
 
-      Mel.settings.worker_id = 7
-
       Timecop.freeze(Time.local) do
         Mel.start_and_stop(4)
         Mel::InstantTask.find(id).should_not be_nil
@@ -53,8 +51,6 @@ describe Mel::Task do
 
       FailedJob.run_every(2.minutes, id: id, retries: {1.minute, 2.minutes})
 
-      Mel.settings.worker_id = 8
-
       Timecop.freeze(2.minutes.from_now) do
         Mel.start_and_stop
         Mel::PeriodicTask.find(id).should_not be_nil
@@ -76,8 +72,6 @@ describe Mel::Task do
         id: id,
         retries: {1.minute, 2.minutes}
       )
-
-      Mel.settings.worker_id = 9
 
       Timecop.freeze(2.minutes.from_now) do
         Mel.start_and_stop
@@ -175,33 +169,6 @@ describe Mel::Task do
       Mel::InstantTask.find(3).try(&.size).should eq(3)
       Mel::InstantTask.find(4).try(&.size).should eq(3)
       Mel::InstantTask.find(-1).try(&.size).should eq(3)
-    end
-  end
-
-  describe ".find_pending" do
-    it "retrieves pending tasks" do
-      address = "user@domain.tld"
-
-      SendEmailJob.run(address: address)
-      SendEmailJob.run(address: address)
-      SendEmailJob.run(address: address)
-
-      Mel.settings.worker_id = 5
-
-      Mel::InstantTask.find_pending(-1).should be_nil
-      Mel::PeriodicTask.find_pending(-1).should be_nil
-      Mel::CronTask.find_pending(-1).should be_nil
-      Mel::Task.find_pending(-1).should be_nil
-
-      Mel::Task.find(2, delete: nil).try(&.size).should eq(2)
-      Mel::InstantTask.find(-1).try(&.size).should eq(1)
-
-      Mel::InstantTask.find_pending(-1).try(&.size).should eq(2)
-      Mel::InstantTask.find_pending(1).try(&.size).should eq(1)
-
-      Mel::PeriodicTask.find_pending(-1).should be_nil
-      Mel::CronTask.find_pending(-1).should be_nil
-      Mel::Task.find_pending(-1).should_not be_nil
     end
   end
 

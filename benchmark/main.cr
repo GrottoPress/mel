@@ -24,7 +24,6 @@ Mel.configure do |settings|
   settings.batch_size = ENV["BATCH_SIZE"]?.try(&.to_i) || 10_000
   settings.poll_interval = 1.microsecond
   settings.store = Mel::Redis.new(ENV["REDIS_URL"], "melbench")
-  settings.worker_id = ENV["WORKER_ID"].to_i
 end
 
 Log.setup(Mel.log.source, :none)

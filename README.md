@@ -238,7 +238,6 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
      Mel.configure do |settings|
        settings.batch_size = -100
        settings.poll_interval = 3.seconds
-       settings.worker_id = ENV["WORKER_ID"].to_i
      end
 
      Mel.start
@@ -259,7 +258,6 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
      Mel.configure do |settings|
        settings.batch_size = -1
        settings.poll_interval = 1.millisecond
-       settings.worker_id = 1
      end
 
      Spec.before_each { Mel::Task::Query.truncate }
@@ -689,119 +687,7 @@ end
 
 A *Mel* worker waits for all running tasks to complete before exiting, if it received a `Signal::INT` or a `Signal::TERM`, or if you called `Mel.stop` somewhere in your code. This means jobs are never lost mid-flight.
 
-Jobs are not lost even if there is a force shutdown of the worker process, since *Mel* does not delete a task from the store until it is complete. The worker can pick off where it left off when it comes back online.
-
-*Mel* relies on the `worker_id` setting to achieve this. Each worker, therefore, must set a *unique*, *static* integer ID, so it knows which *pending* tasks it owns.
-
-Once a task enters the *pending* state, only the worker that put it in that state can run it. So if you need to take down a worker permanently, ensure that it completes all pending tasks by sending the appropriate signal.
-
-### Scaling out
-
-Because each worker requires it's own unique `.worker_id`, autoscaling as used in classic distributed architectures should not be used, since auto-scaled replicas would inherit the same configuration as the original instance.
-
-This would lead to multiple workers using the same `.worker_id`, which could result in pending jobs being run multiple times; once each for each replica that starts up.
-
-Instead, it is recommended that a new service be registered for each worker that is to be deployed, and the appropriate `.worker_id` set for each.
-
-- Using `Procfile`:
-
-  ```procfile
-  # ->> Procfile
-
-  # ...
-  worker_1: export WORKER_ID=1 && ./bin/worker
-  worker_2: export WORKER_ID=2 && ./bin/worker
-  worker_3: export WORKER_ID=3 && ./bin/worker
-  # ...
-  ```
-
-- Using docker compose for swarm:
-
-  ```yaml
-  # ->> docker-compose.yml
-
-  # ...
-  services:
-    worker_1:
-      command: ./bin/worker
-      environment:
-        WORKER_ID: "1"
-      deploy:
-        replicas: 1
-    worker_2:
-      command: ./bin/worker
-      environment:
-        WORKER_ID: "2"
-      deploy:
-        replicas: 1
-    worker_3:
-      command: ./bin/worker
-      environment:
-        WORKER_ID: "3"
-      deploy:
-        replicas: 1
-  # ...
-  ```
-
-Another option is to accept the worker ID as a command argument:
-
-```crystal
-# ->> src/worker.cr
-
-# ...
-ARGV.first?.try { |worker_id| Mel.settings.worker_id = worker_id.to_i }
-
-Mel.start
-```
-
-- Using `Procfile`:
-
-  ```procfile
-  # ->> Procfile
-
-  # ...
-  worker_1: ./bin/worker 1
-  worker_2: ./bin/worker 2
-  worker_3: ./bin/worker 3
-  # ...
-  ```
-
-- Using docker compose for swarm:
-
-  ```yaml
-  # ->> docker-compose.yml
-
-  # ...
-  services:
-    worker_1:
-      command: ./bin/worker 1
-      deploy:
-        replicas: 1
-    worker_2:
-      command: ./bin/worker 2
-      deploy:
-        replicas: 1
-    worker_3:
-      command: ./bin/worker 3
-      deploy:
-        replicas: 1
-  # ...
-  ```
-
-- Using config for [Fly.io](https://fly.io):
-
-  ```toml
-  # ->> fly.toml
-
-  # ...
-  [processes]
-    worker_1 = './bin/worker 1'
-    worker_2 = './bin/worker 2'
-    worker_3 = './bin/worker 3'
-  # ...
-  ```
-
-  Ensure no spare machines are created by passing `--ha=false` to `fly deploy` command.
+Jobs are not lost even if there is a force shutdown of the worker process, since *Mel* does not delete a task from the store until it is complete. A running task is assumed to be orphaned if its timestamp in the queue has not been updated after 3 polls. Once a task is orphaned, any available worker can it pick up and run it.
 
 ### Smart polling
 

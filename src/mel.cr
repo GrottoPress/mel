@@ -24,7 +24,6 @@ module Mel
     class_property progress_expiry : Time::Span? = 1.day
     class_property store : Store?
     class_property timezone : Time::Location?
-    class_property worker_id : Int32 { ENV["WORKER_ID"].to_i }
   end
 
   extend self
@@ -69,8 +68,8 @@ module Mel
     log_starting
     run_handlers
 
-    run_pending_tasks(pond = Pond.new)
-    run_tasks(pond)
+    Task::Env.delete
+    run_tasks(Pond.new)
   end
 
   def stop
@@ -86,10 +85,6 @@ module Mel
 
   def transaction(& : Store::Transaction -> _)
     settings.store.try &.transaction { |transaction| yield transaction }
-  end
-
-  private def run_pending_tasks(pond)
-    Task.find_pending(-1).try &.each &.run(pond, force: true)
   end
 
   private def run_tasks(pond)
