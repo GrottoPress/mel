@@ -16,7 +16,7 @@ describe Mel do
 
   it "stops on SIGINT" do
     Mel.start_async do
-      Process.signal(Signal::INT, Process.pid)
+      Process.signal(:int, Process.pid)
 
       100_000.times do
         break if Mel.state.stopped?
@@ -29,7 +29,7 @@ describe Mel do
 
   it "stops on SIGTERM" do
     Mel.start_async do
-      Process.signal(Signal::TERM, Process.pid)
+      Process.signal(:term, Process.pid)
 
       100_000.times do
         break if Mel.state.stopped?
