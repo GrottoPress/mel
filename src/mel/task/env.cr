@@ -1,16 +1,13 @@
 abstract class Mel::Task
-  # This saves a worker's currently running tasks in the environment. It
-  # removes the need to set a static worker ID for tracking which tasks
-  # belong to the worker.
+  # This saves a worker's currently running tasks in its environment.
   #
-  # Each worker has an isolated environment, even though they were
-  # spawned from the same process. This allows us to scale a Mel process
+  # Each worker has an isolated environment, allowing us to scale Mel
   # without worrying about running a task multiple times.
   #
   # Every time a worker polls for tasks, it updates the timestamp of its
-  # running tasks in the store. When the worker loses track of its tasks
-  # after an abrupt shutdown, another worker will pick up those tasks
-  # if their timestamps have not been updates since 3 polls ago.
+  # running tasks in the store. When the worker loses track of its tasks,
+  # eg. after an abrupt shutdown, another worker will pick up those tasks
+  # if their timestamps have not been updated since the last 3 polls.
   module Env
     extend self
 
