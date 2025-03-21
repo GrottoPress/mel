@@ -5,5 +5,5 @@
 /tmp/
 *.dwarf
 .env*
-/.crystal-version
+/.*-version*
 /*.lock
