@@ -12,9 +12,9 @@ module Mel
       local function scores_ids(ids, score)
         local results = {}
 
-        for _, value in ipairs(ids) do
+        for _, id in ipairs(ids) do
           table.insert(results, score)
-          table.insert(results, value)
+          table.insert(results, id)
         end
 
         return results
