@@ -6,6 +6,7 @@ end
 
 tasks = ->do
   Mel.stop
+  Mel::Task::Env.delete
   Mel.settings.store.try(&.truncate)
   Mel.settings.store.try(&.truncate_progress)
 end
