@@ -93,6 +93,21 @@ describe Mel::Task do
         Mel::Task.find_due(Time.local, -1).should be_nil
       end
     end
+
+    it "deletes tasks from env after completion" do
+      id = UUID.random.hexstring
+
+      SendEmailJob.run(id: id, address: "aa@bb.cc")
+
+      Mel::InstantTask.find(-1, delete: nil)
+
+      task = Mel::InstantTask.find(id)
+      task.should_not be_nil
+
+      Mel::Task::Env.fetch.should_not be_empty
+      Mel.sync(task)
+      Mel::Task::Env.fetch.should be_empty
+    end
   end
 
   describe "#enqueue" do
