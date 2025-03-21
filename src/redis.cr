@@ -9,7 +9,7 @@ module Mel
     private LUA = <<-'LUA'
       local unpack = table.unpack or unpack
 
-      local function scores_ids(ids, score)
+      local function with_score(ids, score)
         local results = {}
 
         for _, id in ipairs(ids) do
@@ -22,7 +22,7 @@ module Mel
 
       local function update_score(ids, score)
         if #ids ~= 0 then
-          redis.call('ZADD', KEYS[1], 'XX', unpack(scores_ids(ids, score)))
+          redis.call('ZADD', KEYS[1], 'XX', unpack(with_score(ids, score)))
         end
       end
 
