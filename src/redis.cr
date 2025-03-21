@@ -156,11 +156,8 @@ module Mel
       "{#{Task::Env.fetch.to_json.lchop('[').rchop(']')}}"
     end
 
-    # We assume a task is orphaned if its score has not been updated after
-    # 3 polls.
     private def orphan_score
-      late = Mel.settings.poll_interval * 3
-      "-#{late.ago.to_unix}"
+      "-#{orphan_after.ago.to_unix}"
     end
 
     private def running_score

@@ -88,6 +88,12 @@ module Mel
           store.set_progress(id, value, description) :
           transaction &.set_progress(id, value, description)
       end
+
+      # We assume a task is orphaned if its score has not been updated after
+      # 3 polls.
+      private def orphan_after
+        Mel.settings.poll_interval * 3
+      end
     end
 
     module Transaction
