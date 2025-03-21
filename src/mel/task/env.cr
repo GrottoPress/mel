@@ -27,7 +27,7 @@ abstract class Mel::Task
     end
 
     def update(*ids : String)
-      update(ids.to_a)
+      update(ids)
     end
 
     def update(ids : Indexable)
@@ -41,7 +41,7 @@ abstract class Mel::Task
     end
 
     def delete(*ids : String)
-      delete(ids.to_a)
+      delete(ids)
     end
 
     def delete(ids : Indexable)
