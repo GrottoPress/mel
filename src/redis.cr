@@ -7,6 +7,7 @@ module Mel
     include Store
 
     private LUA = <<-'LUA'
+      local loadstring = loadstring or load
       local unpack = table.unpack or unpack
 
       local function with_score(ids, score)
