@@ -40,11 +40,11 @@ module Mel
 
       if delete.nil?
         ids = lock do
-          to_running(Task::Env.fetch)
+          to_running(Task::RunQueue.fetch)
           to_running query(count, delete, time)
         end
 
-        Task::Env.update(ids)
+        Task::RunQueue.update(ids)
         return find(ids, delete: false)
       end
 
@@ -57,11 +57,11 @@ module Mel
 
       if delete.nil?
         ids = lock do
-          to_running(Task::Env.fetch)
+          to_running(Task::RunQueue.fetch)
           to_running query(count, delete)
         end
 
-        Task::Env.update(ids)
+        Task::RunQueue.update(ids)
         return find(ids, delete: false)
       end
 

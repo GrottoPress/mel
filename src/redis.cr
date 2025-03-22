@@ -82,7 +82,7 @@ module Mel
           env_to_lua
         }).as(Array)
 
-        Task::Env.update(ids)
+        Task::RunQueue.update(ids)
         return find(ids, delete: false)
       end
 
@@ -108,7 +108,7 @@ module Mel
           env_to_lua
         }).as(Array)
 
-        Task::Env.update(ids)
+        Task::RunQueue.update(ids)
         return find(ids, delete: false)
       end
 
@@ -164,7 +164,7 @@ module Mel
     end
 
     private def env_to_lua
-      Task::Env.fetch.join(',')
+      Task::RunQueue.fetch.join(',')
     end
 
     private def orphan_score

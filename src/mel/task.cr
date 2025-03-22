@@ -62,7 +62,7 @@ abstract class Mel::Task
       schedule_next
       do_after_run(true)
     ensure
-      Env.delete(id)
+      RunQueue.delete(id)
     end
   end
 

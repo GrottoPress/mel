@@ -104,9 +104,9 @@ describe Mel::Task do
       task = Mel::InstantTask.find(id)
       task.should_not be_nil
 
-      Mel::Task::Env.fetch.should_not be_empty
+      Mel::Task::RunQueue.fetch.should_not be_empty
       Mel.sync(task)
-      Mel::Task::Env.fetch.should be_empty
+      Mel::Task::RunQueue.fetch.should be_empty
     end
   end
 
