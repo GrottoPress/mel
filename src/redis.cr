@@ -79,7 +79,7 @@ module Mel
           count.to_s,
           running_score,
           orphan_score,
-          env_to_lua
+          run_queue_lua
         }).as(Array)
 
         Task::RunQueue.update(ids)
@@ -105,7 +105,7 @@ module Mel
           count.to_s,
           running_score,
           orphan_score,
-          env_to_lua
+          run_queue_lua
         }).as(Array)
 
         Task::RunQueue.update(ids)
@@ -163,7 +163,7 @@ module Mel
       @client.del(keys.map &.to_s) unless keys.empty?
     end
 
-    private def env_to_lua
+    private def run_queue_lua
       Task::RunQueue.fetch.join(',')
     end
 
