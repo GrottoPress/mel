@@ -185,6 +185,13 @@ describe Mel::Task do
       Mel::InstantTask.find(4).try(&.size).should eq(3)
       Mel::InstantTask.find(-1).try(&.size).should eq(3)
     end
+
+    it "skips running jobs" do
+      SendEmailJob.run(address: "user@domain.tld")
+
+      Mel::InstantTask.find(-1, delete: nil).try(&.size).should eq(1)
+      Mel::InstantTask.find(-1, delete: nil).should be_nil
+    end
   end
 
   describe ".find_due" do
@@ -199,6 +206,13 @@ describe Mel::Task do
       Mel::InstantTask.find(-1).try(&.size).should eq(3)
       Mel::InstantTask.find_due(later).try(&.size).should eq(2)
       Mel::InstantTask.find_due(later, 1).try(&.size).should eq(1)
+    end
+
+    it "skips running jobs" do
+      SendEmailJob.run(address: "user@domain.tld")
+
+      Mel::InstantTask.find_due(count: -1, delete: nil).try(&.size).should eq(1)
+      Mel::InstantTask.find_due(count: -1, delete: nil).should be_nil
     end
   end
 end

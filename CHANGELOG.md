@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Make `Mel::Settings` module public
 
+### Fixed
+- Ensure orphan period is never less than 1 second
+
 ## [0.23.0] - 2025-03-20
 
 ### Added
