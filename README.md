@@ -260,10 +260,14 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
        settings.poll_interval = 1.millisecond
      end
 
-     Spec.before_each { Mel::Task::Query.truncate }
+     Spec.before_each do
+       Mel::Task::RunQueue.delete
+       Mel::Task::Query.truncate
+     end
 
      Spec.after_suite do
        Mel.stop
+       Mel::Task::RunQueue.delete
        Mel::Task::Query.truncate
      end
      # <= `Mel.stop` waits for all running tasks to complete before exiting
