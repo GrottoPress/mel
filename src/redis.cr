@@ -3,7 +3,7 @@ require "redis"
 require "./mel"
 
 module Mel
-  class Redis
+  struct Redis
     include Store
 
     private LUA = <<-'LUA'

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Changed
 - Make `Mel::Settings` module private
 - Convert `Mel::Memory` into a `struct`
+- Convert `Mel::Redis` into a `struct`
 
 ## [0.24.0] - 2025-03-22
 
