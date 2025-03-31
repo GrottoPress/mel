@@ -6,7 +6,6 @@ module Mel
     include Task::CallbackHelpers
 
     getter schedule : String
-    protected setter schedule : String
 
     def initialize(id, job, time, retries, @till, @schedule)
       super(id, job, time, retries)

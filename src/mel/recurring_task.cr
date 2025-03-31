@@ -3,7 +3,6 @@ require "./task"
 module Mel
   abstract class RecurringTask < Task
     getter till : Time?
-    protected setter till : Time?
 
     private def next_retry_time
       super.try do |time|
