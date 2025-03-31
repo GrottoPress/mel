@@ -7,7 +7,7 @@ module Mel
   #   Besides, memory does not provide the persistence that Mel requires.
   #
   #   You may use this for tests or demos.
-  class Memory
+  struct Memory
     alias Progress = Hash(String, ProgressEntry)
     alias Queue = Hash(String, Int64)
     alias Tasks = Hash(String, String)
