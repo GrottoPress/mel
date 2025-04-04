@@ -461,7 +461,7 @@ struct SendAllEmails
   def run
     return if @users.empty?
 
-    # Pushes all jobs atomically, at the end of the block.
+    # Pushes all jobs atomically
     #
     Mel.transaction do |store|
       # Pass `store` to `.run_*`.
