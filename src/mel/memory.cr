@@ -151,7 +151,7 @@ module Mel
     end
 
     struct Transaction
-      include Store::Transaction
+      include Mel::Transaction
 
       def initialize(@memory : Memory)
       end

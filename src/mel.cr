@@ -83,7 +83,7 @@ module Mel
     end
   end
 
-  def transaction(& : Store::Transaction -> _)
+  def transaction(& : Transaction -> _)
     settings.store.try &.transaction { |transaction| yield transaction }
   end
 

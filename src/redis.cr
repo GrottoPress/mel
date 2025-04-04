@@ -176,7 +176,7 @@ module Mel
     end
 
     struct Transaction
-      include Store::Transaction
+      include Mel::Transaction
 
       def initialize(@redis : Redis, @client : ::Redis::Transaction)
       end

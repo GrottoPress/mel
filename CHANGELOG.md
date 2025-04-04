@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Make `Mel::Settings` module private
 - Convert `Mel::Memory` into a `struct`
 - Convert `Mel::Redis` into a `struct`
+- Rename `Mel::Store::Transaction` to `Mel::Transaction`
 
 ### Removed
 - Remove `Mel::Job::Template#transaction` helper

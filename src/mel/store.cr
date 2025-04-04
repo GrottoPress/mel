@@ -9,21 +9,17 @@ module Mel
     abstract def truncate_progress
 
     macro included
-      def add(
-        task : Task,
-        store : Mel::Store::Transaction? = nil, *,
-        force = false
-      )
+      def add(task : Task, store : Mel::Transaction? = nil, *, force = false)
         store ?
           store.add(task, force: force) :
           transaction &.add(task, force: force)
       end
 
-      def create(task : Task, store : Mel::Store::Transaction? = nil)
+      def create(task : Task, store : Mel::Transaction? = nil)
         store ? store.create(task) : transaction(&.create task)
       end
 
-      def update(task : Task, store : Mel::Store::Transaction? = nil)
+      def update(task : Task, store : Mel::Transaction? = nil)
         store ? store.update(task) : transaction(&.update task)
       end
 
@@ -71,7 +67,7 @@ module Mel
         task : Task,
         value : Int,
         description : String,
-        store : Mel::Store::Transaction? = nil
+        store : Mel::Transaction? = nil
       )
         store ?
           store.set_progress(task, value, description) :
@@ -82,7 +78,7 @@ module Mel
         id,
         value : Int,
         description : String,
-        store : Mel::Store::Transaction? = nil
+        store : Mel::Transaction? = nil
       )
         store ?
           store.set_progress(id, value, description) :
@@ -95,20 +91,20 @@ module Mel
         {Mel.settings.poll_interval * 3, 1.second}.max
       end
     end
+  end
 
-    module Transaction
-      abstract def create(task : Task)
-      abstract def set_progress(id : String, value : Int, description : String)
-      abstract def update(task : Task)
+  module Transaction
+    abstract def create(task : Task)
+    abstract def set_progress(id : String, value : Int, description : String)
+    abstract def update(task : Task)
 
-      macro included
-        def add(task : Task, *, force = false)
-          force ? update(task) : create(task)
-        end
+    macro included
+      def add(task : Task, *, force = false)
+        force ? update(task) : create(task)
+      end
 
-        def set_progress(task : Task, value : Int, description : String)
-          set_progress(task.id, value, description)
-        end
+      def set_progress(task : Task, value : Int, description : String)
+        set_progress(task.id, value, description)
       end
     end
   end
