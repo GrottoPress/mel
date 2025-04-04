@@ -7,7 +7,7 @@ class CounterJob
   def run
     return if @max < 1
 
-    transaction do |store|
+    Mel.transaction do |store|
       @max.times { |count| CountJob.run(count: count, store: store) }
     end
   end

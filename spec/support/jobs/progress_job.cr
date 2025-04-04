@@ -12,7 +12,7 @@ struct ProgressJob
   end
 
   def after_run(success)
-    transaction do |store|
+    Mel.transaction do |store|
       SomeStep.run(store: store, progress: @progress, retries: 0)
       @progress.move(50, store)
     end
@@ -36,7 +36,7 @@ struct ProgressJob
     end
 
     def after_run(success)
-      transaction do |store|
+      Mel.transaction do |store|
         SomeOtherStep.run(store: store, progress: @progress, retries: 0)
         @progress.move(80, store)
       end

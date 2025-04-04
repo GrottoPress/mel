@@ -34,9 +34,5 @@ module Mel::Job::Template
 
     def after_dequeue(success)
     end
-
-    private def transaction
-      Mel.transaction { |transaction| yield transaction }
-    end
   end
 end

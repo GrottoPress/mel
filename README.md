@@ -463,7 +463,7 @@ struct SendAllEmails
 
     # Pushes all jobs atomically, at the end of the block.
     #
-    transaction do |store|
+    Mel.transaction do |store|
       # Pass `store` to `.run_*`.
       @users.each { |user| SendEmail.run(store: store, user: user) }
     end
@@ -601,7 +601,7 @@ struct SomeJob
   def after_run(success)
     return @progress.fail unless success
 
-    transaction do |store|
+    Mel.transaction do |store|
       SomeStep.run(store: store, progress: @progress)
       @progress.move(50, store) # <= Move to 50%
     end
@@ -618,7 +618,7 @@ struct SomeJob
     def after_run(success)
       return @progress.fail unless success
 
-      transaction do |store|
+      Mel.transaction do |store|
         SomeOtherStep.run(store: store, progress: @progress)
         @progress.move(80, store) # <= Move to 80%
       end
