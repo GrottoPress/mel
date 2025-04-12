@@ -44,7 +44,7 @@ abstract class Mel::Task
     do_after_dequeue(false)
   end
 
-  def run(pond : Pond, *, force = false) : Fiber?
+  def run(pond, *, force = false)
     return log_not_due unless force || due?
     do_before_run
 
