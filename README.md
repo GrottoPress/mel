@@ -262,13 +262,13 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
 
      Spec.before_each do
        Mel::Task::RunQueue.delete
-       Mel::Task::Query.truncate
+       Mel.settings.store.try(&.truncate)
      end
 
      Spec.after_suite do
        Mel.stop
        Mel::Task::RunQueue.delete
-       Mel::Task::Query.truncate
+       Mel.settings.store.try(&.truncate)
      end
      # <= `Mel.stop` waits for all running tasks to complete before exiting
 
@@ -674,13 +674,13 @@ You may delete progress data in specs thus:
 
 Spec.before_each do
   # ...
-  Mel::Progress::Query.truncate
+  Mel.settings.store.try(&.truncate_progress)
   # ...
 end
 
 Spec.after_suite do
   # ...
-  Mel::Progress::Query.truncate
+  Mel.settings.store.try(&.truncate_progress)
   # ...
 end
 
