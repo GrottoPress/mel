@@ -68,7 +68,7 @@ module Mel
     log_starting
     run_handlers
 
-    Task::RunQueue.delete
+    RunPool.delete
     run_tasks(Pond.new)
   end
 

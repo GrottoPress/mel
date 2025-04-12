@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Convert `Mel::Memory` into a `struct`
 - Convert `Mel::Redis` into a `struct`
 - Rename `Mel::Store::Transaction` to `Mel::Transaction`
+- Rename `Mel::Task::RunQueue` to `Mel::RunPool`
 
 ### Removed
 - Remove `Mel::Job::Template#transaction` helper

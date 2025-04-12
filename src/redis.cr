@@ -82,7 +82,7 @@ module Mel
           run_queue_lua
         }).as(Array)
 
-        Task::RunQueue.update(ids)
+        RunPool.update(ids)
         return find(ids, delete: false)
       end
 
@@ -108,7 +108,7 @@ module Mel
           run_queue_lua
         }).as(Array)
 
-        Task::RunQueue.update(ids)
+        RunPool.update(ids)
         return find(ids, delete: false)
       end
 
@@ -164,7 +164,7 @@ module Mel
     end
 
     private def run_queue_lua
-      Task::RunQueue.fetch.join(',')
+      RunPool.fetch.join(',')
     end
 
     private def orphan_score

@@ -261,13 +261,13 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
      end
 
      Spec.before_each do
-       Mel::Task::RunQueue.delete
+       Mel::RunPool.delete
        Mel.settings.store.try(&.truncate)
      end
 
      Spec.after_suite do
        Mel.stop
-       Mel::Task::RunQueue.delete
+       Mel::RunPool.delete
        Mel.settings.store.try(&.truncate)
      end
      # <= `Mel.stop` waits for all running tasks to complete before exiting

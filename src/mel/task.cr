@@ -62,7 +62,7 @@ abstract class Mel::Task
       schedule_next
       do_after_run(true)
     ensure
-      RunQueue.delete(id)
+      RunPool.delete(id)
     end
   end
 
