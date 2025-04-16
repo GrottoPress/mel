@@ -9,25 +9,29 @@ module Mel
     abstract def truncate_progress
 
     macro included
-      def add(task : Task, store : Mel::Transaction? = nil, *, force = false)
+      def add(
+        task : Mel::Task,
+        store : Mel::Transaction? = nil, *,
+        force = false
+      )
         store ?
           store.add(task, force: force) :
           transaction &.add(task, force: force)
       end
 
-      def create(task : Task, store : Mel::Transaction? = nil)
+      def create(task : Mel::Task, store : Mel::Transaction? = nil)
         store ? store.create(task) : transaction(&.create task)
       end
 
-      def update(task : Task, store : Mel::Transaction? = nil)
+      def update(task : Mel::Task, store : Mel::Transaction? = nil)
         store ? store.update(task) : transaction(&.update task)
       end
 
-      def delete(task : Task)
+      def delete(task : Mel::Task)
         delete(task.id)
       end
 
-      def delete(tasks : Indexable(Task))
+      def delete(tasks : Indexable(Mel::Task))
         delete(tasks.map &.id)
       end
 
@@ -35,15 +39,15 @@ module Mel
         find(id, delete: true)
       end
 
-      def delete(ids : Indexable)
+      def delete(ids : Mel::Indexable)
         find(ids, delete: true)
       end
 
-      def find(task : Task, *, delete : Bool? = false)
+      def find(task : Mel::Task, *, delete : Bool? = false)
         find(task.id, delete: delete)
       end
 
-      def find(tasks : Indexable(Task), *, delete : Bool? = false)
+      def find(tasks : Indexable(Mel::Task), *, delete : Bool? = false)
         find(tasks.map &.id, delete: delete)
       end
 
@@ -51,11 +55,11 @@ module Mel
         find({id}, delete: delete).try(&.first?)
       end
 
-      def get_progress(task : Task)
+      def get_progress(task : Mel::Task)
         get_progress(task.id)
       end
 
-      def get_progress(tasks : Indexable(Task))
+      def get_progress(tasks : Indexable(Mel::Task))
         get_progress(tasks.map &.id)
       end
 
@@ -64,7 +68,7 @@ module Mel
       end
 
       def set_progress(
-        task : Task,
+        task : Mel::Task,
         value : Int,
         description : String,
         store : Mel::Transaction? = nil
@@ -101,11 +105,11 @@ module Mel
     abstract def update(task : Task)
 
     macro included
-      def add(task : Task, *, force = false)
+      def add(task : Mel::Task, *, force = false)
         force ? update(task) : create(task)
       end
 
-      def set_progress(task : Task, value : Int, description : String)
+      def set_progress(task : Mel::Task, value : Int, description : String)
         set_progress(task.id, value, description)
       end
     end
