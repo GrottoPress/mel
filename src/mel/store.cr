@@ -88,7 +88,9 @@ module Mel
       # We assume a task is orphaned if its score has not been updated after
       # 3 polls.
       private def orphan_after
-        {Mel.settings.poll_interval * 3, 1.second}.max
+        poll_interval = Mel.settings.poll_interval
+
+        {poll_interval * 3, poll_interval + 1.second}.max
       end
     end
   end
