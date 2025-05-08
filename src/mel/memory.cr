@@ -91,8 +91,8 @@ module Mel
     end
 
     def truncate
-      @queue.clear
-      @tasks.clear
+      @queue = Queue.new
+      @tasks = Tasks.new
     end
 
     def get_progress(ids : Indexable) : Array(String)?
@@ -112,7 +112,7 @@ module Mel
     end
 
     def truncate_progress
-      @progress.clear
+      @progress = Progress.new
     end
 
     private def query(count, delete, time = nil)

@@ -31,7 +31,7 @@ module Mel
     end
 
     def delete : Set(String)
-      lock { @@pool.clear }
+      lock { @@pool = Set(String).new }
     end
 
     private def lock
