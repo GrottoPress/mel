@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Create a new object in `RunPool.delete` to avoid eventual memory leak
+- Fix compile error calling `.compare_versions` with `Mel::VERSION`
 
 ## [1.0.0] - 2025-04-18
 
