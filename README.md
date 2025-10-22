@@ -428,15 +428,21 @@ A common pattern is to break up long-running tasks into smaller tasks. For examp
 struct SendAllEmails
   include Mel::Job
 
-  def initialize(@users : Array(User))
+  alias UserParams = {id: Int64}
+
+  @users : Array(UserParams)
+
+  def initialize(users : Array(User))
+    @users = users.map { |user| {id: user.id} }
   end
 
   def run
-    @users.each { |user| send_email(user) }
+    @users.each { |user| send_email(user[:id]) }
   end
 
-  private def send_email(user)
-    # Send email
+  private def send_email(user_id)
+    # user = UserQuery.find(user_id)
+    # UserEmail.new(user).deliver
   end
 end
 
@@ -455,7 +461,12 @@ The preferred approach is to define a job that sends email to one user, and sche
 struct SendAllEmails
   include Mel::Job
 
-  def initialize(@users : Array(User))
+  alias UserParams = {id: Int64}
+
+  @users : Array(UserParams)
+
+  def initialize(users : Array(User))
+    @users = users.map { |user| {id: user.id} }
   end
 
   def run
@@ -472,15 +483,16 @@ struct SendAllEmails
   struct SendEmail
     include Mel::Job
 
-    def initialize(@user : User)
+    def initialize(@user : UserParams)
     end
 
     def run
-      send_email(@user)
+      send_email
     end
 
-    private def send_email(user)
-      # Send email
+    private def send_email
+      # user = UserQuery.find(@user[:id])
+      # UserEmail.new(user).deliver
     end
   end
 end
@@ -501,12 +513,17 @@ This is where sequential scheduling comes in handy. *Mel*'s event-driven design 
 struct SendAllEmails
   include Mel::Job
 
-  def initialize(@users : Array(User))
+  alias UserParams = {id: Int64}
+
+  @users : Array(UserParams)
+
+  def initialize(users : Array(User))
+    @users = users.map { |user| {id: user.id} }
   end
 
   def run
     @users[0]?.try do |user|
-      send_email(user) # <= Send first email
+      send_email(user[:id]) # <= Send first email
     end
   end
 
@@ -520,8 +537,9 @@ struct SendAllEmails
     end
   end
 
-  private def send_email(user)
-    # Send email
+  private def send_email(user_id)
+    # user = UserQuery.find(user_id)
+    # UserEmail.new(user).deliver
   end
 end
 
