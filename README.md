@@ -691,7 +691,7 @@ end
 
 A *Mel* worker waits for all running tasks to complete before exiting, if it received a `Signal::INT` or a `Signal::TERM`, or if you called `Mel.stop` somewhere in your code. This means jobs are never lost mid-flight.
 
-Jobs are not lost even if there is a force shutdown of the worker process, since *Mel* does not delete a task from the store until it is complete. A running task is assumed to be orphaned if its timestamp in the queue has not been updated after 3 polls. Once a task is orphaned, any available worker can it pick up and run it.
+Jobs are not lost even if there is a force shutdown of the worker process, since *Mel* does not delete a task from the store until it is complete. A running task is assumed to be orphaned if its timestamp in the queue has not been updated after 3 polls. Once a task is orphaned, any available worker can pick it up and run it.
 
 ### Smart polling
 
