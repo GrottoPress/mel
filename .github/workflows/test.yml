@@ -57,7 +57,9 @@ jobs:
       - name: Install shards
         run: shards update
       - name: Install Redis
-        run: sudo apt -y install redis
+        run: |
+          sudo apt update
+          sudo apt -y install redis
       - name: Start Redis
         run: sudo systemctl start redis
       - name: Run tests
