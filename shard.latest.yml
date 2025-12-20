@@ -1,0 +1,10 @@
+dependencies:
+  ameba:
+    github: crystal-ameba/ameba
+    version: ~> 1.6
+  carbon:
+    github: luckyframework/carbon
+    version: ~> 0.6.0
+  redis:
+    github: jgaskins/redis
+    version: ~> 0.14.0
