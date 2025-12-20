@@ -8,7 +8,7 @@ module Mel::Job::Template
     # because `JSON::Serializable` defines a `#initialize` method which
     # means the default constructor is never added by the compiler.
     #
-    # Jobs requires a custom constructor to be present, even if unused,
+    # Jobs require a custom constructor to be present, even if unused,
     # otherwise we get a compile error:
     #
     # "Error: wrong number of arguments for 'CollectJobsJob.new'
