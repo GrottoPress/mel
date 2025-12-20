@@ -16,7 +16,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        crystal: ['1.3.2']
+        crystal: [latest]
+        shard_file: [shard.latest.yml]
     runs-on: ubuntu-latest
     continue-on-error: false
     steps:
@@ -28,17 +29,24 @@ jobs:
           crystal: ${{ matrix.crystal }}
       - name: Install shards
         run: shards install
+        env:
+          SHARDS_OVERRIDE: ${{ matrix.shard_file }}
       - name: Lint code
         run: ./bin/ameba
   specs:
     strategy:
       fail-fast: false
       matrix:
-        crystal: ['1.0.0', latest]
+        crystal: ['1.0.0']
         experimental: [false]
+        shard_file: [shard.yml]
         include:
+          - crystal: latest
+            experimental: false
+            shard_file: shard.latest.yml
           - crystal: nightly
             experimental: true
+            shard_file: shard.edge.yml
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.experimental }}
     steps:
@@ -55,7 +63,9 @@ jobs:
           key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml') }}
           restore-keys: ${{ runner.os }}-shards-
       - name: Install shards
-        run: shards update
+        run: shards update --skip-postinstall --skip-executables
+        env:
+          SHARDS_OVERRIDE: ${{ matrix.shard_file }}
       - name: Install Redis
         run: |
           sudo apt update
