@@ -14,7 +14,7 @@ describe Mel::Job::Recurring do
         task = Mel::PeriodicTask.find(id, delete: hour.even?)
         Mel.sync(task)
 
-        task.try(&.job.as(SendEmailRecurringJob).sent).should eq(hour.even?)
+        task.try(&.job.as(SendEmailRecurringJob).sent?).should eq(hour.even?)
       end
     end
 
@@ -33,31 +33,31 @@ describe Mel::Job::Recurring do
     Timecop.travel(time = cron.next) do
       task = Mel::CronTask.find(id, delete: true)
       Mel.sync(task)
-      task.try(&.job.as(SendEmailRecurringJob).sent).should be_true
+      task.try(&.job.as(SendEmailRecurringJob).sent?).should be_true
     end
 
     Timecop.travel(time + 1.hour) do
       task = Mel::CronTask.find(id)
       Mel.sync(task)
-      task.try(&.job.as(SendEmailRecurringJob).sent).should be_false
+      task.try(&.job.as(SendEmailRecurringJob).sent?).should be_false
     end
 
     Timecop.travel(time = cron.next(time)) do
       task = Mel::CronTask.find(id, delete: true)
       Mel.sync(task)
-      task.try(&.job.as(SendEmailRecurringJob).sent).should be_true
+      task.try(&.job.as(SendEmailRecurringJob).sent?).should be_true
     end
 
     Timecop.travel(time + 1.hour) do
       task = Mel::CronTask.find(id)
       Mel.sync(task)
-      task.try(&.job.as(SendEmailRecurringJob).sent).should be_false
+      task.try(&.job.as(SendEmailRecurringJob).sent?).should be_false
     end
 
     Timecop.travel(cron.next(time)) do
       task = Mel::CronTask.find(id, delete: true)
       Mel.sync(task)
-      task.try(&.job.as(SendEmailRecurringJob).sent).should be_true
+      task.try(&.job.as(SendEmailRecurringJob).sent?).should be_true
     end
 
     Mel::CronTask.find(id).should be_a(Mel::CronTask)

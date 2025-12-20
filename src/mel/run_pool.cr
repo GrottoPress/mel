@@ -34,7 +34,7 @@ module Mel
       lock { @@pool = Set(String).new }
     end
 
-    private def lock
+    private def lock(&)
       @@mutex.synchronize { yield }
     end
   end

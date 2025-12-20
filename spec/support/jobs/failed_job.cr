@@ -2,10 +2,10 @@ struct FailedJob
   include Mel::Job
 
   @[JSON::Field(ignore: true)]
-  getter run_before = false
+  getter? run_before = false
 
   @[JSON::Field(ignore: true)]
-  getter run_after = false
+  getter? run_after = false
 
   def run
     raise "Failed on purpose"

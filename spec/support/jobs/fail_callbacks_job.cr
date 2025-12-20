@@ -2,7 +2,7 @@ struct FailCallbacksJob
   include Mel::Job
 
   @[JSON::Field(ignore: true)]
-  getter done = false
+  getter? done = false
 
   def run
     @done = true

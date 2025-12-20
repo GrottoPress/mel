@@ -12,7 +12,7 @@ describe Mel::Job do
 
       task = Mel::InstantTask.find(id, delete: true)
       Mel.sync(task)
-      task.try(&.job.as(SendEmailJob).sent).should be_true
+      task.try(&.job.as(SendEmailJob).sent?).should be_true
 
       Mel::InstantTask.find(id).should be_nil
     end
@@ -30,13 +30,13 @@ describe Mel::Job do
       Timecop.travel(1.hour.from_now) do
         task = Mel::InstantTask.find(id)
         Mel.sync(task)
-        task.try(&.job.as(SendEmailJob).sent).should be_false
+        task.try(&.job.as(SendEmailJob).sent?).should be_false
       end
 
       Timecop.travel(2.hours.from_now) do
         task = Mel::InstantTask.find(id, delete: true)
         Mel.sync(task)
-        task.try(&.job.as(SendEmailJob).sent).should be_true
+        task.try(&.job.as(SendEmailJob).sent?).should be_true
       end
 
       Mel::InstantTask.find(id).should be_nil
@@ -55,13 +55,13 @@ describe Mel::Job do
       Timecop.travel(1.hour.from_now) do
         task = Mel::InstantTask.find(id)
         Mel.sync(task)
-        task.try(&.job.as(SendEmailJob).sent).should be_false
+        task.try(&.job.as(SendEmailJob).sent?).should be_false
       end
 
       Timecop.travel(2.hours.from_now) do
         task = Mel::InstantTask.find(id, delete: true)
         Mel.sync(task)
-        task.try(&.job.as(SendEmailJob).sent).should be_true
+        task.try(&.job.as(SendEmailJob).sent?).should be_true
       end
 
       Mel::InstantTask.find(id).should be_nil
@@ -82,7 +82,7 @@ describe Mel::Job do
           task = Mel::PeriodicTask.find(id, delete: hour.even?)
           Mel.sync(task)
 
-          task.try(&.job.as(SendEmailJob).sent).should eq(hour.even?)
+          task.try(&.job.as(SendEmailJob).sent?).should eq(hour.even?)
         end
       end
 
@@ -102,7 +102,7 @@ describe Mel::Job do
           task = Mel::PeriodicTask.find(id, delete: hour.even?)
           Mel.sync(task)
 
-          task.try(&.job.as(SendEmailJob).sent).should eq(hour.even?)
+          task.try(&.job.as(SendEmailJob).sent?).should eq(hour.even?)
         end
       end
 
@@ -122,31 +122,31 @@ describe Mel::Job do
       Timecop.travel(time = cron.next) do
         task = Mel::CronTask.find(id, delete: true)
         Mel.sync(task)
-        task.try(&.job.as(SendEmailJob).sent).should be_true
+        task.try(&.job.as(SendEmailJob).sent?).should be_true
       end
 
       Timecop.travel(time + 1.hour) do
         task = Mel::CronTask.find(id)
         Mel.sync(task)
-        task.try(&.job.as(SendEmailJob).sent).should be_false
+        task.try(&.job.as(SendEmailJob).sent?).should be_false
       end
 
       Timecop.travel(time = cron.next(time)) do
         task = Mel::CronTask.find(id, delete: true)
         Mel.sync(task)
-        task.try(&.job.as(SendEmailJob).sent).should be_true
+        task.try(&.job.as(SendEmailJob).sent?).should be_true
       end
 
       Timecop.travel(time + 1.hour) do
         task = Mel::CronTask.find(id)
         Mel.sync(task)
-        task.try(&.job.as(SendEmailJob).sent).should be_false
+        task.try(&.job.as(SendEmailJob).sent?).should be_false
       end
 
       Timecop.travel(cron.next(time)) do
         task = Mel::CronTask.find(id, delete: true)
         Mel.sync(task)
-        task.try(&.job.as(SendEmailJob).sent).should be_true
+        task.try(&.job.as(SendEmailJob).sent?).should be_true
       end
 
       Mel::CronTask.find(id).should be_a(Mel::CronTask)
@@ -163,13 +163,13 @@ describe Mel::Job do
       Timecop.travel(time = cron.next) do
         task = Mel::CronTask.find(id, delete: true)
         Mel.sync(task)
-        task.try(&.job.as(SendEmailJob).sent).should be_true
+        task.try(&.job.as(SendEmailJob).sent?).should be_true
       end
 
       Timecop.travel(cron.next(time)) do
         task = Mel::CronTask.find(id, delete: true)
         Mel.sync(task)
-        task.try(&.job.as(SendEmailJob).sent).should be_true
+        task.try(&.job.as(SendEmailJob).sent?).should be_true
       end
 
       Timecop.travel(4.hours.from_now) do
@@ -186,9 +186,9 @@ describe Mel::Job do
       SendEmailJob.run(id: id, address: address)
       task = Mel::InstantTask.find(id)
 
-      task.try(&.job.as(SendEmailJob).run_before).should be_false
+      task.try(&.job.as(SendEmailJob).run_before?).should be_false
       Mel.sync(task)
-      task.try(&.job.as(SendEmailJob).run_before).should be_true
+      task.try(&.job.as(SendEmailJob).run_before?).should be_true
     end
 
     it "runs even if task fails" do
@@ -197,9 +197,9 @@ describe Mel::Job do
       FailedJob.run(id: id, retries: 0)
       task = Mel::InstantTask.find(id)
 
-      task.try(&.job.as(FailedJob).run_before).should be_false
+      task.try(&.job.as(FailedJob).run_before?).should be_false
       Mel.sync(task)
-      task.try(&.job.as(FailedJob).run_before).should be_true
+      task.try(&.job.as(FailedJob).run_before?).should be_true
     end
   end
 
@@ -211,9 +211,9 @@ describe Mel::Job do
       SendEmailJob.run(id: id, address: address)
       task = Mel::InstantTask.find(id)
 
-      task.try(&.job.as(SendEmailJob).run_after).should be_false
+      task.try(&.job.as(SendEmailJob).run_after?).should be_false
       Mel.sync(task)
-      task.try(&.job.as(SendEmailJob).run_after).should be_true
+      task.try(&.job.as(SendEmailJob).run_after?).should be_true
     end
 
     it "runs even if task fails" do
@@ -222,9 +222,9 @@ describe Mel::Job do
       FailedJob.run(id: id, retries: 0)
       task = Mel::InstantTask.find(id)
 
-      task.try(&.job.as(FailedJob).run_after).should be_false
+      task.try(&.job.as(FailedJob).run_after?).should be_false
       Mel.sync(task)
-      task.try(&.job.as(FailedJob).run_after).should be_true
+      task.try(&.job.as(FailedJob).run_after?).should be_true
     end
   end
 
@@ -236,7 +236,7 @@ describe Mel::Job do
       SendEmailJob.run(id: id, address: address)
 
       task = Mel::InstantTask.find(id)
-      task.try(&.job.as(SendEmailJob).enqueue_before).should be_true
+      task.try(&.job.as(SendEmailJob).enqueue_before?).should be_true
     end
   end
 
@@ -249,7 +249,7 @@ describe Mel::Job do
 
       task = Mel::InstantTask.find(id)
       task.try(&.enqueue)
-      task.try(&.job.as(SendEmailJob).enqueue_after).should be_true
+      task.try(&.job.as(SendEmailJob).enqueue_after?).should be_true
     end
   end
 
@@ -261,9 +261,9 @@ describe Mel::Job do
       SendEmailJob.run(id: id, address: address)
       task = Mel::InstantTask.find(id)
 
-      task.try(&.job.as(SendEmailJob).dequeue_before).should be_false
+      task.try(&.job.as(SendEmailJob).dequeue_before?).should be_false
       task.try(&.dequeue)
-      task.try(&.job.as(SendEmailJob).dequeue_before).should be_true
+      task.try(&.job.as(SendEmailJob).dequeue_before?).should be_true
     end
   end
 
@@ -275,9 +275,9 @@ describe Mel::Job do
       SendEmailJob.run(id: id, address: address)
       task = Mel::InstantTask.find(id)
 
-      task.try(&.job.as(SendEmailJob).dequeue_after).should be_false
+      task.try(&.job.as(SendEmailJob).dequeue_after?).should be_false
       task.try(&.dequeue)
-      task.try(&.job.as(SendEmailJob).dequeue_after).should be_true
+      task.try(&.job.as(SendEmailJob).dequeue_after?).should be_true
     end
   end
 
@@ -288,9 +288,9 @@ describe Mel::Job do
       FailCallbacksJob.run(id: id, retries: 0)
       task = Mel::InstantTask.find(id)
 
-      task.try(&.job.as(FailCallbacksJob).done).should be_false
+      task.try(&.job.as(FailCallbacksJob).done?).should be_false
       Mel.sync(task)
-      task.try(&.job.as(FailCallbacksJob).done).should be_true
+      task.try(&.job.as(FailCallbacksJob).done?).should be_true
     end
 
     it "schedules bulk jobs" do

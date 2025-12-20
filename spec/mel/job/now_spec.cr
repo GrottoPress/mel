@@ -11,7 +11,7 @@ describe Mel::Job::Now do
 
     task = Mel::InstantTask.find(id, delete: true)
     Mel.sync(task)
-    task.try(&.job.as(SendEmailNowJob).sent).should be_true
+    task.try(&.job.as(SendEmailNowJob).sent?).should be_true
 
     Mel::InstantTask.find(id).should be_nil
   end

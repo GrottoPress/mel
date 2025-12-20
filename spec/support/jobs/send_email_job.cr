@@ -4,24 +4,24 @@ struct SendEmailJob
   getter :address
 
   @[JSON::Field(ignore: true)]
-  getter sent = false
+  getter? sent = false
 
   @[JSON::Field(ignore: true)]
-  getter run_before = false
+  getter? run_before = false
 
   @[JSON::Field(ignore: true)]
-  getter run_after = false
+  getter? run_after = false
 
-  getter enqueue_before = false
-
-  @[JSON::Field(ignore: true)]
-  getter enqueue_after = false
+  getter? enqueue_before = false
 
   @[JSON::Field(ignore: true)]
-  getter dequeue_before = false
+  getter? enqueue_after = false
 
   @[JSON::Field(ignore: true)]
-  getter dequeue_after = false
+  getter? dequeue_before = false
+
+  @[JSON::Field(ignore: true)]
+  getter? dequeue_after = false
 
   def initialize(@address : String)
   end
