@@ -63,7 +63,7 @@ jobs:
           key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml') }}
           restore-keys: ${{ runner.os }}-shards-
       - name: Install shards
-        run: shards update --skip-postinstall --skip-executables
+        run: shards update
         env:
           SHARDS_OVERRIDE: ${{ matrix.shard_file }}
       - name: Install Redis
