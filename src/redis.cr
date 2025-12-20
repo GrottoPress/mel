@@ -194,10 +194,13 @@ module Mel
       end
 
       def create(task : Task)
-        @client.zadd(
+        @client.run({
+          "ZADD",
           @redis.key.name,
-          {"NX", task.time.to_unix.to_s, task.id}
-        )
+          "NX",
+          task.time.to_unix.to_s,
+          task.id
+        })
 
         @client.set(@redis.key.name(task.id), task.to_json, nx: true)
       end
