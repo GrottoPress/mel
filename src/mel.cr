@@ -38,7 +38,7 @@ module Mel
     Settings
   end
 
-  def configure : Nil
+  def configure(&) : Nil
     yield settings
 
     settings.timezone.try { |location| Time::Location.local = location }
@@ -48,7 +48,7 @@ module Mel
     Log.for(self)
   end
 
-  def start_async
+  def start_async(&)
     start_async
     yield
     stop
@@ -117,7 +117,7 @@ module Mel
     {0, settings.batch_size.abs - pond.size}.max
   end
 
-  private def lock
+  private def lock(&)
     @@mutex.synchronize { yield }
   end
 

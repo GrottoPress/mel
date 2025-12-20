@@ -14,7 +14,7 @@ describe Mel::Job::Every do
         task = Mel::PeriodicTask.find(id, delete: hour.even?)
         Mel.sync(task)
 
-        task.try(&.job.as(SendEmailEveryJob).sent).should eq(hour.even?)
+        task.try(&.job.as(SendEmailEveryJob).sent?).should eq(hour.even?)
       end
     end
 
@@ -63,7 +63,7 @@ describe Mel::Job::Every do
         task = Mel::PeriodicTask.find(id, delete: hour.even?)
         Mel.sync(task)
 
-        task.try(&.job.as(SendEmailEveryTillJob).sent).should eq(hour.even?)
+        task.try(&.job.as(SendEmailEveryTillJob).sent?).should eq(hour.even?)
       end
     end
 
@@ -88,7 +88,7 @@ describe Mel::Job::Every do
         task = Mel::PeriodicTask.find(id, delete: hour.even?)
         Mel.sync(task)
 
-        task.try(&.job.as(SendEmailEveryForJob).sent).should eq(hour.even?)
+        task.try(&.job.as(SendEmailEveryForJob).sent?).should eq(hour.even?)
       end
     end
 

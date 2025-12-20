@@ -3,7 +3,7 @@ struct SendEmailNowJob
 
 
   @[JSON::Field(ignore: true)]
-  getter sent = false
+  getter? sent = false
 
   def initialize(@address : String)
   end

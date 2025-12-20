@@ -12,13 +12,13 @@ describe Mel::Job::In do
     Timecop.travel(1.hour.from_now) do
       task = Mel::InstantTask.find(id)
       Mel.sync(task)
-      task.try(&.job.as(SendEmailInJob).sent).should be_false
+      task.try(&.job.as(SendEmailInJob).sent?).should be_false
     end
 
     Timecop.travel(2.hours.from_now) do
       task = Mel::InstantTask.find(id, delete: true)
       Mel.sync(task)
-      task.try(&.job.as(SendEmailInJob).sent).should be_true
+      task.try(&.job.as(SendEmailInJob).sent?).should be_true
     end
 
     Mel::InstantTask.find(id).should be_nil

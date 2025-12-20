@@ -133,7 +133,7 @@ module Mel
       count < 0 ? queue.to_h : queue.first(count).to_h
     end
 
-    private def lock
+    private def lock(&)
       @mutex.synchronize { yield }
     end
 

@@ -1,0 +1,5 @@
+Lint/Formatting:
+  Enabled: false
+Lint/SpecFilename:
+  Excluded:
+    - spec/setup/**/*.cr
