@@ -7,4 +7,4 @@ dependencies:
     branch: main
   redis:
     github: jgaskins/redis
-    branch: main
+    branch: master
