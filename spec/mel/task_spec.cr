@@ -164,10 +164,10 @@ describe Mel::Task do
       Mel::Task.find(-1).try(&.size).should eq(3)
       Mel::PeriodicTask.find(-1).try(&.size).should eq(1)
 
-      Mel::PeriodicTask.find(id).try(&.dequeue)
+      Mel::Task.find(id).try(&.dequeue)
 
       Mel::Task.find(-1).try(&.size).should eq(2)
-      Mel::PeriodicTask.find(-1).should be_nil
+      SendEmailJob.should_not be_enqueued(as: Mel::PeriodicTask)
     end
   end
 
