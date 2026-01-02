@@ -302,7 +302,7 @@ describe Mel::Job do
 
       task.should_not be_nil
       Mel.sync(task)
-      Mel::InstantTask.find(-1).try(&.size).should eq(max)
+      CountJob.should be_enqueued(max, Mel::InstantTask)
     end
   end
 end

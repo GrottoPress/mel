@@ -119,7 +119,7 @@ describe Mel::Task do
       SendEmailJob.run(id, address: "aa@bb.cc")
       SendEmailJob.run(id, address: "dd@ee.ff")
 
-      Mel::InstantTask.find(-1).try(&.size).should eq(1)
+      SendEmailJob.should be_enqueued(1)
 
       Mel::InstantTask.find(id)
         .try(&.job.as(SendEmailJob).address)
@@ -134,7 +134,7 @@ describe Mel::Task do
       SendEmailJob.run(id, force: true, address: "dd@ee.ff")
       SendEmailJob.run(id, force: true, address: address)
 
-      Mel::InstantTask.find(-1).try(&.size).should eq(1)
+      SendEmailJob.should be_enqueued(1)
 
       Mel::InstantTask.find(id)
         .try(&.job.as(SendEmailJob).address)
@@ -148,7 +148,7 @@ describe Mel::Task do
       SendEmailJob.run(address: address)
       SendEmailJob.run(address: address)
 
-      Mel::InstantTask.find(-1).try(&.size).should eq(3)
+      SendEmailJob.should be_enqueued(3)
     end
   end
 
@@ -161,12 +161,12 @@ describe Mel::Task do
       SendEmailJob.run_every(10.minutes, id: id, address: address)
       SendEmailJob.run_on("0 2 * * *", for: 1.week, address: address)
 
-      Mel::Task.find(-1).try(&.size).should eq(3)
-      Mel::PeriodicTask.find(-1).try(&.size).should eq(1)
+      SendEmailJob.should be_enqueued(3)
+      SendEmailJob.should be_enqueued(1, Mel::PeriodicTask)
 
       Mel::Task.find(id).try(&.dequeue)
 
-      Mel::Task.find(-1).try(&.size).should eq(2)
+      SendEmailJob.should be_enqueued(2)
       SendEmailJob.should_not be_enqueued(as: Mel::PeriodicTask)
     end
   end
