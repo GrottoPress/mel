@@ -2,7 +2,7 @@ require "../spec_helper"
 
 describe Mel::CronTask do
   describe ".find" do
-    it "returns all periodic tasks" do
+    it "returns all cron tasks" do
       address = "user@domain.tld"
 
       SendEmailJob.run(address: address)
