@@ -690,6 +690,8 @@ You may delete progress data in specs thus:
 
 # ...
 
+require "mel/spec"
+
 Spec.before_each do
   # ...
   Mel.settings.store.try(&.truncate_progress)
@@ -729,6 +731,10 @@ If it is a negative integer `-N`  (other than `-1`), the number of due tasks pul
 - `#be_enqueued`: This expectation can you be used to assert that a given job has been enqueued in the store:
 
   ```crystal
+  # ...
+
+  require "mel/spec"
+
   SendEmailJob.should be_enqueued
   SendEmailJob.should be_enqueued(id: "1234")
   SendEmailJob.should be_enqueued(count: 2)
@@ -742,6 +748,8 @@ If it is a negative integer `-N`  (other than `-1`), the number of due tasks pul
   SendEmailJob.should_not be_enqueued(as: Mel::InstantTask)
   SendEmailJob.should_not be_enqueued(id: "1234", as: Mel::PeridicTask)
   SendEmailJob.should_not be_enqueued(count: 2, as: Mel::InstantTask)
+
+  # ...
   ```
 
 ## Integrations
