@@ -1,13 +1,27 @@
-def be_enqueued(count : Int32? = nil, as type = nil)
-  Mel::BeEnqueuedExpectation.new(count, type)
+def be_enqueued(as type = nil)
+  Mel::BeEnqueuedExpectation.new(type)
 end
 
 def be_enqueued(count : Int, as type = nil)
-  Mel::BeEnqueuedExpectation.new(count.to_i, type)
+  Mel::BeEnqueuedExpectation.new(count, type)
+end
+
+def be_enqueued(id : String, as type = nil)
+  Mel::BeEnqueuedExpectation.new(id, type)
 end
 
 struct Mel::BeEnqueuedExpectation
-  def initialize(@count : Int32? = nil, @type : Mel::Task.class | Nil = nil)
+  @count : Int32?
+  @id : String?
+
+  def initialize(@type : Mel::Task.class | Nil = nil)
+  end
+
+  def initialize(count : Int, @type : Mel::Task.class | Nil = nil)
+    @count = count.to_i
+  end
+
+  def initialize(@id : String, @type : Mel::Task.class | Nil = nil)
   end
 
   def self.new(count : Int, type = nil)
@@ -15,7 +29,9 @@ struct Mel::BeEnqueuedExpectation
   end
 
   def match(job : Mel::Job::Template.class)
-    count = Mel::Task.find(-1).try &.count do |task|
+    find = @id.nil? ? -1 : {@id.not_nil!}
+
+    count = Mel::Task.find(find).try &.count do |task|
       next false unless task.job.class == job
       @type.nil? || task.class <= @type.not_nil!
     end

@@ -21,6 +21,6 @@ describe Mel::Job::At do
       task.try(&.job.as(SendEmailAtJob).sent?).should be_true
     end
 
-    Mel::InstantTask.find(id).should be_nil
+    SendEmailAtJob.should_not be_enqueued(id)
   end
 end
