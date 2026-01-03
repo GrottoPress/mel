@@ -721,6 +721,29 @@ If it is a negative integer `-N`  (other than `-1`), the number of due tasks pul
 
 `-1` sets *no* limits. *Mel* would pull as many tasks as are due each poll, and run all of them.
 
+### Spec Helpers
+
+*Mel* comes with helpers and expectations for use in your specs:
+
+- `Mel.start_and_stop`: Starts *Mel*, pulls due tasks from the queue and runs them. It stops immediately after.
+- `#be_enqueued`: This expectation can you be used to assert that a given job has been enqueued in the store:
+
+  ```crystal
+  SendEmailJob.should be_enqueued
+  SendEmailJob.should be_enqueued(id: "1234")
+  SendEmailJob.should be_enqueued(count: 2)
+  SendEmailJob.should be_enqueued(as: Mel::InstantTask)
+  SendEmailJob.should be_enqueued(id: "1234", as: Mel::PeridicTask)
+  SendEmailJob.should be_enqueued(count: 2, as: Mel::CronTask)
+
+  SendEmailJob.should_not be_enqueued
+  SendEmailJob.should_not be_enqueued(id: "1234")
+  SendEmailJob.should_not be_enqueued(count: 2)
+  SendEmailJob.should_not be_enqueued(as: Mel::InstantTask)
+  SendEmailJob.should_not be_enqueued(id: "1234", as: Mel::PeridicTask)
+  SendEmailJob.should_not be_enqueued(count: 2, as: Mel::InstantTask)
+  ```
+
 ## Integrations
 
 ### *Carbon* mailer
