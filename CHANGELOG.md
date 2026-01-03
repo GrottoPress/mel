@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Add `#be_enqueued` spec expectation
 
+### Changed
+- Move Lua script into its own file
+
 ## [1.0.3] - 2025-12-23
 
 ### Fixed
