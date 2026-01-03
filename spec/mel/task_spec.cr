@@ -17,7 +17,7 @@ describe Mel::Task do
       Mel.sync(task)
       task.try(&.attempts).should eq(2)
 
-      Mel::InstantTask.find(id).should be_nil
+      FailedJob.should_not be_enqueued(id)
     end
 
     it "retries failed tasks with backoffs" do
@@ -27,22 +27,22 @@ describe Mel::Task do
 
       Timecop.freeze(Time.local) do
         Mel.start_and_stop(4)
-        Mel::InstantTask.find(id).should_not be_nil
+        FailedJob.should be_enqueued(id)
       end
 
       Timecop.travel(1.minute.from_now) do
         Mel.start_and_stop
-        Mel::InstantTask.find(id).should_not be_nil
+        FailedJob.should be_enqueued(id)
       end
 
       Timecop.travel(2.minutes.from_now) do
         Mel.start_and_stop
-        Mel::InstantTask.find(id).should_not be_nil
+        FailedJob.should be_enqueued(id)
       end
 
       Timecop.travel(3.minutes.from_now) do
         Mel.start_and_stop
-        Mel::InstantTask.find(id).should be_nil
+        FailedJob.should_not be_enqueued(id)
       end
     end
 
@@ -53,7 +53,7 @@ describe Mel::Task do
 
       Timecop.freeze(2.minutes.from_now) do
         Mel.start_and_stop
-        Mel::PeriodicTask.find(id).should_not be_nil
+        FailedJob.should be_enqueued(id)
       end
 
       Timecop.freeze(3.minutes.from_now) do
@@ -75,7 +75,7 @@ describe Mel::Task do
 
       Timecop.freeze(2.minutes.from_now) do
         Mel.start_and_stop
-        Mel::PeriodicTask.find(id).should_not be_nil
+        FailedJob.should be_enqueued(id)
       end
 
       Timecop.freeze(3.minutes.from_now) do

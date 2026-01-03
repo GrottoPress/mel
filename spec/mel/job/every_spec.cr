@@ -18,7 +18,7 @@ describe Mel::Job::Every do
       end
     end
 
-    Mel::PeriodicTask.find(id).should be_a(Mel::PeriodicTask)
+    SendEmailEveryJob.should be_enqueued(id, Mel::PeriodicTask)
   end
 
   it "starts at specified time" do

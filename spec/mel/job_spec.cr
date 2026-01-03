@@ -14,7 +14,7 @@ describe Mel::Job do
       Mel.sync(task)
       task.try(&.job.as(SendEmailJob).sent?).should be_true
 
-      Mel::InstantTask.find(id).should be_nil
+      SendEmailJob.should_not be_enqueued(id)
     end
   end
 
@@ -39,7 +39,7 @@ describe Mel::Job do
         task.try(&.job.as(SendEmailJob).sent?).should be_true
       end
 
-      Mel::InstantTask.find(id).should be_nil
+      SendEmailJob.should_not be_enqueued(id)
     end
   end
 
@@ -64,7 +64,7 @@ describe Mel::Job do
         task.try(&.job.as(SendEmailJob).sent?).should be_true
       end
 
-      Mel::InstantTask.find(id).should be_nil
+      SendEmailJob.should_not be_enqueued(id)
     end
   end
 
@@ -86,7 +86,7 @@ describe Mel::Job do
         end
       end
 
-      Mel::PeriodicTask.find(id).should be_a(Mel::PeriodicTask)
+      SendEmailJob.should be_enqueued(id, Mel::PeriodicTask)
     end
 
     it "deletes task after given time" do
@@ -106,7 +106,7 @@ describe Mel::Job do
         end
       end
 
-      Mel::PeriodicTask.find(id).should be_nil
+      SendEmailJob.should_not be_enqueued(id)
     end
   end
 
@@ -149,7 +149,7 @@ describe Mel::Job do
         task.try(&.job.as(SendEmailJob).sent?).should be_true
       end
 
-      Mel::CronTask.find(id).should be_a(Mel::CronTask)
+      SendEmailJob.should be_enqueued(id, Mel::CronTask)
     end
 
     it "deletes task after given time" do
@@ -173,7 +173,7 @@ describe Mel::Job do
       end
 
       Timecop.travel(4.hours.from_now) do
-        Mel::CronTask.find(id).should be_nil
+        SendEmailJob.should_not be_enqueued(id)
       end
     end
   end
