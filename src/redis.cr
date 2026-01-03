@@ -7,7 +7,7 @@ module Mel
   struct Redis
     include Store
 
-    private LUA = {{ read_file("./src/redis/mel.lua") }}
+    private LUA = {{ read_file("#{__DIR__}/redis/mel.lua") }}
 
     getter :client
 
