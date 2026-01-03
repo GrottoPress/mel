@@ -29,11 +29,11 @@ struct Mel::BeEnqueuedExpectation
   end
 
   def match(job : Mel::Job::Template.class)
-    find = @id.nil? ? -1 : {@id.not_nil!}
+    find = @id.nil? ? -1 : {@id.not_nil!} # ameba:disable Lint/NotNil
 
     count = Mel::Task.find(find).try &.count do |task|
       next false unless task.job.class == job
-      @type.nil? || task.class <= @type.not_nil!
+      @type.nil? || task.class <= @type.not_nil! # ameba:disable Lint/NotNil
     end
 
     return false if count.nil?
