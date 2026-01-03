@@ -24,10 +24,6 @@ struct Mel::BeEnqueuedExpectation
   def initialize(@id : String, @type : Mel::Task.class | Nil = nil)
   end
 
-  def self.new(count : Int, type = nil)
-    new(count.to_i, type)
-  end
-
   def match(job : Mel::Job::Template.class)
     find = @id.nil? ? -1 : {@id.not_nil!} # ameba:disable Lint/NotNil
 
