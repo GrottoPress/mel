@@ -142,14 +142,6 @@ module Mel
       ids
     end
 
-    private def orphan_score
-      -orphan_after.ago.to_unix
-    end
-
-    private def running_score
-      -Time.local.to_unix
-    end
-
     struct Transaction
       include Mel::Transaction
 

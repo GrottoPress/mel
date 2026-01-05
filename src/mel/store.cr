@@ -93,8 +93,15 @@ module Mel
       # 3 polls.
       private def orphan_after
         poll_interval = Mel.settings.poll_interval
-
         {poll_interval * 3, poll_interval + 1.second}.max
+      end
+
+      private def running_score
+        -Time.local.to_unix
+      end
+
+      private def orphan_score
+        -orphan_after.ago.to_unix
       end
     end
   end

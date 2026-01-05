@@ -40,8 +40,8 @@ module Mel
         ids = @client.eval(LUA, {key.name}, {
           time.to_unix.to_s,
           count.to_s,
-          running_score,
-          orphan_score,
+          running_score.to_s,
+          orphan_score.to_s,
           run_queue_lua
         }).as(Array)
 
@@ -66,8 +66,8 @@ module Mel
         ids = @client.eval(LUA, {key.name}, {
           "+inf",
           count.to_s,
-          running_score,
-          orphan_score,
+          running_score.to_s,
+          orphan_score.to_s,
           run_queue_lua
         }).as(Array)
 
@@ -128,14 +128,6 @@ module Mel
 
     private def run_queue_lua
       RunPool.fetch.join(',')
-    end
-
-    private def orphan_score
-      "-#{orphan_after.ago.to_unix}"
-    end
-
-    private def running_score
-      "-#{Time.local.to_unix}"
     end
 
     struct Transaction
