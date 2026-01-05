@@ -75,11 +75,11 @@ module Mel
       values = lock do
         ids.compact_map do |id|
           if delete
-            @queue.delete(id)
-            next @tasks.delete(id)
+            queue.delete(id)
+            next tasks.delete(id)
           end
 
-          @tasks[id]?
+          tasks[id]?
         end
       end
 
@@ -100,9 +100,9 @@ module Mel
 
       values = lock do
         ids.compact_map do |id|
-          @progress[id]?.try do |entry|
+          progress[id]?.try do |entry|
             next entry.value unless entry.expired?
-            @progress.delete(id)
+            progress.delete(id)
             nil
           end
         end
@@ -134,7 +134,7 @@ module Mel
     end
 
     private def lock(&)
-      @mutex.synchronize { yield }
+      mutex.synchronize { yield }
     end
 
     private def to_running(ids)

@@ -37,7 +37,7 @@ module Mel
       return if count.zero?
 
       if delete.nil?
-        ids = @client.eval(LUA, {key.name}, {
+        ids = client.eval(LUA, {key.name}, {
           time.to_unix.to_s,
           count.to_s,
           running_score.to_s,
@@ -49,7 +49,7 @@ module Mel
         return find(ids, delete: false)
       end
 
-      ids = @client.zrangebyscore(
+      ids = client.zrangebyscore(
         key.name,
         "0",
         time.to_unix.to_s,
@@ -63,7 +63,7 @@ module Mel
       return if count.zero?
 
       if delete.nil?
-        ids = @client.eval(LUA, {key.name}, {
+        ids = client.eval(LUA, {key.name}, {
           "+inf",
           count.to_s,
           running_score.to_s,
@@ -75,7 +75,7 @@ module Mel
         return find(ids, delete: false)
       end
 
-      ids = @client.zrangebyscore(key.name, "0", "+inf", {
+      ids = client.zrangebyscore(key.name, "0", "+inf", {
         "0",
         count.to_s
       }).as(Array)
@@ -88,7 +88,7 @@ module Mel
 
       keys = ids.map { |id| key.name(id.to_s) }
 
-      values = @client.multi do |redis|
+      values = client.multi do |redis|
         redis.mget(keys)
 
         if delete
@@ -102,28 +102,28 @@ module Mel
     end
 
     def transaction(& : Transaction -> _)
-      @client.multi do |redis|
+      client.multi do |redis|
         yield Transaction.new(self, redis)
       end
     end
 
     def truncate
-      keys = @client.keys("#{key.name}*")
-      @client.del(keys.map &.to_s) unless keys.empty?
+      keys = client.keys("#{key.name}*")
+      client.del(keys.map &.to_s) unless keys.empty?
     end
 
     def get_progress(ids : Indexable) : Array(String)?
       return if ids.empty?
 
       keys = ids.map { |id| key.progress(id) }
-      values = @client.mget(keys).as(Array).compact_map(&.as? String)
+      values = client.mget(keys).as(Array).compact_map(&.as? String)
 
       values unless values.empty?
     end
 
     def truncate_progress
-      keys = @client.keys("#{key.progress}*")
-      @client.del(keys.map &.to_s) unless keys.empty?
+      keys = client.keys("#{key.progress}*")
+      client.del(keys.map &.to_s) unless keys.empty?
     end
 
     private def run_queue_lua
@@ -189,7 +189,7 @@ module Mel
       end
 
       def name : String
-        "#{@namespace}:tasks"
+        "#{namespace}:tasks"
       end
 
       def progress(*parts : Symbol | String) : String
@@ -197,7 +197,7 @@ module Mel
       end
 
       def progress : String
-        "#{@namespace}:progress"
+        "#{namespace}:progress"
       end
 
       private def name_parts(name, parts)
