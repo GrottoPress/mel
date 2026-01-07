@@ -28,6 +28,8 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
        github: GrottoPress/mel
      #redis: # Uncomment if using the Redis backend
      #  github: jgaskins/redis
+     #pg: # Uncomment if using the Posgres backend
+     #  github: will/crystal-pg
    ```
 
 1. Run `shards update`
@@ -68,6 +70,28 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
        settings.store = Mel::Redis.new(
          "redis://localhost:6379/0",
          namespace: "mel"
+       )
+       # ...
+     end
+
+     # ...
+     ```
+
+   - Using the Postgres backend
+
+     ```crystal
+     # ->>> src/app/config.cr
+
+     # ...
+
+     require "mel/postgres"
+
+     Mel.configure do |settings|
+       # ...
+       settings.store = Mel::Postgres.new(
+         "postgres://username:password@localhost:5432/database_name",
+         namespace: "mel",
+         setup: true # <= Creates database
        )
        # ...
      end
@@ -800,8 +824,10 @@ If it is a negative integer `-N`  (other than `-1`), the number of due tasks pul
 Create a `.env.sh` file:
 
 ```bash
-#!/bin/bash
+#!/usr/bin/env bash
 
+export COCKROACH_URL='postgres://root@localhost:26257/mel_spec?sslmode=disable'
+export POSTGRES_URL='postgres://postgres:password@localhost:5432/mel_spec'
 export REDIS_URL='redis://localhost:6379/0'
 ```
 

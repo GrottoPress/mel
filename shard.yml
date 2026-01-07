@@ -8,7 +8,7 @@ authors:
 
 license: MIT
 
-crystal: ~> 1.0
+crystal: ~> 1.4
 
 dependencies:
   cron_parser:
@@ -25,6 +25,9 @@ development_dependencies:
   carbon:
     github: luckyframework/carbon
     version: ~> 0.2.0
+  pg:
+    github: will/crystal-pg
+    version: ~> 0.29.0
   redis:
     github: jgaskins/redis
     version: ~> 0.8.0

@@ -8,7 +8,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased] - 
 
 ### Added
+- Add `Mel::Postgres` adapter
 - Add `#be_enqueued` spec expectation
+
+### Changed
+- Bump minimum required Crystal version to 1.4
 
 ### Changed
 - Move Lua script into its own file
