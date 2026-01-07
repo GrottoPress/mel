@@ -39,14 +39,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        crystal: ['1.0.0']
+        cockroachdb: ['v22.2.0', latest]
+        crystal: ['1.4.0']
         experimental: [false]
         shard_file: [shard.yml]
         include:
-          - crystal: latest
+          - cockroachdb: latest
+            crystal: latest
             experimental: false
             shard_file: shard.latest.yml
-          - crystal: nightly
+          - cockroachdb: latest
+            crystal: nightly
             experimental: true
             shard_file: shard.edge.yml
     runs-on: ubuntu-latest
@@ -74,7 +77,32 @@ jobs:
           sudo apt -y install redis
       - name: Start Redis
         run: sudo systemctl start redis
+      - name: Install Postgresql
+        run: |
+          sudo apt update
+          sudo apt -y install postgresql
+      - name: Start Postgresql
+        run: sudo systemctl start postgresql
+      - name: Set Postgres password
+        run: >-
+          sudo -u postgres psql -c
+          "ALTER USER postgres WITH PASSWORD 'password';"
+      - name: Install CockroachDB
+        run: |
+          sudo apt update
+          sudo apt -y install tar wget
+          sudo mkdir -p /usr/local/lib/cockroach
+          wget -O cockroachdb.tgz https://binaries.cockroachdb.com/cockroach-${{ matrix.cockroachdb }}.linux-amd64.tgz
+          tar -xzf cockroachdb.tgz
+          sudo cp -f cockroach-*/cockroach /usr/local/bin/
+          sudo chmod +x /usr/local/bin/cockroach
+          sudo cp -rf cockroach-*/lib/* /usr/local/lib/cockroach/
+        working-directory: /tmp
+      - name: Start CockroachDB
+        run: cockroach start-single-node --insecure --listen-addr=localhost:36257 --sql-addr=localhost:26257 --background
       - name: Run tests
         env:
+          COCKROACH_URL: postgres://root@localhost:26257/mel_spec?sslmode=disable
+          POSTGRES_URL: postgres://postgres:password@localhost:5432/mel_spec
           REDIS_URL: redis://localhost:6379/0
         run: crystal spec --error-on-warnings -Dpreview_mt

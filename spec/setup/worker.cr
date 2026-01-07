@@ -14,7 +14,12 @@ end
 Spec.around_each do |spec|
   next spec.run if all_tags(spec.example).includes?("skip_around_each")
 
-  {Mel::Memory.new, Mel::Redis.new(ENV["REDIS_URL"])}.each do |store|
+  {
+    Mel::Memory.new,
+    Mel::Postgres.new(ENV["COCKROACH_URL"], setup: true),
+    Mel::Postgres.new(ENV["POSTGRES_URL"], setup: true),
+    Mel::Redis.new(ENV["REDIS_URL"])
+  }.each do |store|
     Mel.settings.store = store
     tasks.call
     spec.run
