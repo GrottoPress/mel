@@ -5,12 +5,12 @@ describe Mel do
     CollectJobsJob.run
     CollectJobsJob.run_every(2.hours, for: 4.hours)
 
-    JOBS.lazy_get.should eq(0)
+    JOBS.get.should eq(0)
 
     Timecop.travel(2.hours.from_now) do
       Mel.start_and_stop
       Mel.state.stopped?.should be_true
-      JOBS.lazy_get.should eq(2)
+      JOBS.get.should eq(2)
     end
   end
 
