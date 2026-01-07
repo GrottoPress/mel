@@ -66,10 +66,6 @@ module Mel
         ORDER BY score LIMIT $3 FOR UPDATE SKIP LOCKED;
         SQL
 
-      running_update_sql = <<-SQL
-        UPDATE #{tasks_table} SET score = $1 WHERE id = ANY($2);
-        SQL
-
       select_sql = <<-SQL
         SELECT data FROM #{tasks_table} WHERE score >= $1 AND score <= $2
         ORDER BY score LIMIT $3;
@@ -79,6 +75,8 @@ module Mel
 
       with_transaction do |connection|
         if delete.nil?
+          to_running(connection, RunPool.fetch)
+
           values = connection.query_all(
             running_select_sql,
             orphan_score,
@@ -90,7 +88,7 @@ module Mel
           data = values.map(&.[:data])
           ids = values.map(&.[:id])
 
-          connection.exec(running_update_sql, running_score, ids)
+          to_running(connection, ids)
           RunPool.update(ids)
 
           next data.empty? ? nil : data
@@ -116,10 +114,6 @@ module Mel
         ORDER BY score LIMIT $2 FOR UPDATE SKIP LOCKED;
         SQL
 
-      running_update_sql = <<-SQL
-        UPDATE #{tasks_table} SET score = $1 WHERE id = ANY($2);
-        SQL
-
       select_sql = <<-SQL
         SELECT data FROM #{tasks_table} WHERE score >= $1
         ORDER BY score LIMIT $2;
@@ -129,6 +123,8 @@ module Mel
 
       with_transaction do |connection|
         if delete.nil?
+          to_running(connection, RunPool.fetch)
+
           values = connection.query_all(
             running_select_sql,
             orphan_score,
@@ -139,7 +135,7 @@ module Mel
           data = values.map(&.[:data])
           ids = values.map(&.[:id])
 
-          connection.exec(running_update_sql, running_score, ids)
+          to_running(connection, ids)
           RunPool.update(ids)
 
           next data.empty? ? nil : data
@@ -232,6 +228,14 @@ module Mel
           );
           SQL
       end
+    end
+
+    private def to_running(connection, ids)
+      sql = <<-SQL
+        UPDATE #{tasks_table} SET score = $1 WHERE id = ANY($2);
+        SQL
+
+      connection.exec(sql, running_score, ids.to_a)
     end
 
     private def with_transaction(&)
