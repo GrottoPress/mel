@@ -93,7 +93,7 @@ module Mel
           connection.exec(running_update_sql, running_score, ids)
           RunPool.update(ids)
 
-          break data.empty? ? nil : data
+          next data.empty? ? nil : data
         end
 
         data = connection.query_all(
@@ -142,7 +142,7 @@ module Mel
           connection.exec(running_update_sql, running_score, ids)
           RunPool.update(ids)
 
-          break data.empty? ? nil : data
+          next data.empty? ? nil : data
         end
 
         data = connection.query_all(select_sql, 0, limit, as: String)
