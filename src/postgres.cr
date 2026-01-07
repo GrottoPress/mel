@@ -185,20 +185,20 @@ module Mel
     def get_progress(ids : Indexable) : Array(String)?
       return if ids.empty?
 
-      data = with_transaction do |connection|
+      with_transaction do |connection|
         connection.exec <<-SQL
           DELETE FROM #{progress_table}
           WHERE expires_at IS NOT NULL AND expires_at <= CURRENT_TIMESTAMP;
           SQL
 
-        connection.query_all <<-SQL, ids.map(&.to_s), as: String
+        data = connection.query_all <<-SQL, ids.map(&.to_s), as: String
           SELECT data FROM #{progress_table}
           WHERE id = ANY($1)
           AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP);
           SQL
-      end
 
-      data.try { |_data| _data unless _data.empty? }
+        data unless data.empty?
+      end
     end
 
     def truncate_progress
