@@ -79,7 +79,7 @@ module Mel
 
           values = connection.query_all(
             running_select_sql,
-            orphan_score,
+            orphan_timestamp,
             time.to_unix,
             limit,
             as: {id: String, data: String}
@@ -127,7 +127,7 @@ module Mel
 
           values = connection.query_all(
             running_select_sql,
-            orphan_score,
+            orphan_timestamp,
             limit,
             as: {id: String, data: String}
           )
@@ -229,7 +229,7 @@ module Mel
     private def to_running(connection, ids)
       return if ids.empty?
 
-      connection.exec <<-SQL, running_score, ids.to_a
+      connection.exec <<-SQL, running_timestamp, ids.to_a
         UPDATE #{tasks_table} SET score = $1 WHERE id = ANY($2);
         SQL
     end

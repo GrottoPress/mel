@@ -89,19 +89,22 @@ module Mel
           transaction &.set_progress(id, value, description)
       end
 
-      # We assume a task is orphaned if its score has not been updated after
-      # 3 polls.
-      private def orphan_after
-        poll_interval = Mel.settings.poll_interval
-        {poll_interval * 3, poll_interval + 1.second}.max
+      private def orphan_timestamp
+        -orphan_after.ago.to_unix
       end
 
-      private def running_score
+      private def running_timestamp
         -Time.local.to_unix
       end
 
-      private def orphan_score
-        -orphan_after.ago.to_unix
+      # A task is assumed to be orphaned if its timestamp has not been updated
+      # after 3 polls.
+      #
+      # This must never be less than 1 second, since timestamps are saved in
+      # seconds.
+      private def orphan_after
+        poll_interval = Mel.settings.poll_interval
+        {poll_interval * 3, poll_interval + 1.second}.max
       end
     end
   end

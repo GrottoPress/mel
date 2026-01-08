@@ -38,10 +38,10 @@ module Mel
 
       if delete.nil?
         ids = client.eval(LUA, {key.name}, {
-          orphan_score.to_s,
+          orphan_timestamp.to_s,
           time.to_unix.to_s,
           count.to_s,
-          running_score.to_s,
+          running_timestamp.to_s,
           run_pool_lua
         }).as(Array)
 
@@ -64,10 +64,10 @@ module Mel
 
       if delete.nil?
         ids = client.eval(LUA, {key.name}, {
-          orphan_score.to_s,
+          orphan_timestamp.to_s,
           "+inf",
           count.to_s,
-          running_score.to_s,
+          running_timestamp.to_s,
           run_pool_lua
         }).as(Array)
 

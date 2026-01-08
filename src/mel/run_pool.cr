@@ -1,8 +1,8 @@
 module Mel
-  # This saves a worker's currently running tasks in memory.
+  # Saves a worker's currently running tasks in memory.
   #
-  # Every time a worker polls for tasks, it updates the timestamp (score) of
-  # its running tasks in the store. The Pool is how it knows which tasks to
+  # Every time a worker polls for tasks, it updates the timestamp of
+  # its running tasks in the store. This pool is how it knows which tasks to
   # update.
   module RunPool
     extend self
