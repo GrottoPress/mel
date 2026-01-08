@@ -42,7 +42,7 @@ module Mel
           count.to_s,
           running_score.to_s,
           orphan_score.to_s,
-          run_queue_lua
+          run_pool_lua
         }).as(Array)
 
         RunPool.update(ids)
@@ -68,7 +68,7 @@ module Mel
           count.to_s,
           running_score.to_s,
           orphan_score.to_s,
-          run_queue_lua
+          run_pool_lua
         }).as(Array)
 
         RunPool.update(ids)
@@ -126,7 +126,7 @@ module Mel
       client.del(keys.map &.to_s) unless keys.empty?
     end
 
-    private def run_queue_lua
+    private def run_pool_lua
       RunPool.fetch.join(',')
     end
 
