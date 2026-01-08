@@ -4,6 +4,9 @@ Mel.configure do |settings|
   settings.timezone = Time::Location.load("America/Los_Angeles")
 end
 
+Mel::Postgres.create_database(ENV["COCKROACH_URL"])
+Mel::Postgres.create_database(ENV["POSTGRES_URL"])
+
 tasks = ->do
   Mel.stop
   Mel::RunPool.delete
@@ -16,8 +19,8 @@ Spec.around_each do |spec|
 
   {
     Mel::Memory.new,
-    Mel::Postgres.new(ENV["COCKROACH_URL"], setup: true),
-    Mel::Postgres.new(ENV["POSTGRES_URL"], setup: true),
+    Mel::Postgres.new(ENV["COCKROACH_URL"]),
+    Mel::Postgres.new(ENV["POSTGRES_URL"]),
     Mel::Redis.new(ENV["REDIS_URL"])
   }.each do |store|
     Mel.settings.store = store

@@ -86,13 +86,14 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
 
      require "mel/postgres"
 
+     db_url = "postgres://username:password@localhost:5432/database_name"
+
+     # Uncomment to create database
+     #Mel::Postgres.create_database(db_url)
+
      Mel.configure do |settings|
        # ...
-       settings.store = Mel::Postgres.new(
-         "postgres://username:password@localhost:5432/database_name",
-         namespace: "mel",
-         setup: true # <= Creates database
-       )
+       settings.store = Mel::Postgres.new(db_url, namespace: "mel")
        # ...
      end
 

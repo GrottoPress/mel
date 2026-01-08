@@ -18,9 +18,7 @@ module Mel
       create_tables
     end
 
-    def self.new(url, namespace = :mel, *, setup = false)
-      create_database(url) if setup
-
+    def self.new(url, namespace = :mel)
       new DB.open(url), namespace
     end
 
