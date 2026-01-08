@@ -29,18 +29,18 @@ local function update_score(ids, score)
 end
 
 local running_ids = split_string(ARGV[5], ',')
-update_score(running_ids, ARGV[3])
+update_score(running_ids, ARGV[4])
 
 local due_ids = redis.call(
   'ZRANGEBYSCORE',
   KEYS[1],
-  ARGV[4],
   ARGV[1],
+  ARGV[2],
   'LIMIT',
   0,
-  ARGV[2]
+  ARGV[3]
 )
 
-update_score(due_ids, ARGV[3])
+update_score(due_ids, ARGV[4])
 
 return due_ids
