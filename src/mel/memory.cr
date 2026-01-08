@@ -118,8 +118,8 @@ module Mel
     private def query(count, delete, time = nil)
       queue = sorted_queue.select do |_, value|
         if delete.nil?
-          next orphan_score <= value <= time.to_unix if time
-          next value >= orphan_score
+          next orphan_timestamp <= value <= time.to_unix if time
+          next value >= orphan_timestamp
         end
 
         next 0 <= value <= time.to_unix if time
@@ -138,7 +138,7 @@ module Mel
     end
 
     private def to_running(ids)
-      ids.each { |id| queue[id] = running_score }
+      ids.each { |id| queue[id] = running_timestamp }
       ids
     end
 
