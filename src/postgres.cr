@@ -171,11 +171,9 @@ module Mel
     end
 
     def truncate
-      with_connection do |connection|
-        connection.exec <<-SQL
-          TRUNCATE TABLE #{tasks_table};
-          SQL
-      end
+      with_connection &.exec <<-SQL
+        TRUNCATE TABLE #{tasks_table};
+        SQL
     end
 
     def get_progress(ids : Indexable) : Array(String)?
@@ -198,11 +196,9 @@ module Mel
     end
 
     def truncate_progress
-      with_connection do |connection|
-        connection.exec <<-SQL
-          TRUNCATE TABLE #{progress_table};
-          SQL
-      end
+      with_connection &.exec <<-SQL
+        TRUNCATE TABLE #{progress_table};
+        SQL
     end
 
     private def create_tables
@@ -239,8 +235,8 @@ module Mel
     end
 
     private def with_transaction(&)
-      with_connection do |connection|
-        connection.transaction { |transaction| yield transaction.connection }
+      with_connection &.transaction do |transaction|
+        yield transaction.connection
       end
     end
 
