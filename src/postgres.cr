@@ -231,11 +231,11 @@ module Mel
     end
 
     private def to_running(connection, ids)
-      sql = <<-SQL
+      return if ids.empty?
+
+      connection.exec <<-SQL, running_score, ids.to_a
         UPDATE #{tasks_table} SET score = $1 WHERE id = ANY($2);
         SQL
-
-      connection.exec(sql, running_score, ids.to_a)
     end
 
     private def with_transaction(&)
