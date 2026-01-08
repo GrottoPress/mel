@@ -62,13 +62,15 @@ module Mel
       return if count.zero?
 
       running_select_sql = <<-SQL
-        SELECT id, data FROM #{tasks_table} WHERE score >= $1 AND score <= $2
-        ORDER BY score LIMIT $3 FOR UPDATE SKIP LOCKED;
+        SELECT id, data FROM #{tasks_table}
+        WHERE schedule >= $1 AND schedule <= $2
+        ORDER BY schedule LIMIT $3 FOR UPDATE SKIP LOCKED;
         SQL
 
       select_sql = <<-SQL
-        SELECT data FROM #{tasks_table} WHERE score >= $1 AND score <= $2
-        ORDER BY score LIMIT $3;
+        SELECT data FROM #{tasks_table}
+        WHERE schedule >= $1 AND schedule <= $2
+        ORDER BY schedule LIMIT $3;
         SQL
 
       limit = count > 0 ? count : nil
@@ -110,13 +112,13 @@ module Mel
       return if count.zero?
 
       running_select_sql = <<-SQL
-        SELECT id, data FROM #{tasks_table} WHERE score >= $1
-        ORDER BY score LIMIT $2 FOR UPDATE SKIP LOCKED;
+        SELECT id, data FROM #{tasks_table} WHERE schedule >= $1
+        ORDER BY schedule LIMIT $2 FOR UPDATE SKIP LOCKED;
         SQL
 
       select_sql = <<-SQL
-        SELECT data FROM #{tasks_table} WHERE score >= $1
-        ORDER BY score LIMIT $2;
+        SELECT data FROM #{tasks_table} WHERE schedule >= $1
+        ORDER BY schedule LIMIT $2;
         SQL
 
       limit = count > 0 ? count : nil
@@ -207,13 +209,13 @@ module Mel
           CREATE TABLE IF NOT EXISTS #{tasks_table} (
             id TEXT PRIMARY KEY,
             data TEXT NOT NULL,
-            score BIGINT NOT NULL
+            schedule BIGINT NOT NULL
           );
           SQL
 
         connection.exec <<-SQL
-          CREATE INDEX IF NOT EXISTS idx_#{tasks_table}_score
-          ON #{tasks_table} (score);
+          CREATE INDEX IF NOT EXISTS idx_#{tasks_table}_schedule
+          ON #{tasks_table} (schedule);
           SQL
 
         connection.exec <<-SQL
@@ -230,7 +232,7 @@ module Mel
       return if ids.empty?
 
       connection.exec <<-SQL, running_timestamp, ids.to_a
-        UPDATE #{tasks_table} SET score = $1 WHERE id = ANY($2);
+        UPDATE #{tasks_table} SET schedule = $1 WHERE id = ANY($2);
         SQL
     end
 
@@ -273,7 +275,7 @@ module Mel
 
       def create(task : Task)
         @connection.exec <<-SQL, task.id, task.to_json, task.time.to_unix
-          INSERT INTO #{@postgres.tasks_table} (id, data, score)
+          INSERT INTO #{@postgres.tasks_table} (id, data, schedule)
           VALUES ($1, $2, $3)
           ON CONFLICT (id) DO NOTHING;
           SQL
@@ -283,9 +285,9 @@ module Mel
         time = task.retry_time || task.time
 
         @connection.exec <<-SQL, task.id, task.to_json, time.to_unix
-          INSERT INTO #{@postgres.tasks_table} (id, data, score)
+          INSERT INTO #{@postgres.tasks_table} (id, data, schedule)
           VALUES ($1, $2, $3)
-          ON CONFLICT (id) DO UPDATE SET data = $2, score = $3;
+          ON CONFLICT (id) DO UPDATE SET data = $2, schedule = $3;
           SQL
       end
 
