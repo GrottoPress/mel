@@ -59,7 +59,7 @@ describe Mel::Task do
       Timecop.freeze(3.minutes.from_now) do
         Mel.start_and_stop
         # Expect failed task to NOT be retried
-        Mel::PeriodicTask.find(id).try(&.attempts.> 0).should be_false
+        Mel::PeriodicTask.find(id).try(&.attempts).should eq(0)
       end
     end
 
@@ -81,7 +81,7 @@ describe Mel::Task do
       Timecop.freeze(3.minutes.from_now) do
         Mel.start_and_stop
         # Expect failed task to be retried
-        Mel::PeriodicTask.find(id).try(&.attempts.> 0).should be_true
+        Mel::PeriodicTask.find(id).try(&.attempts).should eq(2)
       end
     end
 
