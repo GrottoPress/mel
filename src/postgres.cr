@@ -59,15 +59,18 @@ module Mel
     ) : Array(String)?
       return if count.zero?
 
-      return find_due_update(time, count) if delete.nil?
-      delete ? find_due_delete(time, count) : find_due_no_delete(time, count)
+      return find_due_delete_nil(time, count) if delete.nil?
+
+      delete ?
+        find_due_delete_true(time, count) :
+        find_due_delete_false(time, count)
     end
 
     def find(count : Int, *, delete : Bool? = false) : Array(String)?
       return if count.zero?
 
-      return find_update(count) if delete.nil?
-      delete ? find_delete(count) : find_no_delete(count)
+      return find_delete_nil(count) if delete.nil?
+      delete ? find_delete_true(count) : find_delete_false(count)
     end
 
     def find(ids : Indexable, *, delete : Bool = false) : Array(String)?
@@ -145,7 +148,7 @@ module Mel
       end
     end
 
-    private def find_due_delete(time, count)
+    private def find_due_delete_true(time, count)
       sql = <<-SQL
         SELECT id, data FROM #{tasks_table}
         WHERE schedule >= $1 AND schedule <= $2
@@ -166,7 +169,7 @@ module Mel
       end
     end
 
-    private def find_due_no_delete(time, count)
+    private def find_due_delete_false(time, count)
       sql = <<-SQL
         SELECT data FROM #{tasks_table}
         WHERE schedule >= $1 AND schedule <= $2
@@ -186,7 +189,7 @@ module Mel
       end
     end
 
-    private def find_due_update(time, count)
+    private def find_due_delete_nil(time, count)
       sql = <<-SQL
         SELECT id, data FROM #{tasks_table}
         WHERE schedule >= $1 AND schedule <= $2
@@ -211,7 +214,7 @@ module Mel
       end
     end
 
-    private def find_delete(count)
+    private def find_delete_true(count)
       sql = <<-SQL
         SELECT id, data FROM #{tasks_table} WHERE schedule >= $1
         ORDER BY schedule LIMIT $2 FOR UPDATE SKIP LOCKED;
@@ -230,7 +233,7 @@ module Mel
       end
     end
 
-    private def find_no_delete(count)
+    private def find_delete_false(count)
       sql = <<-SQL
         SELECT data FROM #{tasks_table} WHERE schedule >= $1
         ORDER BY schedule LIMIT $2;
@@ -248,7 +251,7 @@ module Mel
       end
     end
 
-    private def find_update(count)
+    private def find_delete_nil(count)
       sql = <<-SQL
         SELECT id, data FROM #{tasks_table} WHERE schedule >= $1
         ORDER BY schedule LIMIT $2 FOR UPDATE SKIP LOCKED;
