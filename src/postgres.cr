@@ -152,7 +152,7 @@ module Mel
       sql = <<-SQL
         SELECT id, data FROM #{tasks_table}
         WHERE schedule >= $1 AND schedule <= $2
-        ORDER BY schedule LIMIT $3 FOR UPDATE SKIP LOCKED;
+        ORDER BY schedule LIMIT $3 FOR UPDATE;
         SQL
 
       with_transaction do |connection|
@@ -193,7 +193,7 @@ module Mel
       sql = <<-SQL
         SELECT id, data FROM #{tasks_table}
         WHERE schedule >= $1 AND schedule <= $2
-        ORDER BY schedule LIMIT $3 FOR UPDATE SKIP LOCKED;
+        ORDER BY schedule LIMIT $3 FOR UPDATE;
         SQL
 
       with_transaction do |connection|
@@ -217,7 +217,7 @@ module Mel
     private def find_delete_true(count)
       sql = <<-SQL
         SELECT id, data FROM #{tasks_table} WHERE schedule >= $1
-        ORDER BY schedule LIMIT $2 FOR UPDATE SKIP LOCKED;
+        ORDER BY schedule LIMIT $2 FOR UPDATE;
         SQL
 
       with_transaction do |connection|
@@ -254,7 +254,7 @@ module Mel
     private def find_delete_nil(count)
       sql = <<-SQL
         SELECT id, data FROM #{tasks_table} WHERE schedule >= $1
-        ORDER BY schedule LIMIT $2 FOR UPDATE SKIP LOCKED;
+        ORDER BY schedule LIMIT $2 FOR UPDATE;
         SQL
 
       with_transaction do |connection|
