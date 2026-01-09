@@ -10,10 +10,11 @@ module Mel
 
     def initialize(
       @client : DB::Database,
-      @namespace : Symbol | String = :mel
+      namespace : Symbol | String = ""
     )
-      @progress_table = "#{@namespace}_progress"
-      @tasks_table = "#{@namespace}_tasks"
+      namespace = namespace.to_s
+      @progress_table = namespace.empty? ? "progress" : "#{namespace}_progress"
+      @tasks_table = namespace.empty? ? "tasks" : "#{namespace}_tasks"
 
       create_tables
     end
