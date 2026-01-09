@@ -77,14 +77,7 @@ module Mel
     def find(ids : Indexable, *, delete : Bool = false) : Array(String)?
       return if ids.empty?
 
-      with_transaction do |connection|
-        data = connection.query_all <<-SQL, ids.map(&.to_s), as: String
-          SELECT data FROM #{tasks_table} WHERE id = ANY($1);
-          SQL
-
-        delete(connection, ids) if delete
-        data unless data.empty?
-      end
+      delete ? find_delete_true(ids) : find_delete_false(ids)
     end
 
     def transaction(& : Transaction -> _)
@@ -151,21 +144,25 @@ module Mel
 
     private def find_due_delete_true(time, count)
       sql = <<-SQL
-        SELECT id, data FROM #{tasks_table}
-        WHERE schedule >= $1 AND schedule <= $2
-        ORDER BY schedule LIMIT $3 FOR UPDATE;
+        DELETE FROM #{tasks_table}
+        WHERE id IN (
+          SELECT id FROM #{tasks_table}
+          WHERE schedule >= $1 AND schedule <= $2
+          ORDER BY schedule LIMIT $3
+          FOR UPDATE
+        )
+        RETURNING data;
         SQL
 
-      with_transaction do |connection|
-        ids, data = unpack connection.query_all(
+      with_connection do |connection|
+        data = connection.query_all(
           sql,
           0,
           time.to_unix,
           limit(count),
-          as: {id: String, data: String}
+          as: String
         )
 
-        delete(connection, ids)
         data unless data.empty?
       end
     end
@@ -177,7 +174,7 @@ module Mel
         ORDER BY schedule LIMIT $3;
         SQL
 
-      with_transaction do |connection|
+      with_connection do |connection|
         data = connection.query_all(
           sql,
           0,
@@ -192,9 +189,14 @@ module Mel
 
     private def find_due_delete_nil(time, count)
       sql = <<-SQL
-        SELECT id, data FROM #{tasks_table}
-        WHERE schedule >= $1 AND schedule <= $2
-        ORDER BY schedule LIMIT $3 FOR UPDATE;
+        UPDATE #{tasks_table} SET schedule = $1
+        WHERE id IN (
+          SELECT id FROM #{tasks_table}
+          WHERE schedule >= $2 AND schedule <= $3
+          ORDER BY schedule LIMIT $4
+          FOR UPDATE
+        )
+        RETURNING id, data;
         SQL
 
       with_transaction do |connection|
@@ -202,51 +204,40 @@ module Mel
 
         ids, data = unpack connection.query_all(
           sql,
+          running_timestamp,
           orphan_timestamp,
           time.to_unix,
           limit(count),
           as: {id: String, data: String}
         )
 
-        to_running(connection, ids)
         RunPool.update(ids)
+        data unless data.empty?
+      end
+    end
+
+    private def find_delete_true(count : Int)
+      with_connection do |connection|
+        data = connection.query_all <<-SQL, 0, limit(count), as: String
+          DELETE FROM #{tasks_table}
+          WHERE id IN (
+            SELECT id FROM #{tasks_table} WHERE schedule >= $1
+            ORDER BY schedule LIMIT $2
+            FOR UPDATE
+          )
+          RETURNING data;
+          SQL
 
         data unless data.empty?
       end
     end
 
-    private def find_delete_true(count)
-      sql = <<-SQL
-        SELECT id, data FROM #{tasks_table} WHERE schedule >= $1
-        ORDER BY schedule LIMIT $2 FOR UPDATE;
-        SQL
-
-      with_transaction do |connection|
-        ids, data = unpack connection.query_all(
-          sql,
-          0,
-          limit(count),
-          as: {id: String, data: String}
-        )
-
-        delete(connection, ids)
-        data unless data.empty?
-      end
-    end
-
-    private def find_delete_false(count)
-      sql = <<-SQL
-        SELECT data FROM #{tasks_table} WHERE schedule >= $1
-        ORDER BY schedule LIMIT $2;
-        SQL
-
-      with_transaction do |connection|
-        data = connection.query_all(
-          sql,
-          0,
-          limit(count),
-          as: String
-        )
+    private def find_delete_false(count : Int)
+      with_connection do |connection|
+        data = connection.query_all <<-SQL, 0, limit(count), as: String
+          SELECT data FROM #{tasks_table} WHERE schedule >= $1
+          ORDER BY schedule LIMIT $2;
+          SQL
 
         data unless data.empty?
       end
@@ -254,8 +245,13 @@ module Mel
 
     private def find_delete_nil(count)
       sql = <<-SQL
-        SELECT id, data FROM #{tasks_table} WHERE schedule >= $1
-        ORDER BY schedule LIMIT $2 FOR UPDATE;
+        UPDATE #{tasks_table} SET schedule = $1
+        WHERE id IN (
+          SELECT id FROM #{tasks_table} WHERE schedule >= $2
+          ORDER BY schedule LIMIT $3
+          FOR UPDATE
+        )
+        RETURNING id, data;
         SQL
 
       with_transaction do |connection|
@@ -263,22 +259,36 @@ module Mel
 
         ids, data = unpack connection.query_all(
           sql,
+          running_timestamp,
           orphan_timestamp,
           limit(count),
           as: {id: String, data: String}
         )
 
-        to_running(connection, ids)
         RunPool.update(ids)
+        data unless data.empty?
+      end
+    end
+
+    private def find_delete_true(ids : Indexable)
+      with_connection do |connection|
+        data = connection.query_all <<-SQL, ids.map(&.to_s), as: String
+          DELETE FROM #{tasks_table} WHERE id = ANY($1)
+          RETURNING data;
+          SQL
 
         data unless data.empty?
       end
     end
 
-    private def delete(connection, ids)
-      connection.exec <<-SQL, ids.map(&.to_s)
-        DELETE FROM #{tasks_table} WHERE id = ANY($1);
-        SQL
+    private def find_delete_false(ids : Indexable)
+      with_connection do |connection|
+        data = connection.query_all <<-SQL, ids.map(&.to_s), as: String
+          SELECT data FROM #{tasks_table} WHERE id = ANY($1);
+          SQL
+
+        data unless data.empty?
+      end
     end
 
     private def to_running(connection, ids)
