@@ -59,82 +59,15 @@ module Mel
     ) : Array(String)?
       return if count.zero?
 
-      sql = <<-SQL
-        SELECT id, data FROM #{tasks_table}
-        WHERE schedule >= $1 AND schedule <= $2
-        ORDER BY schedule LIMIT $3 FOR UPDATE SKIP LOCKED;
-        SQL
-
-      limit = count > 0 ? count : nil
-
-      with_transaction do |connection|
-        if delete.nil?
-          to_running(connection, RunPool.fetch)
-
-          ids, data = unpack connection.query_all(
-            sql,
-            orphan_timestamp,
-            time.to_unix,
-            limit,
-            as: {id: String, data: String}
-          )
-
-          to_running(connection, ids)
-          RunPool.update(ids)
-
-          next data.empty? ? nil : data
-        end
-
-        ids, data = unpack connection.query_all(
-          sql,
-          0,
-          time.to_unix,
-          limit,
-          as: {id: String, data: String}
-        )
-
-        delete_tasks(connection, ids) if delete
-        data unless data.empty?
-      end
+      return find_due_update(time, count) if delete.nil?
+      delete ? find_due_delete(time, count) : find_due_no_delete(time, count)
     end
 
     def find(count : Int, *, delete : Bool? = false) : Array(String)?
       return if count.zero?
 
-      sql = <<-SQL
-        SELECT id, data FROM #{tasks_table} WHERE schedule >= $1
-        ORDER BY schedule LIMIT $2 FOR UPDATE SKIP LOCKED;
-        SQL
-
-      limit = count > 0 ? count : nil
-
-      with_transaction do |connection|
-        if delete.nil?
-          to_running(connection, RunPool.fetch)
-
-          ids, data = unpack connection.query_all(
-            sql,
-            orphan_timestamp,
-            limit,
-            as: {id: String, data: String}
-          )
-
-          to_running(connection, ids)
-          RunPool.update(ids)
-
-          next data.empty? ? nil : data
-        end
-
-        ids, data = unpack connection.query_all(
-          sql,
-          0,
-          limit,
-          as: {id: String, data: String}
-        )
-
-        delete_tasks(connection, ids) if delete
-        data unless data.empty?
-      end
+      return find_update(count) if delete.nil?
+      delete ? find_delete(count) : find_no_delete(count)
     end
 
     def find(ids : Indexable, *, delete : Bool = false) : Array(String)?
@@ -145,7 +78,7 @@ module Mel
           SELECT data FROM #{tasks_table} WHERE id = ANY($1);
           SQL
 
-        delete_tasks(connection, ids) if delete
+        delete(connection, ids) if delete
         data unless data.empty?
       end
     end
@@ -212,7 +145,133 @@ module Mel
       end
     end
 
-    private def delete_tasks(connection, ids)
+    private def find_due_delete(time, count)
+      sql = <<-SQL
+        SELECT id, data FROM #{tasks_table}
+        WHERE schedule >= $1 AND schedule <= $2
+        ORDER BY schedule LIMIT $3 FOR UPDATE SKIP LOCKED;
+        SQL
+
+      with_transaction do |connection|
+        ids, data = unpack connection.query_all(
+          sql,
+          0,
+          time.to_unix,
+          limit(count),
+          as: {id: String, data: String}
+        )
+
+        delete(connection, ids)
+        data unless data.empty?
+      end
+    end
+
+    private def find_due_no_delete(time, count)
+      sql = <<-SQL
+        SELECT data FROM #{tasks_table}
+        WHERE schedule >= $1 AND schedule <= $2
+        ORDER BY schedule LIMIT $3;
+        SQL
+
+      with_transaction do |connection|
+        data = connection.query_all(
+          sql,
+          0,
+          time.to_unix,
+          limit(count),
+          as: String
+        )
+
+        data unless data.empty?
+      end
+    end
+
+    private def find_due_update(time, count)
+      sql = <<-SQL
+        SELECT id, data FROM #{tasks_table}
+        WHERE schedule >= $1 AND schedule <= $2
+        ORDER BY schedule LIMIT $3 FOR UPDATE SKIP LOCKED;
+        SQL
+
+      with_transaction do |connection|
+        to_running(connection, RunPool.fetch)
+
+        ids, data = unpack connection.query_all(
+          sql,
+          orphan_timestamp,
+          time.to_unix,
+          limit(count),
+          as: {id: String, data: String}
+        )
+
+        to_running(connection, ids)
+        RunPool.update(ids)
+
+        data unless data.empty?
+      end
+    end
+
+    private def find_delete(count)
+      sql = <<-SQL
+        SELECT id, data FROM #{tasks_table} WHERE schedule >= $1
+        ORDER BY schedule LIMIT $2 FOR UPDATE SKIP LOCKED;
+        SQL
+
+      with_transaction do |connection|
+        ids, data = unpack connection.query_all(
+          sql,
+          0,
+          limit(count),
+          as: {id: String, data: String}
+        )
+
+        delete(connection, ids)
+        data unless data.empty?
+      end
+    end
+
+    private def find_no_delete(count)
+      sql = <<-SQL
+        SELECT data FROM #{tasks_table} WHERE schedule >= $1
+        ORDER BY schedule LIMIT $2;
+        SQL
+
+      with_transaction do |connection|
+        data = connection.query_all(
+          sql,
+          0,
+          limit(count),
+          as: String
+        )
+
+        data unless data.empty?
+      end
+    end
+
+    private def find_update(count)
+      sql = <<-SQL
+        SELECT id, data FROM #{tasks_table} WHERE schedule >= $1
+        ORDER BY schedule LIMIT $2 FOR UPDATE SKIP LOCKED;
+        SQL
+
+      with_transaction do |connection|
+        to_running(connection, RunPool.fetch)
+
+        ids, data = unpack connection.query_all(
+          sql,
+          orphan_timestamp,
+          limit(count),
+          as: {id: String, data: String}
+        )
+
+        to_running(connection, ids)
+        RunPool.update(ids)
+
+        data unless data.empty?
+      end
+    end
+
+    private def delete(connection, ids)
       connection.exec <<-SQL, ids.map(&.to_s)
         DELETE FROM #{tasks_table} WHERE id = ANY($1);
         SQL
@@ -226,6 +285,17 @@ module Mel
         SQL
     end
 
+    private def limit(count)
+      count > 0 ? count : nil
+    end
+
+    private def unpack(values)
+      ids = values.map(&.[:id])
+      data = values.map(&.[:data])
+
+      {ids, data}
+    end
+
     private def with_transaction(&)
       with_connection &.transaction do |transaction|
         yield transaction.connection
@@ -236,13 +306,6 @@ module Mel
       client.retry do
         client.using_connection { |connection| yield connection }
       end
-    end
-
-    private def unpack(values)
-      ids = values.map(&.[:id])
-      data = values.map(&.[:data])
-
-      {ids, data}
     end
 
     private def self.create_database(connection, name)
