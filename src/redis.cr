@@ -88,13 +88,15 @@ module Mel
 
       keys = ids.map { |id| key.name(id.to_s) }
 
+      if delete == false
+        values = client.mget(keys).as(Array).compact_map(&.as? String)
+        return values.empty? ? nil : values
+      end
+
       values = client.multi do |redis|
         redis.mget(keys)
-
-        if delete
-          redis.zrem(key.name, ids.map(&.to_s))
-          redis.del(keys)
-        end
+        redis.zrem(key.name, ids.map(&.to_s))
+        redis.del(keys)
       end
 
       values = values.first.as(Array).compact_map(&.as? String)
