@@ -148,7 +148,7 @@ module Mel
         WHERE id IN (
           SELECT id FROM #{tasks_table}
           WHERE schedule >= $1 AND schedule <= $2
-          ORDER BY schedule LIMIT $3
+          ORDER BY schedule ASC LIMIT $3
           FOR UPDATE
         )
         RETURNING data;
@@ -171,7 +171,7 @@ module Mel
       sql = <<-SQL
         SELECT data FROM #{tasks_table}
         WHERE schedule >= $1 AND schedule <= $2
-        ORDER BY schedule LIMIT $3;
+        ORDER BY schedule ASC LIMIT $3;
         SQL
 
       with_connection do |connection|
@@ -193,7 +193,7 @@ module Mel
         WHERE id IN (
           SELECT id FROM #{tasks_table}
           WHERE schedule >= $2 AND schedule <= $3
-          ORDER BY schedule LIMIT $4
+          ORDER BY schedule ASC LIMIT $4
           FOR UPDATE
         )
         RETURNING id, data;
@@ -222,7 +222,7 @@ module Mel
           DELETE FROM #{tasks_table}
           WHERE id IN (
             SELECT id FROM #{tasks_table} WHERE schedule >= $1
-            ORDER BY schedule LIMIT $2
+            ORDER BY schedule ASC LIMIT $2
             FOR UPDATE
           )
           RETURNING data;
@@ -236,7 +236,7 @@ module Mel
       with_connection do |connection|
         data = connection.query_all <<-SQL, 0, limit(count), as: String
           SELECT data FROM #{tasks_table} WHERE schedule >= $1
-          ORDER BY schedule LIMIT $2;
+          ORDER BY schedule ASC LIMIT $2;
           SQL
 
         data unless data.empty?
@@ -248,7 +248,7 @@ module Mel
         UPDATE #{tasks_table} SET schedule = $1
         WHERE id IN (
           SELECT id FROM #{tasks_table} WHERE schedule >= $2
-          ORDER BY schedule LIMIT $3
+          ORDER BY schedule ASC LIMIT $3
           FOR UPDATE
         )
         RETURNING id, data;
