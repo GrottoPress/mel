@@ -334,14 +334,15 @@ module Mel
     end
 
     private def self.create_database(connection, name)
+      return if connection.query_one? <<-SQL, name, as: Int32
+        SELECT 1::int4 FROM pg_database WHERE datname = $1
+      SQL
+
       clean_name = PG::EscapeHelper.escape_identifier(name)
 
       connection.exec <<-SQL
         CREATE DATABASE #{clean_name};
         SQL
-    rescue error : PQ::PQError
-      message = error.message.to_s
-      raise error unless message.includes?(%("#{name}" already exists))
     end
 
     private def self.delete_database(connection, name)
