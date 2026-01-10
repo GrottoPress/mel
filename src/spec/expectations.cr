@@ -41,7 +41,7 @@ struct Mel::BeEnqueuedExpectation
   end
 
   def negative_failure_message(job : Mel::Job::Template.class)
-    "Expected #{job} to not be enqueued#{failure_message_suffix}"
+    "Expected #{job} not to be enqueued#{failure_message_suffix}"
   end
 
   private def failure_message_suffix

@@ -142,7 +142,7 @@ describe Mel::BeEnqueuedExpectation do
       it "fails if job is enqueued" do
         SendEmailJob.run(address: "user@domain.tld")
 
-        expect_raises Spec::AssertionFailed, " not be enqueued" do
+        expect_raises Spec::AssertionFailed, " not to be enqueued" do
           SendEmailJob.should_not be_enqueued
         end
       end
@@ -150,11 +150,11 @@ describe Mel::BeEnqueuedExpectation do
       it "fails if type matches" do
         SendEmailJob.run_every(1.hour, address: "newuser@domain.tld")
 
-        expect_raises Spec::AssertionFailed, " not be enqueued as " do
+        expect_raises Spec::AssertionFailed, " not to be enqueued as " do
           SendEmailJob.should_not be_enqueued(as: Mel::PeriodicTask)
         end
 
-        expect_raises Spec::AssertionFailed, " not be enqueued as " do
+        expect_raises Spec::AssertionFailed, " not to be enqueued as " do
           SendEmailJob.should_not be_enqueued(as: Mel::RecurringTask)
         end
       end
@@ -163,7 +163,7 @@ describe Mel::BeEnqueuedExpectation do
         SendEmailJob.run(address: "user@domain.tld")
         SendEmailJob.run_every(1.hour, address: "newuser@domain.tld")
 
-        expect_raises Spec::AssertionFailed, " not be enqueued exactly 2 " do
+        expect_raises Spec::AssertionFailed, " not to be enqueued exactly 2 " do
           SendEmailJob.should_not be_enqueued(2)
         end
       end
@@ -172,7 +172,7 @@ describe Mel::BeEnqueuedExpectation do
         id = "1001"
         SendEmailJob.run(id: id, address: "user@domain.tld")
 
-        expect_raises Spec::AssertionFailed, " not be enqueued" do
+        expect_raises Spec::AssertionFailed, " not to be enqueued" do
           SendEmailJob.should_not be_enqueued(id)
         end
       end
@@ -186,14 +186,14 @@ describe Mel::BeEnqueuedExpectation do
 
         expect_raises(
           Spec::AssertionFailed,
-          " not be enqueued exactly once as "
+          " not to be enqueued exactly once as "
         ) do
           SendEmailJob.should_not be_enqueued(1, as: Mel::PeriodicTask)
         end
 
         expect_raises(
           Spec::AssertionFailed,
-          " not be enqueued exactly once as "
+          " not to be enqueued exactly once as "
         ) do
           SendEmailJob.should_not be_enqueued(1, as: Mel::RecurringTask)
         end
@@ -203,7 +203,7 @@ describe Mel::BeEnqueuedExpectation do
         id = "1001"
         SendEmailJob.run_every(1.hour, id: id, address: "newuser@domain.tld")
 
-        expect_raises Spec::AssertionFailed, " not be enqueued as " do
+        expect_raises Spec::AssertionFailed, " not to be enqueued as " do
           SendEmailJob.should_not be_enqueued(id, as: Mel::PeriodicTask)
         end
       end
