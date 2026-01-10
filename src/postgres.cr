@@ -6,6 +6,8 @@ module Mel
   struct Postgres
     include Store
 
+    @skip_locked_sql : String
+
     getter :client, :progress_table, :tasks_table
 
     def initialize(
@@ -15,6 +17,8 @@ module Mel
       namespace = namespace.to_s
       @progress_table = namespace.empty? ? "progress" : "#{namespace}_progress"
       @tasks_table = namespace.empty? ? "tasks" : "#{namespace}_tasks"
+
+      @skip_locked_sql = is_cockroachdb ? "" : "SKIP LOCKED"
 
       create_tables
     end
@@ -149,7 +153,7 @@ module Mel
           SELECT id FROM #{tasks_table}
           WHERE schedule >= $1 AND schedule <= $2
           ORDER BY schedule ASC LIMIT $3
-          FOR UPDATE
+          FOR UPDATE #{@skip_locked_sql}
         )
         RETURNING data;
         SQL
@@ -194,7 +198,7 @@ module Mel
           SELECT id FROM #{tasks_table}
           WHERE schedule >= $2 AND schedule <= $3
           ORDER BY schedule ASC LIMIT $4
-          FOR UPDATE
+          FOR UPDATE #{@skip_locked_sql}
         )
         RETURNING id, data;
         SQL
@@ -223,7 +227,7 @@ module Mel
           WHERE id IN (
             SELECT id FROM #{tasks_table} WHERE schedule >= $1
             ORDER BY schedule ASC LIMIT $2
-            FOR UPDATE
+            FOR UPDATE #{@skip_locked_sql}
           )
           RETURNING data;
           SQL
@@ -249,7 +253,7 @@ module Mel
         WHERE id IN (
           SELECT id FROM #{tasks_table} WHERE schedule >= $2
           ORDER BY schedule ASC LIMIT $3
-          FOR UPDATE
+          FOR UPDATE #{@skip_locked_sql}
         )
         RETURNING id, data;
         SQL
@@ -308,6 +312,13 @@ module Mel
       data = values.map(&.[:data])
 
       {ids, data}
+    end
+
+    private def is_cockroachdb
+      with_connection do |connection|
+        version = connection.scalar("SELECT version();").as(String)
+        version.starts_with?("CockroachDB")
+      end
     end
 
     private def with_transaction(&)
