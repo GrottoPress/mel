@@ -314,7 +314,7 @@ module Mel
       {ids, data}
     end
 
-    private def cockroachdb?
+    private getter? cockroachdb : Bool do
       with_connection { |connection| self.class.cockroachdb?(connection) }
     end
 
