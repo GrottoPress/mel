@@ -6,8 +6,6 @@ module Mel
   struct Postgres
     include Store
 
-    @skip_locked_sql : String
-
     getter :client, :progress_table, :tasks_table
 
     def initialize(
