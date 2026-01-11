@@ -18,7 +18,7 @@ module Mel
       @progress_table = namespace.empty? ? "progress" : "#{namespace}_progress"
       @tasks_table = namespace.empty? ? "tasks" : "#{namespace}_tasks"
 
-      @skip_locked_sql = is_cockroachdb ? "" : "SKIP LOCKED"
+      @skip_locked_sql = cockroachdb? ? "" : "SKIP LOCKED"
 
       create_tables
     end
@@ -314,11 +314,8 @@ module Mel
       {ids, data}
     end
 
-    private def is_cockroachdb
-      with_connection do |connection|
-        version = connection.scalar("SELECT version();").as(String)
-        version.starts_with?("CockroachDB")
-      end
+    private def cockroachdb?
+      with_connection { |connection| self.class.cockroachdb?(connection) }
     end
 
     private def with_transaction(&)
@@ -347,10 +344,16 @@ module Mel
 
     private def self.delete_database(connection, name)
       clean_name = PG::EscapeHelper.escape_identifier(name)
+      cascade_sql = cockroachdb?(connection) ? "CASCADE" : ""
 
       connection.exec <<-SQL
-        DROP DATABASE IF EXISTS #{clean_name};
+        DROP DATABASE IF EXISTS #{clean_name} #{cascade_sql};
         SQL
+    end
+
+    protected def self.cockroachdb?(connection)
+      version = connection.scalar("SELECT version();").as(String)
+      version.starts_with?("CockroachDB")
     end
 
     struct Transaction
