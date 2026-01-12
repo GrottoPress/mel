@@ -1,5 +1,7 @@
 require "./store"
 
+require "./memory/**"
+
 module Mel
   # DO NOT USE IN PRODUCTION:
   #
@@ -163,20 +165,6 @@ module Mel
       def set_progress(id : String, value : Int, description : String)
         report = Mel::Progress::Report.new(id, description, value)
         @memory.progress[id] = ProgressEntry.new(report.to_json)
-      end
-    end
-
-    struct ProgressEntry
-      getter :value
-
-      getter expire : Time?
-
-      def initialize(@value : String)
-        @expire = Mel.settings.progress_expiry.try(&.from_now)
-      end
-
-      def expired? : Bool
-        !!expire.try { |expire| expire <= Time.local }
       end
     end
   end
