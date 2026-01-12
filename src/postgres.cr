@@ -25,36 +25,6 @@ module Mel
       new DB.open(url), namespace
     end
 
-    def self.create_database(url : String)
-      create_database URI.parse(url)
-    end
-
-    def self.create_database(url : URI)
-      db_name = url.path.lchop('/')
-
-      default_url = URI.parse(url.to_s)
-      default_url.path = "/postgres"
-
-      DB.connect(default_url) do |connection|
-        create_database(connection, db_name)
-      end
-    end
-
-    def self.delete_database(url : String)
-      delete_database URI.parse(url)
-    end
-
-    def self.delete_database(url : URI)
-      db_name = url.path.lchop('/')
-
-      default_url = URI.parse(url.to_s)
-      default_url.path = "/postgres"
-
-      DB.connect(default_url) do |connection|
-        delete_database(connection, db_name)
-      end
-    end
-
     def find_due(
       at time = Time.local,
       count : Int = -1, *,
@@ -117,6 +87,36 @@ module Mel
       with_connection &.exec <<-SQL
         TRUNCATE TABLE #{progress_table};
         SQL
+    end
+
+    def self.create_database(url : String)
+      create_database URI.parse(url)
+    end
+
+    def self.create_database(url : URI)
+      db_name = url.path.lchop('/')
+
+      default_url = URI.parse(url.to_s)
+      default_url.path = "/postgres"
+
+      DB.connect(default_url) do |connection|
+        create_database(connection, db_name)
+      end
+    end
+
+    def self.delete_database(url : String)
+      delete_database URI.parse(url)
+    end
+
+    def self.delete_database(url : URI)
+      db_name = url.path.lchop('/')
+
+      default_url = URI.parse(url.to_s)
+      default_url.path = "/postgres"
+
+      DB.connect(default_url) do |connection|
+        delete_database(connection, db_name)
+      end
     end
 
     private def create_tables
