@@ -88,14 +88,22 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
 
      db_url = "postgres://username:password@localhost:5432/database_name"
 
-     # Uncomment to create database
+     # Create database if not already created
      #Mel::Postgres.create_database(db_url)
 
      Mel.configure do |settings|
        # ...
        settings.store = Mel::Postgres.new(db_url, namespace: "mel")
+       # OR pass an existing `DB::Database` instance
+       #settings.store = Mel::Postgres.new(db, namespace: "mel")
        # ...
      end
+
+     # You may use this in your app's migrations to migrate
+     Mel.settings.store.as(Mel::Postres).migrate_database
+
+     # You may use this in your app's migrations to roll back
+     #Mel.settings.store.as(Mel::Postres).rollback_database
 
      # ...
      ```

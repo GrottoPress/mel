@@ -24,6 +24,8 @@ Spec.around_each do |spec|
     Mel::Redis.new(ENV["REDIS_URL"])
   }.each do |store|
     Mel.settings.store = store
+
+    store.as?(Mel::Postgres).try(&.migrate_database)
     tasks.call
     spec.run
   end
