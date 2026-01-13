@@ -100,10 +100,10 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
      end
 
      # You may use this in your app's migrations to migrate
-     Mel.settings.store.as(Mel::Postres).migrate_database
+     Mel.settings.store.as(Mel::Postgres).migrate_database
 
      # You may use this in your app's migrations to roll back
-     #Mel.settings.store.as(Mel::Postres).rollback_database
+     #Mel.settings.store.as(Mel::Postgres).rollback_database
 
      # ...
      ```
