@@ -37,7 +37,7 @@ module Mel
       return if count.zero?
 
       if delete.nil?
-        ids = client.eval(LUA, {key.name}, {
+        ids = with_connection &.eval(LUA, {key.name}, {
           orphan_timestamp.to_s,
           time.to_unix.to_s,
           count.to_s,
@@ -49,7 +49,7 @@ module Mel
         return find(ids, delete: false)
       end
 
-      ids = client.zrangebyscore(
+      ids = with_connection &.zrangebyscore(
         key.name,
         "0",
         time.to_unix.to_s,
@@ -63,7 +63,7 @@ module Mel
       return if count.zero?
 
       if delete.nil?
-        ids = client.eval(LUA, {key.name}, {
+        ids = with_connection &.eval(LUA, {key.name}, {
           orphan_timestamp.to_s,
           "+inf",
           count.to_s,
@@ -75,7 +75,7 @@ module Mel
         return find(ids, delete: false)
       end
 
-      ids = client.zrangebyscore(key.name, "0", "+inf", {
+      ids = with_connection &.zrangebyscore(key.name, "0", "+inf", {
         "0",
         count.to_s
       }).as(Array)
@@ -89,14 +89,17 @@ module Mel
       keys = ids.map { |id| key.name(id.to_s) }
 
       if delete == false
-        values = client.mget(keys).as(Array).compact_map(&.as? String)
+        values = with_connection do |connection|
+          connection.mget(keys).as(Array).compact_map(&.as? String)
+        end
+
         return values.empty? ? nil : values
       end
 
-      values = client.multi do |redis|
-        redis.mget(keys)
-        redis.zrem(key.name, ids.map(&.to_s))
-        redis.del(keys)
+      values = with_transaction do |transaction|
+        transaction.mget(keys)
+        transaction.zrem(key.name, ids.map(&.to_s))
+        transaction.del(keys)
       end
 
       values = values.first.as(Array).compact_map(&.as? String)
@@ -104,38 +107,56 @@ module Mel
     end
 
     def transaction(& : Transaction -> _)
-      client.multi do |redis|
-        yield Transaction.new(self, redis)
+      with_transaction do |transaction|
+        yield Transaction.new(self, transaction)
       end
     end
 
     def truncate
-      keys = client.keys("#{key.name}*")
-      client.del(keys.map &.to_s) unless keys.empty?
+      keys = with_connection &.keys("#{key.name}*")
+      with_connection &.del(keys.map &.to_s) unless keys.empty?
     end
 
     def get_progress(ids : Indexable) : Array(String)?
       return if ids.empty?
 
       keys = ids.map { |id| key.progress(id) }
-      values = client.mget(keys).as(Array).compact_map(&.as? String)
+      values = with_connection &.mget(keys).as(Array).compact_map(&.as? String)
 
       values unless values.empty?
     end
 
     def truncate_progress
-      keys = client.keys("#{key.progress}*")
-      client.del(keys.map &.to_s) unless keys.empty?
+      keys = with_connection &.keys("#{key.progress}*")
+      with_connection &.del(keys.map &.to_s) unless keys.empty?
     end
 
     private def run_pool_lua
       RunPool.fetch.join(',')
     end
 
+    private def with_transaction(&)
+      with_connection &.multi(0) { |transaction| yield transaction }
+    end
+
+    private def with_connection(&)
+      client.@pool.retry do
+        client.@pool.checkout do |connection|
+          yield connection
+        rescue error : IO::Error
+          # Triggers a retry
+          raise DB::PoolResourceLost(::Redis::Connection).new(
+            connection,
+            cause: error
+          )
+        end
+      end
+    end
+
     struct Transaction
       include Mel::Transaction
 
-      def initialize(@redis : Redis, @client : ::Redis::Transaction)
+      def initialize(@redis : Redis, @transaction : ::Redis::Transaction)
       end
 
       def self.new(redis : Redis, url : String)
@@ -151,7 +172,7 @@ module Mel
       end
 
       def create(task : Task)
-        @client.run({
+        @transaction.run({
           "ZADD",
           @redis.key.name,
           "NX",
@@ -159,20 +180,20 @@ module Mel
           task.id
         })
 
-        @client.set(@redis.key.name(task.id), task.to_json, nx: true)
+        @transaction.set(@redis.key.name(task.id), task.to_json, nx: true)
       end
 
       def update(task : Task)
         time = task.retry_time || task.time
 
-        @client.zadd(@redis.key.name, time.to_unix.to_s, task.id)
-        @client.set(@redis.key.name(task.id), task.to_json)
+        @transaction.zadd(@redis.key.name, time.to_unix.to_s, task.id)
+        @transaction.set(@redis.key.name(task.id), task.to_json)
       end
 
       def set_progress(id : String, value : Int, description : String)
         report = Progress::Report.new(id, description, value)
 
-        @client.set(
+        @transaction.set(
           @redis.key.progress(id),
           report.to_json,
           ex: Mel.settings.progress_expiry
