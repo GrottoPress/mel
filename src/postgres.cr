@@ -74,9 +74,7 @@ module Mel
           SQL
 
         data = connection.query_all <<-SQL, ids.map(&.to_s), as: String
-          SELECT data FROM #{progress_table}
-          WHERE id = ANY($1)
-          AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP);
+          SELECT data FROM #{progress_table} WHERE id = ANY($1);
           SQL
 
         data unless data.empty?
