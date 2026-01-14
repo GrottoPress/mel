@@ -51,7 +51,8 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
    end
 
    Log.setup(Mel.log.source, :info, Log::IOBackend.new)
-   # Redis::Connection::LOG.level = :info # Uncomment if using the Redis backend
+   # Redis::Log.level = :error # Uncomment if using the Redis backend
+   # DB::Log.level = :error # Uncomment if using the Postgres backend
 
    # ...
    ```
