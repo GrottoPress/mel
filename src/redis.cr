@@ -102,7 +102,7 @@ module Mel
         transaction.del(keys)
       end
 
-      values = values.first.as(Array).compact_map(&.as? String)
+      values = values.as(Array).first.as(Array).compact_map(&.as? String)
       values unless values.empty?
     end
 
