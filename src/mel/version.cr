@@ -1,7 +1,5 @@
 module Mel
-  private macro set_version
+  {% begin %}
     VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify }}
-  end
-
-  set_version
+  {% end %}
 end
