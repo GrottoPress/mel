@@ -17,8 +17,6 @@ module Mel
       namespace = namespace.to_s
       @progress_table = namespace.empty? ? "progress" : "#{namespace}_progress"
       @tasks_table = namespace.empty? ? "tasks" : "#{namespace}_tasks"
-
-      @skip_locked_sql = cockroachdb? ? "" : "SKIP LOCKED"
     end
 
     def self.new(url, namespace = :mel)
@@ -94,7 +92,7 @@ module Mel
           SELECT id FROM #{tasks_table}
           WHERE schedule >= $1 AND schedule <= $2
           ORDER BY schedule ASC LIMIT $3
-          FOR UPDATE #{@skip_locked_sql}
+          FOR UPDATE #{skip_locked_sql}
         )
         RETURNING data;
         SQL
@@ -139,7 +137,7 @@ module Mel
           SELECT id FROM #{tasks_table}
           WHERE schedule >= $2 AND schedule <= $3
           ORDER BY schedule ASC LIMIT $4
-          FOR UPDATE #{@skip_locked_sql}
+          FOR UPDATE #{skip_locked_sql}
         )
         RETURNING id, data;
         SQL
@@ -168,7 +166,7 @@ module Mel
           WHERE id IN (
             SELECT id FROM #{tasks_table} WHERE schedule >= $1
             ORDER BY schedule ASC LIMIT $2
-            FOR UPDATE #{@skip_locked_sql}
+            FOR UPDATE #{skip_locked_sql}
           )
           RETURNING data;
           SQL
@@ -194,7 +192,7 @@ module Mel
         WHERE id IN (
           SELECT id FROM #{tasks_table} WHERE schedule >= $2
           ORDER BY schedule ASC LIMIT $3
-          FOR UPDATE #{@skip_locked_sql}
+          FOR UPDATE #{skip_locked_sql}
         )
         RETURNING id, data;
         SQL
@@ -253,6 +251,10 @@ module Mel
       data = values.map(&.[:data])
 
       {ids, data}
+    end
+
+    private def skip_locked_sql
+      cockroachdb? ? "" : "SKIP LOCKED"
     end
 
     private getter? cockroachdb : Bool do
