@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased] - 
 
 ### Fixed
+- Fix block return type inference error in Crystal v1.20
 - Avoid database connection in `Mel::Postgres` initializer
 
 ## [1.1.3] - 2026-02-03

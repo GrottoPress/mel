@@ -136,7 +136,7 @@ module Mel
     end
 
     private def lock(&)
-      mutex.synchronize { yield }
+      mutex.synchronize { yield.as(Array(String)) }
     end
 
     private def to_running(ids)
