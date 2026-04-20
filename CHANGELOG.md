@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Add `default_database` parameter to `Mel::Postgres.delete_database`
 
 ### Fixed
+- Fix nested Postgres transaction errors
 - Fix *database does not exist* error in `Mel::Postgres` initializer
 - Clone URI instead of parse to improve performance
 
