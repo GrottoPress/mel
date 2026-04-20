@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 - Fix *database does not exist* error in `Mel::Postgres` initializer
+- Clone URI instead of parse to improve performance
 
 ## [1.1.4] - 2026-04-19
 

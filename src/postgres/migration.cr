@@ -16,7 +16,7 @@ struct Mel::Postgres
       def self.create_database(url : URI)
         db_name = url.path.lchop('/')
 
-        default_url = URI.parse(url.to_s)
+        default_url = clone_uri(url)
         default_url.path = "/postgres"
 
         DB.connect(default_url) do |connection|
@@ -31,7 +31,7 @@ struct Mel::Postgres
       def self.delete_database(url : URI)
         db_name = url.path.lchop('/')
 
-        default_url = URI.parse(url.to_s)
+        default_url = clone_uri(url)
         default_url.path = "/postgres"
 
         DB.connect(default_url) do |connection|
@@ -95,6 +95,19 @@ struct Mel::Postgres
         connection.exec <<-SQL
           DROP DATABASE IF EXISTS #{clean_name} #{cascade_sql};
           SQL
+      end
+
+      private def self.clone_uri(uri)
+        URI.new(
+          uri.scheme,
+          uri.host,
+          uri.port,
+          uri.path,
+          uri.query,
+          uri.user,
+          uri.password,
+          uri.fragment
+        )
       end
     end
   end
