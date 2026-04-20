@@ -19,8 +19,8 @@ module Mel
       @tasks_table = namespace.empty? ? "tasks" : "#{namespace}_tasks"
     end
 
-    def self.new(url, namespace = :mel)
-      create_database(url)
+    def self.new(url, namespace = :mel, default_database = "postgres")
+      create_database(url, default_database) if default_database
       new DB.open(url), namespace
     end
 

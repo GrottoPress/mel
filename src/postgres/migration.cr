@@ -9,30 +9,30 @@ struct Mel::Postgres
         delete_tables
       end
 
-      def self.create_database(url : String)
-        create_database URI.parse(url)
+      def self.create_database(url : String, default_database = "postgres")
+        create_database URI.parse(url), default_database
       end
 
-      def self.create_database(url : URI)
+      def self.create_database(url : URI, default_database = "postgres")
         db_name = url.path.lchop('/')
 
         default_url = clone_uri(url)
-        default_url.path = "/postgres"
+        default_url.path = "/#{default_database}"
 
         DB.connect(default_url) do |connection|
           create_database(connection, db_name)
         end
       end
 
-      def self.delete_database(url : String)
-        delete_database URI.parse(url)
+      def self.delete_database(url : String, default_database = "postgres")
+        delete_database URI.parse(url), default_database
       end
 
-      def self.delete_database(url : URI)
+      def self.delete_database(url : URI, default_database = "postgres")
         db_name = url.path.lchop('/')
 
         default_url = clone_uri(url)
-        default_url.path = "/postgres"
+        default_url.path = "/#{default_database}"
 
         DB.connect(default_url) do |connection|
           delete_database(connection, db_name)
