@@ -4,9 +4,6 @@ Mel.configure do |settings|
   settings.timezone = Time::Location.load("America/Los_Angeles")
 end
 
-Mel::Postgres.create_database(ENV["COCKROACH_URL"])
-Mel::Postgres.create_database(ENV["POSTGRES_URL"])
-
 tasks = ->do
   Mel.stop
   Mel::RunPool.delete

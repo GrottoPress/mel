@@ -20,6 +20,7 @@ module Mel
     end
 
     def self.new(url, namespace = :mel)
+      create_database(url)
       new DB.open(url), namespace
     end
 
