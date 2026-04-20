@@ -87,6 +87,10 @@ module Mel
     settings.store.try &.transaction { |transaction| yield transaction }
   end
 
+  def postgres : Mel::Postgres
+    settings.store.as(Mel::Postgres)
+  end
+
   private def run_tasks(pond)
     log_started
     lock { @@state = State::Started }

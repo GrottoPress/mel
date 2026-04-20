@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased] - 
 
 ### Added
+- Add `Mel.postgres` method
 - Add `default_database` parameter to `Mel::Postgres.create_database`
 - Add `default_database` parameter to `Mel::Postgres.delete_database`
 
