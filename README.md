@@ -68,10 +68,7 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
 
      Mel.configure do |settings|
        # ...
-       settings.store = Mel::Redis.new(
-         "redis://localhost:6379/0",
-         namespace: "mel"
-       )
+       settings.store = Mel::Redis.new(ENV["REDIS_URL"], namespace: "mel")
        # ...
      end
 
@@ -87,11 +84,9 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
 
      require "mel/postgres"
 
-     db_url = "postgres://username:password@localhost:5432/database_name"
-
      Mel.configure do |settings|
        # ...
-       settings.store = Mel::Postgres.new(db_url, namespace: "mel")
+       settings.store = Mel::Postgres.new(ENV["DATABASE_URL"], namespace: "mel")
        # OR pass an existing `DB::Database` instance
        #settings.store = Mel::Postgres.new(db, namespace: "mel")
        # ...
