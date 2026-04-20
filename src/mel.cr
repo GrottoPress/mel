@@ -87,6 +87,10 @@ module Mel
     settings.store.try &.transaction { |transaction| yield transaction }
   end
 
+  def memory : Mel::Memory
+    settings.store.as(Mel::Memory)
+  end
+
   def postgres : Mel::Postgres
     settings.store.as(Mel::Postgres)
   end
