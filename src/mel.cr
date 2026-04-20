@@ -91,6 +91,10 @@ module Mel
     settings.store.as(Mel::Postgres)
   end
 
+  def redis : Mel::Redis
+    settings.store.as(Mel::Redis)
+  end
+
   private def run_tasks(pond)
     log_started
     lock { @@state = State::Started }
