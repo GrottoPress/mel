@@ -72,7 +72,7 @@ module Mel
   end
 
   def stop
-    return log_not_started unless state.started?
+    return log_already_stopped unless state.started?
 
     log_stopping
     lock { self.state = State::Stopping unless state.stopped? }

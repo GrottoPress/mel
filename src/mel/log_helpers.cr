@@ -4,8 +4,8 @@ module Mel::LogHelpers
       log.notice { "Mel already started" }
     end
 
-    private def log_not_started : Nil
-      log.notice { "Cannot stop Mel. Not started" }
+    private def log_already_stopped : Nil
+      log.notice { "Mel already stopped" }
     end
 
     private def log_stopping : Nil

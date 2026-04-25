@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 - Make `Mel::Memory#mutex` private
+- Reword log message for when *Mel* is already stopped
 
 ## [1.2.0] - 2026-04-20
 
