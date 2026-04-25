@@ -126,7 +126,12 @@ module Mel
   end
 
   private def run_handlers
-    {Signal::HUP, Signal::INT, Signal::TERM}.each &.trap { stop }
+    {% if compare_versions(Crystal::VERSION, "1.12.0") >= 0 %}
+      Process.on_terminate { stop }
+    {% else %}
+      {Signal::HUP, Signal::INT, Signal::TERM}.each &.trap { stop }
+    {% end %}
+
     at_exit { stop if state.started? }
   end
 
