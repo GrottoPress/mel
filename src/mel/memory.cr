@@ -16,7 +16,6 @@ module Mel
 
     include Store
 
-    getter :mutex
     getter :progress
     getter :queue
     getter :tasks
@@ -136,7 +135,7 @@ module Mel
     end
 
     private def lock(&)
-      mutex.synchronize { yield.as(Array(String)) }
+      @mutex.synchronize { yield.as(Array(String)) }
     end
 
     private def to_running(ids)

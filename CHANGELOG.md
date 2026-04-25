@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Synchronize `Mel.state` reads with writes
 
+### Changed
+- Make `Mel::Memory#mutex` private
+
 ## [1.2.0] - 2026-04-20
 
 ### Added
