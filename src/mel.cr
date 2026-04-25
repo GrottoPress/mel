@@ -126,9 +126,8 @@ module Mel
   end
 
   private def run_handlers
+    {Signal::HUP, Signal::INT, Signal::TERM}.each &.trap { stop }
     at_exit { stop }
-
-    {Signal::INT, Signal::TERM}.each &.trap { stop }
   end
 
   private def batch_size(pond)

@@ -268,8 +268,8 @@ This makes the storage backend the *source of truth* for schedules, allowing to 
 
      Mel.start
      # <= Blocks forever, polls for due tasks and runs them.
-     # <= You may stop Mel by sending `Signal::INT` or `Signal::TERM`.
-     # <= Mel will wait for all running tasks to complete before exiting.
+     # <= Stops upon receiving `Signal::HUP`, `Signal::INT` or `Signal::TERM`.
+     # <= Waits for all running tasks to complete before exiting.
      ```
 
    - As part of your app (useful for testing):
@@ -735,7 +735,7 @@ end
 
 ### Jobs safety
 
-A *Mel* worker waits for all running tasks to complete before exiting, if it received a `Signal::INT` or a `Signal::TERM`, or if you called `Mel.stop` somewhere in your code. This means jobs are never lost mid-flight.
+A *Mel* worker waits for all running tasks to complete before exiting, if it received a `Signal::HUP`, `Signal::INT` or `Signal::TERM`, or if you called `Mel.stop` somewhere in your code. This means jobs are never lost mid-flight.
 
 Jobs are not lost even if there is a force shutdown of the worker process, since *Mel* does not delete a task from the store until it is complete. A running task is assumed to be orphaned if its timestamp in the queue has not been updated after 3 polls. Once a task is orphaned, any available worker can pick it up and run it.
 

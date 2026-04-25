@@ -14,6 +14,19 @@ describe Mel do
     end
   end
 
+  it "stops on SIGHUP" do
+    Mel.start_async do
+      Process.signal(:hup, Process.pid)
+
+      100_000.times do
+        break if Mel.state.stopped?
+        sleep 1.microsecond
+      end
+
+      Mel.state.stopped?.should be_true
+    end
+  end
+
   it "stops on SIGINT" do
     Mel.start_async do
       Process.signal(:int, Process.pid)
