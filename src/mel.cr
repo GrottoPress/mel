@@ -30,9 +30,8 @@ module Mel
 
   include LogHelpers
 
-  @@mutex = Mutex.new
-
-  class_getter state = State::Ready
+  @@mutex = Mutex.new(:reentrant)
+  @@state : State = State::Ready
 
   def settings
     Settings
@@ -76,7 +75,7 @@ module Mel
     return log_not_started unless state.started?
 
     log_stopping
-    lock { @@state = State::Stopping } unless state.stopped?
+    lock { self.state = State::Stopping unless state.stopped? }
 
     until state.stopped?
       sleep 1.microsecond
@@ -99,9 +98,17 @@ module Mel
     settings.store.as(Mel::Redis)
   end
 
+  def state : State
+    lock { @@state }
+  end
+
+  protected def state=(state)
+    lock { @@state = state }
+  end
+
   private def run_tasks(pond)
     log_started
-    lock { @@state = State::Started }
+    self.state = State::Started
 
     while state.started?
       Task.find_due(Time.local, batch_size(pond), delete: nil).try do |tasks|
@@ -115,7 +122,7 @@ module Mel
     pond.drain
 
     log_stopped
-    lock { @@state = State::Stopped }
+    self.state = State::Stopped
   end
 
   private def run_handlers
