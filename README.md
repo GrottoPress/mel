@@ -733,7 +733,7 @@ end
 # ...
 ```
 
-### Jobs *security*
+### Jobs safety
 
 A *Mel* worker waits for all running tasks to complete before exiting, if it received a `Signal::INT` or a `Signal::TERM`, or if you called `Mel.stop` somewhere in your code. This means jobs are never lost mid-flight.
 
