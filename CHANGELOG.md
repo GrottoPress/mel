@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Add `Signal::HUP` to `Mel.stop` signals
 - Add Windows support to signal handlers
+- Log and handle any exceptions on process exit
 
 ### Fixed
 - Synchronize `Mel.state` reads with writes

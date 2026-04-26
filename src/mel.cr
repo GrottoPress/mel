@@ -28,6 +28,7 @@ module Mel
 
   extend self
 
+  include Helpers
   include LogHelpers
 
   @@mutex = Mutex.new(:reentrant)
@@ -131,6 +132,8 @@ module Mel
     {% else %}
       {Signal::HUP, Signal::INT, Signal::TERM}.each &.trap { stop }
     {% end %}
+
+    at_exit { |code, error| handle_exit(code, error) }
   end
 
   private def batch_size(pond)
