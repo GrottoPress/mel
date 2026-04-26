@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 - Synchronize `Mel.state` reads with writes
 - Stop *Mel* at process exit **only** if started
+- Fix hung process after PostgreSQL killed in the background
 
 ### Changed
 - Make `Mel::Memory#mutex` private

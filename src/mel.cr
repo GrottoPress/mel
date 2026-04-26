@@ -131,8 +131,6 @@ module Mel
     {% else %}
       {Signal::HUP, Signal::INT, Signal::TERM}.each &.trap { stop }
     {% end %}
-
-    at_exit { stop if state.started? }
   end
 
   private def batch_size(pond)
