@@ -21,11 +21,20 @@ module Mel
     getter :tasks
 
     def initialize(
-      @queue = Queue.new,
-      @tasks = Tasks.new,
-      @progress = Progress.new,
-      @mutex = Mutex.new
+      @queue : Queue,
+      @tasks : Tasks,
+      @progress : Progress,
+      @mutex : Mutex
     )
+    end
+
+    def self.new
+      queue = Queue.new
+      tasks = Tasks.new
+      progress = Progress.new
+      mutex = Mutex.new
+
+      new(queue, tasks, progress, mutex)
     end
 
     def sorted_queue : Queue
@@ -88,12 +97,16 @@ module Mel
     end
 
     def transaction(& : Transaction -> _)
-      yield Transaction.new(self)
+      lock do
+        yield Transaction.new(self)
+      end
     end
 
     def truncate
-      @queue = Queue.new
-      @tasks = Tasks.new
+      lock do
+        @queue = Queue.new
+        @tasks = Tasks.new
+      end
     end
 
     def get_progress(ids : Indexable) : Array(String)?
@@ -113,7 +126,9 @@ module Mel
     end
 
     def truncate_progress
-      @progress = Progress.new
+      lock do
+        @progress = Progress.new
+      end
     end
 
     private def query(count, delete, time = nil)
@@ -135,7 +150,7 @@ module Mel
     end
 
     private def lock(&)
-      @mutex.synchronize { yield.as(Array(String)) }
+      @mutex.synchronize { yield }
     end
 
     private def to_running(ids)
