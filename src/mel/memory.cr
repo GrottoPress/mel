@@ -1,5 +1,4 @@
 require "./store"
-
 require "./memory/**"
 
 module Mel
