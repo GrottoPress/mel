@@ -11,20 +11,23 @@ tasks = ->do
   Mel.settings.store.try(&.truncate_progress)
 end
 
+private STORES = {
+  Mel::Memory.new,
+  Mel::Postgres.new(ENV["COCKROACH_URL"]),
+  Mel::Postgres.new(ENV["POSTGRES_URL"]),
+  Mel::Redis.new(ENV["REDIS_URL"])
+}
+
 Spec.around_each do |spec|
   next spec.run if all_tags(spec.example).includes?("skip_around_each")
 
-  {
-    Mel::Memory.new,
-    Mel::Postgres.new(ENV["COCKROACH_URL"]),
-    Mel::Postgres.new(ENV["POSTGRES_URL"]),
-    Mel::Redis.new(ENV["REDIS_URL"])
-  }.each do |store|
+  STORES.each_with_index do |store, i|
     Mel.settings.store = store
 
     store.as?(Mel::Postgres).try(&.migrate_database)
     tasks.call
     spec.run
+    puts STORES[i].class
   end
 end
 
