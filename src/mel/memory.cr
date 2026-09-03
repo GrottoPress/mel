@@ -103,8 +103,8 @@ module Mel
 
     def truncate
       lock do
-        @queue = Queue.new
-        @tasks = Tasks.new
+        @queue.clear
+        @tasks.clear
       end
     end
 
@@ -126,7 +126,7 @@ module Mel
 
     def truncate_progress
       lock do
-        @progress = Progress.new
+        @progress.clear
       end
     end
 
