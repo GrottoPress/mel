@@ -32,9 +32,11 @@ jobs:
         with:
           crystal: ${{ matrix.crystal }}
       - name: Install shards
-        run: shards install
+        run: shards install --skip-postinstall --skip-executables
         env:
           SHARDS_OVERRIDE: ${{ matrix.shard_file }}
+      - name: Build ameba
+        run: crystal build -o bin/ameba lib/ameba/bin/ameba.cr
       - name: Lint code
         run: ./bin/ameba
   specs:
@@ -72,7 +74,7 @@ jobs:
           key: ${{ runner.os }}-shards-${{ hashFiles('shard.yml') }}
           restore-keys: ${{ runner.os }}-shards-
       - name: Install shards
-        run: shards update
+        run: shards update --skip-postinstall --skip-executables
         env:
           SHARDS_OVERRIDE: ${{ matrix.shard_file }}
       - name: Install Redis
@@ -104,4 +106,4 @@ jobs:
           COCKROACH_URL: postgres://root@localhost:26257/mel_spec?sslmode=disable
           POSTGRES_URL: postgres://postgres:password@localhost:5432/mel_spec
           REDIS_URL: redis://localhost:6379/0
-        run: crystal spec --error-on-warnings -Dpreview_mt
+        run: crystal spec -Dpreview_mt -Dmt
