@@ -1,5 +1,17 @@
+Excluded:
+  - bin
+  - lib
+  - tmp
+Lint/AssignmentInCallArgument:
+  Enabled: false
 Lint/Formatting:
+  Enabled: false
+Lint/NotNil:
   Enabled: false
 Lint/SpecFilename:
   Excluded:
     - spec/setup/**/*.cr
+Style/HeredocEscape:
+  Enabled: false
+Style/PercentLiteralDelimiters:
+  Enabled: false

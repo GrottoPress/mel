@@ -1,5 +1,5 @@
 class Mel::Carbon::DeliverLater < Carbon::DeliverLaterStrategy
-  def run(email, &block)
+  def run(email, &_block)
     {% begin %}
     case email
     {% for klass in ::Carbon::Email.all_subclasses.reject(&.abstract?) %}

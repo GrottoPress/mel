@@ -8,7 +8,7 @@ class WelcomeEmail < BaseEmail
 
   def text_body : String
     <<-TEXT
-    Welcome
-    TEXT
+      Welcome
+      TEXT
   end
 end
